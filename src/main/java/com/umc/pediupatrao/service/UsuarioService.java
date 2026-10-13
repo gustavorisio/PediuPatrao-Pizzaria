@@ -10,12 +10,14 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 @Service
 public class UsuarioService {
 
-    private static final Set<String> ROLES_PERMITIDAS = Set.of("ADMIN", "GERENTE", "ATENDENTE");
+    private static final Set<String> ROLES_PERMITIDAS = Set.of("ADMIN", "GERENTE", "ATENDENTE", "ENTREGADOR");
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -68,6 +70,12 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
+    public List<Usuario> listarFuncionarios() {
+        return StreamSupport.stream(usuarioRepository.findAll().spliterator(), false)
+                .filter(usuario -> "GERENTE".equals(usuario.getRole()) || "ATENDENTE".equals(usuario.getRole()))
+                .toList();
+    }
+
     // Atualiza o usuário usuários
     @PreAuthorize("hasRole('ADMIN') or @usuarioService.isCurrentUser(#id)")
     public Usuario atualizarUsuario(String id, Usuario usuarioAtualizado) {
@@ -116,7 +124,7 @@ public class UsuarioService {
 
     private void validarRole(String role) {
         if (role == null || !ROLES_PERMITIDAS.contains(role)) {
-            throw new IllegalArgumentException("A role deve ser ADMIN, GERENTE ou ATENDENTE.");
+            throw new IllegalArgumentException("A role deve ser ADMIN, GERENTE, ATENDENTE ou ENTREGADOR.");
         }
     }
 }
