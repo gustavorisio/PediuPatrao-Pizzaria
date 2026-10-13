@@ -5,6 +5,7 @@ import com.umc.pediupatrao.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -14,16 +15,19 @@ public class PedidoController {
     private PedidoService pedidoService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     public Pedido criarPedido(@RequestBody Pedido pedido) {
         return pedidoService.criarPedido(pedido);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE', 'ENTREGADOR')")
     public List<Pedido> listarPedidos() {
         return pedidoService.listarPedidos();
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ENTREGADOR')")
     public Pedido atualizarStatus(@PathVariable String id, @RequestParam String status) {
         return pedidoService.atualizarStatus(id, status);
     }
