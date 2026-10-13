@@ -11,6 +11,7 @@ public class Pedido {
     private String id;
     private String clienteId;
     private String tipoPizza;
+    // Status utilizado pelo atendimento, preparo e entrega do pedido.
     private String status;
     private int quantidade;
     private String sabor;

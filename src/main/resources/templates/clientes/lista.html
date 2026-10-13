@@ -33,8 +33,9 @@
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
         const API_URL = '/api/clientes';
+        const podeExcluir = /*[[${#authorization.expression("hasAnyRole('ADMIN', 'GERENTE')")}]]*/ false;
         const tabelaClientes = document.getElementById('clientes-tabela');
 
         function formatarEndereco(cliente) {
@@ -76,9 +77,9 @@
                         <a href="/clientes/editar/${cliente.id}" class="btn btn-sm btn-outline-primary me-1">
                             <i class="bi bi-pencil-fill"></i> Editar
                         </a>
-                        <button class="btn btn-sm btn-outline-danger" onclick="excluirCliente('${cliente.id}')">
+                        ${podeExcluir ? `<button class="btn btn-sm btn-outline-danger" onclick="excluirCliente('${cliente.id}')">
                             <i class="bi bi-trash-fill"></i> Excluir
-                        </button>
+                        </button>` : ''}
                     </td>
                 `;
                 tabelaClientes.appendChild(row);

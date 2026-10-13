@@ -12,14 +12,17 @@ public class PedidoService {
     @Autowired
     private PedidoRepository pedidoRepository;
 
+    // Persiste um pedido recém-criado pelo atendimento.
     public Pedido criarPedido(Pedido pedido) {
         return pedidoRepository.save(pedido);
     }
 
+    // Entrega à aplicação os pedidos necessários para acompanhamento.
     public List<Pedido> listarPedidos() {
         return pedidoRepository.findAll();
     }
 
+    // Altera apenas o status, preservando os demais dados do pedido.
     public Pedido atualizarStatus(String id, String status) {
         Pedido pedido = pedidoRepository.findById(id).orElseThrow();
         pedido.setStatus(status);
