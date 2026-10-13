@@ -13,7 +13,7 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initDatabase(UsuarioRepository repo) {
         return args -> {
-
+            // Cria a conta administrativa inicial somente quando ela ainda não existe.
             if (repo.findByUsername("admin").isEmpty()) {
 
                 BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

@@ -3,7 +3,7 @@ package com.umc.pediupatrao.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "usuarios") // Define a coleção no MongoDB
+@Document(collection = "usuarios")
 public class Usuario {
     @Id
     private String id;

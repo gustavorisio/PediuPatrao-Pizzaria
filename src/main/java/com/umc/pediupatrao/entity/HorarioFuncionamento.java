@@ -10,6 +10,7 @@ public class HorarioFuncionamento {
     private String diaSemana;
     private String abertura;
     private String fechamento;
+    // Quando verdadeiro, os horários de abertura e fechamento não são considerados.
     private boolean fechado;
 
     public String getId() { return id; }

@@ -15,16 +15,19 @@ public class HorarioFuncionamentoController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    // A equipe de atendimento pode consultar os horários para orientar clientes.
     public ResponseEntity<?> listar() { return ResponseEntity.ok(service.listarTodos()); }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Somente a gestão pode cadastrar um novo horário de funcionamento.
     public ResponseEntity<HorarioFuncionamento> salvar(@RequestBody HorarioFuncionamento horario) {
         return ResponseEntity.ok(service.salvar(horario));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Atualiza o horário identificado pela rota sem aceitar outro ID no corpo.
     public ResponseEntity<HorarioFuncionamento> atualizar(@PathVariable String id,
             @RequestBody HorarioFuncionamento horario) {
         horario.setId(id);
@@ -33,6 +36,7 @@ public class HorarioFuncionamentoController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Remove uma configuração de horário administrada pela gerência.
     public ResponseEntity<Void> excluir(@PathVariable String id) {
         service.excluir(id);
         return ResponseEntity.noContent().build();

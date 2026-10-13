@@ -25,7 +25,6 @@ public class ProdutoService {
         produtoRepository.deleteById(id);
     }
 
-
     // Método para salvar um novo cliente ou atualizar um cliente existente
     public Produto salvar(Produto produto) {
         // Se o cliente não tem ID (novo cliente), salva como novo

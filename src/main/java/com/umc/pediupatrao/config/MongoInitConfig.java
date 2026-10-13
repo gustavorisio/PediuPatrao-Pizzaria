@@ -13,6 +13,7 @@ public class MongoInitConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Garante as coleções usadas pelos repositórios antes das primeiras operações.
         if (!mongoTemplate.collectionExists("pedidos")) {
             mongoTemplate.createCollection("pedidos");
         }

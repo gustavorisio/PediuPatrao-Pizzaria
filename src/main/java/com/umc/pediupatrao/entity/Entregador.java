@@ -9,6 +9,7 @@ public class Entregador {
     private String id;
     private String nome;
     private String telefone;
+    // Indica se o entregador pode receber novas entregas.
     private boolean disponivel = true;
 
     public String getId() { return id; }

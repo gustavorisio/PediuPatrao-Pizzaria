@@ -59,9 +59,7 @@ public class HomeController {
         return "layout";
     }
 
-    // ========================
-    // USUÁRIOS
-    // ========================
+    // Renderiza a lista administrativa de usuários.
     @GetMapping("/usuarios")
     @PreAuthorize("hasRole('ADMIN')")
     public String listarUsuarios(Model model) {
@@ -74,6 +72,7 @@ public class HomeController {
 
     @GetMapping("/usuarios/novo")
     @PreAuthorize("hasRole('ADMIN')")
+    // Abre o formulário de criação de usuário.
     public String novoUsuarioForm(Model model) {
         model.addAttribute("usuario", new Usuario());
         model.addAttribute("content", "usuarios/form :: content");
@@ -82,6 +81,7 @@ public class HomeController {
 
     @GetMapping("/usuarios/editar/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    // Carrega o usuário existente ou retorna à lista com uma mensagem de erro.
     public String editarUsuarioForm(@PathVariable String id, Model model,
             RedirectAttributes redirectAttributes) {
         boolean encontrado = usuarioService.buscarPorId(id).map(u -> {
@@ -100,6 +100,7 @@ public class HomeController {
 
     @PostMapping("/usuarios/salvar")
     @PreAuthorize("hasRole('ADMIN')")
+    // Persiste o novo usuário e informa o resultado na próxima página.
     public String salvarUsuario(@ModelAttribute Usuario usuario,
             RedirectAttributes redirectAttributes) {
         usuarioService.salvarUsuario(usuario);
@@ -109,6 +110,7 @@ public class HomeController {
 
     @PostMapping("/usuarios/editar/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    // Atualiza o usuário indicado pela rota.
     public String atualizarUsuario(@PathVariable String id,
             @ModelAttribute Usuario usuario,
             RedirectAttributes redirectAttributes) {
@@ -119,6 +121,7 @@ public class HomeController {
 
     @PostMapping("/usuarios/deletar/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    // Remove o usuário e redireciona para a listagem administrativa.
     public String deletarUsuario(@PathVariable String id,
             RedirectAttributes redirectAttributes) {
         usuarioService.deletarUsuario(id);
@@ -126,9 +129,7 @@ public class HomeController {
         return "redirect:/usuarios";
     }
 
-    // ========================
-    // PEDIDOS
-    // ========================
+    // Renderiza os pedidos disponíveis para a operação.
     @GetMapping("/pedidos")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE', 'ENTREGADOR')")
     public String pedidos(Model model) {
@@ -139,9 +140,7 @@ public class HomeController {
         return "layout";
     }
 
-    // ========================
-    // FUNCIONÁRIOS, ENTREGADORES E HORÁRIOS
-    // ========================
+    // Lista os funcionários operacionais sem incluir a conta ADMIN.
     @GetMapping("/funcionarios")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public String funcionarios(Model model) {
@@ -152,6 +151,7 @@ public class HomeController {
 
     @GetMapping("/entregadores")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Exibe os entregadores cadastrados para a gestão.
     public String entregadores(Model model) {
         model.addAttribute("entregadores", entregadorService.listarTodos());
         model.addAttribute("content", "entregadores/lista :: content");
@@ -160,6 +160,7 @@ public class HomeController {
 
     @PostMapping("/entregadores/salvar")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Salva um novo entregador enviado pelo formulário.
     public String salvarEntregador(@ModelAttribute Entregador entregador,
             RedirectAttributes redirectAttributes) {
         entregadorService.salvar(entregador);
@@ -169,6 +170,7 @@ public class HomeController {
 
     @PostMapping("/entregadores/deletar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Remove o entregador e mantém o usuário na mesma tela.
     public String deletarEntregador(@PathVariable String id, RedirectAttributes redirectAttributes) {
         entregadorService.excluir(id);
         redirectAttributes.addFlashAttribute("sucesso", "Entregador removido com sucesso!");
@@ -177,6 +179,7 @@ public class HomeController {
 
     @GetMapping("/horarios")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    // Mostra os horários que orientam o funcionamento da pizzaria.
     public String horarios(Model model) {
         model.addAttribute("horarios", horarioFuncionamentoService.listarTodos());
         model.addAttribute("content", "horarios/lista :: content");
@@ -185,6 +188,7 @@ public class HomeController {
 
     @PostMapping("/horarios/salvar")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Salva uma configuração de horário enviada pela gestão.
     public String salvarHorario(@ModelAttribute HorarioFuncionamento horario,
             RedirectAttributes redirectAttributes) {
         horarioFuncionamentoService.salvar(horario);
@@ -194,15 +198,14 @@ public class HomeController {
 
     @PostMapping("/horarios/deletar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Exclui uma configuração de horário selecionada.
     public String deletarHorario(@PathVariable String id, RedirectAttributes redirectAttributes) {
         horarioFuncionamentoService.excluir(id);
         redirectAttributes.addFlashAttribute("sucesso", "Horário removido com sucesso!");
         return "redirect:/horarios";
     }
 
-    // ========================
-    // PRODUTOS
-    // ========================
+    // Renderiza o catálogo de produtos para consulta e manutenção.
     @GetMapping("/produtos")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     public String produtos(Model model) {
@@ -213,9 +216,7 @@ public class HomeController {
         return "layout";
     }
 
-    // ========================
-    // CLIENTES
-    // ========================
+    // Renderiza a lista de clientes para o atendimento.
     @GetMapping("/clientes")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     public String clientes(Model model) {
@@ -228,6 +229,7 @@ public class HomeController {
 
     @GetMapping("/clientes/novo")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    // Abre o formulário de cadastro de cliente.
     public String novoClienteForm(Model model) {
         model.addAttribute("cliente", new Cliente());
         model.addAttribute("content", "clientes/form :: content");
@@ -236,6 +238,7 @@ public class HomeController {
 
     @PostMapping("/clientes/salvar")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    // Salva o cliente e retorna à listagem.
     public String salvarCliente(@ModelAttribute Cliente cliente,
             RedirectAttributes redirectAttributes) {
         clienteService.salvar(cliente);
@@ -245,6 +248,7 @@ public class HomeController {
 
     @GetMapping("/clientes/editar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    // Carrega os dados do cliente para edição.
     public String editarClienteForm(@PathVariable String id, Model model,
             RedirectAttributes redirectAttributes) {
         boolean encontrado = clienteService.buscarPorId(id).map(c -> {
@@ -263,6 +267,7 @@ public class HomeController {
 
     @PostMapping("/clientes/editar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    // Mantém o ID da URL ao salvar a edição do cliente.
     public String atualizarCliente(@PathVariable String id,
             @ModelAttribute Cliente cliente,
             RedirectAttributes redirectAttributes) {
@@ -272,9 +277,7 @@ public class HomeController {
         return "redirect:/clientes";
     }
 
-    // ========================
-    // OUTRAS ROTAS
-    // ========================
+    // Abre a página de configurações permitida para a gestão.
     @GetMapping("/configuracoes")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public String configuracoes(Model model) {
@@ -283,12 +286,14 @@ public class HomeController {
     }
 
     @GetMapping("/teste")
+    // Mantém a rota de teste disponível para validações locais.
     public String teste() {
         return "teste";
     }
 
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
+    // Exibe a área administrativa apenas para a role ADMIN.
     public String admin() {
         return "admin";
     }

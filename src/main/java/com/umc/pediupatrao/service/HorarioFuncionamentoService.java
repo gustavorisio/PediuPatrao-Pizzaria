@@ -14,7 +14,12 @@ public class HorarioFuncionamentoService {
         this.repository = repository;
     }
 
+    // Consulta os horários exibidos para a equipe e para o atendimento.
     public List<HorarioFuncionamento> listarTodos() { return repository.findAll(); }
+
+    // Persiste a configuração de funcionamento de um dia da semana.
     public HorarioFuncionamento salvar(HorarioFuncionamento horario) { return repository.save(horario); }
+
+    // Exclui uma configuração de horário pelo seu identificador.
     public void excluir(String id) { repository.deleteById(id); }
 }

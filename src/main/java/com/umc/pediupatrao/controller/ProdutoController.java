@@ -18,12 +18,14 @@ public class ProdutoController {
     
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    // Atendimento consulta o catálogo, enquanto a gestão controla sua manutenção.
     public List<Produto> listarProdutos() {
         return produtoService.listarProdutos();
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // A remoção do catálogo é uma operação exclusiva da gestão.
     public ResponseEntity<Void> excluirProduto(@PathVariable String id) {
         produtoService.excluir(id);
         return ResponseEntity.noContent().build();
@@ -31,6 +33,7 @@ public class ProdutoController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Registra um novo item no catálogo de produtos.
     public ResponseEntity<Produto> salvarProduto(@RequestBody Produto produto) {
         Produto salvo = produtoService.salvar(produto);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
@@ -38,6 +41,7 @@ public class ProdutoController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    // Atualiza o produto correspondente ao ID informado na rota.
     public ResponseEntity<Produto> atualizarProduto(@PathVariable String id, @RequestBody Produto produto) {
         produto.setId(id);
         Produto atualizado = produtoService.salvar(produto);
