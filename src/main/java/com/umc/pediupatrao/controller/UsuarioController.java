@@ -5,6 +5,7 @@ import com.umc.pediupatrao.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Optional;
 
@@ -19,6 +20,7 @@ public class UsuarioController {
     }
 
     // Endpoint para listar todos os usuários
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Iterable<Usuario>> listarTodos() {
         Iterable<Usuario> usuarios = usuarioService.listarTodos();
@@ -26,6 +28,7 @@ public class UsuarioController {
     }
 
     // Endpoint para buscar um usuário por ID
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> buscarPorId(@PathVariable String id) {
         Optional<Usuario> usuario = usuarioService.buscarPorId(id);
@@ -33,6 +36,7 @@ public class UsuarioController {
     }
 
     // Endpoint para criar um novo usuário
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario usuario) {
         usuarioService.salvarUsuario(usuario);
@@ -40,23 +44,15 @@ public class UsuarioController {
     }
 
     // Endpoint para atualizar um usuário
+    @PreAuthorize("hasRole('ADMIN') or @usuarioService.isCurrentUser(#id)")
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> atualizarUsuario(@PathVariable String id, @RequestBody Usuario usuarioAtualizado) {
-        Optional<Usuario> usuarioExistente = usuarioService.buscarPorId(id);
-
-        if (usuarioExistente.isPresent()) {
-            Usuario usuario = usuarioExistente.get();
-            usuario.setUsername(usuarioAtualizado.getUsername());
-            usuario.setPassword(usuarioAtualizado.getPassword());
-            usuarioService.salvarUsuario(usuario);
-
-            return ResponseEntity.ok(usuario);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Usuario usuario = usuarioService.atualizarUsuario(id, usuarioAtualizado);
+        return ResponseEntity.ok(usuario);
     }
 
     // Endpoint para deletar um usuário
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarUsuario(@PathVariable String id) {
         Optional<Usuario> usuarioExistente = usuarioService.buscarPorId(id);
