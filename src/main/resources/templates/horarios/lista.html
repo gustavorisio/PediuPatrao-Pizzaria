@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+    <h2 class="mb-4"><i class="bi bi-clock-fill me-2 text-primary"></i>Horário de funcionamento</h2>
+    <div class="alert alert-success" th:if="${sucesso}" th:text="${sucesso}"></div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form th:action="@{/horarios/salvar}" method="post" class="row g-3">
+                <div class="col-md-3"><label class="form-label" for="diaSemana">Dia</label>
+                    <select id="diaSemana" name="diaSemana" class="form-select" required>
+                        <option value="SEGUNDA">Segunda-feira</option><option value="TERCA">Terça-feira</option>
+                        <option value="QUARTA">Quarta-feira</option><option value="QUINTA">Quinta-feira</option>
+                        <option value="SEXTA">Sexta-feira</option><option value="SABADO">Sábado</option>
+                        <option value="DOMINGO">Domingo</option>
+                    </select></div>
+                <div class="col-md-2"><label class="form-label" for="abertura">Abertura</label>
+                    <input id="abertura" name="abertura" type="time" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label" for="fechamento">Fechamento</label>
+                    <input id="fechamento" name="fechamento" type="time" class="form-control"></div>
+                <div class="col-md-2 d-flex align-items-end"><div class="form-check">
+                    <input id="fechado" name="fechado" type="checkbox" class="form-check-input">
+                    <label for="fechado" class="form-check-label">Fechado</label></div></div>
+                <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary" type="submit">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="alert alert-info" th:if="${#lists.isEmpty(horarios)}">Nenhum horário cadastrado.</div>
+    <div class="card shadow-sm" th:if="${!#lists.isEmpty(horarios)}">
+        <table class="table table-hover mb-0"><thead class="table-dark"><tr><th>Dia</th><th>Horário</th><th></th></tr></thead>
+        <tbody><tr th:each="horario : ${horarios}">
+            <td th:text="${horario.diaSemana}"></td>
+            <td th:text="${horario.fechado ? 'Fechado' : horario.abertura + ' - ' + horario.fechamento}"></td>
+            <td><form th:action="@{/horarios/deletar/{id}(id=${horario.id})}" method="post">
+                <button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button>
+            </form></td>
+        </tr></tbody></table>
+    </div>
+</div>
+</body>
+</html>
