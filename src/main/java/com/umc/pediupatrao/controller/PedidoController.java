@@ -59,7 +59,7 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}/cancelar")
-    @PreAuthorize("hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public Pedido cancelarPedido(@PathVariable String id, @RequestParam String justificativa) {
         return pedidoService.cancelarPedido(id, justificativa);
     }

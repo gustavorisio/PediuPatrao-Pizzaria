@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Pedido {
     @Id
     private String id;
+    private Integer numeroPedido;
     private String clienteId;
     private String tipoPizza;
     private int quantidade;
@@ -28,6 +29,14 @@ public class Pedido {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getNumeroPedido() {
+        return numeroPedido;
+    }
+
+    public void setNumeroPedido(Integer numeroPedido) {
+        this.numeroPedido = numeroPedido;
     }
 
     public String getClienteId() {

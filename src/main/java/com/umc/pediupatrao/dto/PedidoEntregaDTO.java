@@ -1,15 +1,20 @@
 package com.umc.pediupatrao.dto;
 
+import java.time.LocalDateTime;
+
 public class PedidoEntregaDTO {
 
     private String numeroPedido;
     private String endereco;
     private String telefone;
+    private LocalDateTime dataHoraEntrada;
 
-    public PedidoEntregaDTO(String numeroPedido, String endereco, String telefone) {
+    public PedidoEntregaDTO(String numeroPedido, String endereco, String telefone,
+            LocalDateTime dataHoraEntrada) {
         this.numeroPedido = numeroPedido;
         this.endereco = endereco;
         this.telefone = telefone;
+        this.dataHoraEntrada = dataHoraEntrada;
     }
 
     public String getNumeroPedido() {
@@ -22,5 +27,9 @@ public class PedidoEntregaDTO {
 
     public String getTelefone() {
         return telefone;
+    }
+
+    public LocalDateTime getDataHoraEntrada() {
+        return dataHoraEntrada;
     }
 }

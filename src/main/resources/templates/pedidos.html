@@ -46,7 +46,7 @@
             </div>
             <div class="mt-3">
                 <button class="btn btn-success" onclick="salvarPedido()">Salvar</button>
-                <button sec:authorize="hasAnyRole('ATENDENTE', 'GERENTE')" type="button"
+                <button sec:authorize="hasAnyRole('ADMIN', 'ATENDENTE', 'GERENTE')" type="button"
                         class="btn btn-warning" onclick="definirDescontoNoFormulario()">
                     Desconto
                 </button>
@@ -90,7 +90,13 @@
 
         if (entregador) {
             document.getElementById('pedidos-cabecalho').innerHTML =
-                '<th class="ps-4">Número do pedido</th><th>Endereço</th><th>Telefone</th>';
+                '<th class="ps-4">Número do pedido</th><th>Data e hora</th>' +
+                '<th>Endereço</th><th>Telefone</th>';
+        } else {
+            document.getElementById('pedidos-cabecalho').innerHTML =
+                '<th class="ps-4">Número</th><th>Cliente</th><th>Item</th>' +
+                '<th>Qtd.</th><th>Preço original</th><th>Valor total</th>' +
+                '<th>Data e hora</th><th>Status</th><th class="text-end pe-4">Ações</th>';
         }
 
         function mostrarMensagem(texto, erro) {
@@ -123,7 +129,7 @@
             pedidos = await resposta.json();
             tabela.innerHTML = '';
             if (pedidos.length === 0) {
-                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '3' : '7')
+                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '4' : '9')
                     + '" class="text-center text-muted py-5">Nenhum pedido cadastrado.</td></tr>';
                 return;
             }
@@ -132,6 +138,7 @@
                     const linhaEntrega = document.createElement('tr');
                     linhaEntrega.innerHTML =
                         '<td class="ps-4">' + mostrarValor(pedido.numeroPedido, '-') + '</td>' +
+                        '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
                         '<td>' + mostrarValor(pedido.endereco, '-') + '</td>' +
                         '<td>' + mostrarValor(pedido.telefone, '-') + '</td>';
                     tabela.appendChild(linhaEntrega);
@@ -140,11 +147,13 @@
                 const item = pedido.itens && pedido.itens.length ? pedido.itens[0] : {};
                 const linha = document.createElement('tr');
                 linha.innerHTML =
-                    '<td class="ps-4">' + nomeCliente(pedido.clienteId) + '</td>' +
+                    '<td class="ps-4">' + numeroPedido(pedido) + '</td>' +
+                    '<td>' + nomeCliente(pedido.clienteId) + '</td>' +
                     '<td>' + mostrarValor(item.descricao ?? item.produtoId, '-') + '</td>' +
                     '<td>' + mostrarValor(item.quantidade, '-') + '</td>' +
                     '<td>R$ ' + mostrarValor(item.precoUnitario, '0.00') + '</td>' +
                     '<td>R$ ' + mostrarValor(pedido.valorTotal, '0.00') + '</td>' +
+                    '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
                     '<td><span class="badge bg-secondary">' + pedido.status + '</span></td>' +
                     '<td class="text-end pe-4">' + botoes(pedido) + '</td>';
                 tabela.appendChild(linha);
@@ -175,6 +184,15 @@
         function nomeCliente(id) {
             const cliente = (window.clientes ?? []).find(item => item.id === id);
             return cliente ? cliente.nome : mostrarValor(id, '-');
+        }
+
+        function numeroPedido(pedido) {
+            return pedido.numeroPedido ? 'Pedido ' + pedido.numeroPedido : 'Pedido ' + pedido.id;
+        }
+
+        function formatarData(data) {
+            if (!data) return '-';
+            return new Date(data).toLocaleString('pt-BR');
         }
 
         function abrirFormulario(pedido) {
@@ -221,7 +239,8 @@
                 body: JSON.stringify(dados)
             });
             if (!resposta.ok) {
-                mostrarMensagem('Não foi possível salvar o pedido.', true);
+                const erro = await resposta.text();
+                mostrarMensagem(erro || 'Não foi possível salvar o pedido.', true);
                 return;
             }
             fecharFormulario();

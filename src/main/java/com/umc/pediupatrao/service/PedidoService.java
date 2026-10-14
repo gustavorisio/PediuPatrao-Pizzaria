@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class PedidoService {
@@ -28,17 +30,20 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ClienteRepository clienteRepository;
     private final ProdutoRepository produtoRepository;
+    private final AuditoriaService auditoriaService;
 
     public PedidoService(PedidoRepository pedidoRepository, ClienteRepository clienteRepository,
-            ProdutoRepository produtoRepository) {
+            ProdutoRepository produtoRepository, AuditoriaService auditoriaService) {
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
         this.produtoRepository = produtoRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     // Persiste um pedido recém-criado pelo atendimento.
     public Pedido criarPedido(Pedido pedido) {
         validarPedido(pedido);
+        pedido.setNumeroPedido(proximoNumeroPedido());
         pedido.setStatus("RECEBIDO");
         pedido.setValorTotal(calcularValorTotal(pedido));
         pedido.setResponsavelRegistro(usuarioAutenticado());
@@ -49,7 +54,10 @@ public class PedidoService {
         pedido.setAuditoria(new ArrayList<>());
         registrarAuditoria(pedido, "RECEBIMENTO", null, pedido.getStatus(), null,
                 BigDecimal.ZERO, pedido.getPercentualDesconto(), null, pedido.getValorTotal());
-        return pedidoRepository.save(pedido);
+        Pedido salvo = pedidoRepository.save(pedido);
+        auditoriaService.registrar("INCLUSAO", "PEDIDO", salvo.getId(),
+                new HashMap<>(), dadosPedido(salvo), null);
+        return salvo;
     }
 
     private void validarPedido(Pedido pedido) {
@@ -83,9 +91,10 @@ public class PedidoService {
                 || desconto.compareTo(DESCONTO_MAXIMO) > 0) {
             throw erro("O desconto deve estar entre 0% e 20%.");
         } else if (desconto.compareTo(BigDecimal.ZERO) > 0
-                && !usuarioTemRole("GERENTE") && !usuarioTemRole("ATENDENTE")) {
+                && !podeAplicarDesconto()) {
             throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "Somente o ATENDENTE ou GERENTE pode aplicar descontos.");
+                    HttpStatus.FORBIDDEN,
+                    "Somente o ADMIN ou GERENTE pode aplicar descontos.");
         }
     }
 
@@ -117,6 +126,10 @@ public class PedidoService {
                 .anyMatch(authority -> ("ROLE_" + role).equals(authority.getAuthority()));
     }
 
+    private boolean podeAplicarDesconto() {
+        return usuarioTemRole("ADMIN") || usuarioTemRole("GERENTE");
+    }
+
     public boolean usuarioEhEntregador() {
         return usuarioTemRole("ENTREGADOR");
     }
@@ -131,11 +144,15 @@ public class PedidoService {
 
     // Entrega à aplicação os pedidos necessários para acompanhamento.
     public List<Pedido> listarPedidos() {
-        return pedidoRepository.findAll();
+        List<Pedido> pedidos = pedidoRepository.findAll();
+        preencherNumerosAntigos(pedidos);
+        return pedidos;
     }
 
     public List<PedidoEntregaDTO> listarPedidosParaEntrega() {
-        return pedidoRepository.findAll().stream()
+        List<Pedido> pedidos = pedidoRepository.findAll();
+        preencherNumerosAntigos(pedidos);
+        return pedidos.stream()
                 .map(this::transformarParaEntrega)
                 .toList();
     }
@@ -147,10 +164,35 @@ public class PedidoService {
     private PedidoEntregaDTO transformarParaEntrega(Pedido pedido) {
         var cliente = clienteRepository.findById(pedido.getClienteId()).orElse(null);
         if (cliente == null) {
-            return new PedidoEntregaDTO(pedido.getId(), "-", "-");
+            return new PedidoEntregaDTO(numeroParaExibicao(pedido), "-", "-",
+                    pedido.getDataHoraEntrada());
         }
-        return new PedidoEntregaDTO(pedido.getId(), enderecoCliente(cliente),
-                cliente.getTelefone());
+        return new PedidoEntregaDTO(numeroParaExibicao(pedido), enderecoCliente(cliente),
+                cliente.getTelefone(), pedido.getDataHoraEntrada());
+    }
+
+    private String numeroParaExibicao(Pedido pedido) {
+        if (pedido.getNumeroPedido() != null) {
+            return "Pedido " + pedido.getNumeroPedido();
+        }
+        return "Pedido " + pedido.getId();
+    }
+
+    private int proximoNumeroPedido() {
+        return pedidoRepository.findTopByOrderByNumeroPedidoDesc()
+                .map(pedido -> pedido.getNumeroPedido() == null
+                        ? 1 : pedido.getNumeroPedido() + 1)
+                .orElse(1);
+    }
+
+    private void preencherNumerosAntigos(List<Pedido> pedidos) {
+        int proximo = proximoNumeroPedido();
+        for (Pedido pedido : pedidos) {
+            if (pedido.getNumeroPedido() == null) {
+                pedido.setNumeroPedido(proximo++);
+                pedidoRepository.save(pedido);
+            }
+        }
     }
 
     private String enderecoCliente(com.umc.pediupatrao.entity.Cliente cliente) {
@@ -193,11 +235,18 @@ public class PedidoService {
         pedido.setItens(dados.getItens());
         BigDecimal descontoAnterior = percentualDoPedido(pedido);
         BigDecimal valorAnterior = pedido.getValorTotal();
+        pedido.setPercentualDesconto(dados.getPercentualDesconto());
         pedido.setValorTotal(calcularValorTotal(pedido));
         registrarAuditoria(pedido, "ALTERACAO_PEDIDO", pedido.getStatus(), pedido.getStatus(),
                 null, descontoAnterior, pedido.getPercentualDesconto(),
                 valorAnterior, pedido.getValorTotal());
-        return pedidoRepository.save(pedido);
+        Pedido salvo = pedidoRepository.save(pedido);
+        String operacao = descontoAnterior.compareTo(salvo.getPercentualDesconto()) != 0
+                ? "DESCONTO" : "ALTERACAO";
+        auditoriaService.registrar(operacao, "PEDIDO", salvo.getId(),
+                dadosPedidoAntes(pedido, descontoAnterior, valorAnterior),
+                dadosPedido(salvo), null);
+        return salvo;
     }
 
     public void excluirPedido(String id) {
@@ -224,7 +273,10 @@ public class PedidoService {
         registrarAuditoria(pedido, "ALTERACAO_STATUS", statusAnterior, novoStatus,
                 null, pedido.getPercentualDesconto(), pedido.getPercentualDesconto(),
                 pedido.getValorTotal(), pedido.getValorTotal());
-        return pedidoRepository.save(pedido);
+        Pedido salvo = pedidoRepository.save(pedido);
+        auditoriaService.registrar("ALTERACAO_STATUS", "PEDIDO", salvo.getId(),
+                mapa("status", statusAnterior), mapa("status", novoStatus), null);
+        return salvo;
     }
 
     public Pedido cancelarPedido(String id, String justificativa) {
@@ -243,7 +295,11 @@ public class PedidoService {
         registrarAuditoria(pedido, "CANCELAMENTO", statusAnterior, "CANCELADO",
                 pedido.getJustificativaCancelamento(), pedido.getPercentualDesconto(),
                 pedido.getPercentualDesconto(), pedido.getValorTotal(), pedido.getValorTotal());
-        return pedidoRepository.save(pedido);
+        Pedido salvo = pedidoRepository.save(pedido);
+        auditoriaService.registrar("CANCELAMENTO", "PEDIDO", salvo.getId(),
+                mapa("status", statusAnterior), mapa("status", "CANCELADO"),
+                justificativa);
+        return salvo;
     }
 
     private Pedido buscarPedido(String id) {
@@ -267,15 +323,36 @@ public class PedidoService {
     }
 
     private void exigirGerente() {
-        if (!usuarioTemRole("GERENTE")) {
+        if (!usuarioTemRole("ADMIN") && !usuarioTemRole("GERENTE")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Somente o GERENTE pode cancelar pedidos.");
+                    "Somente o ADMIN ou GERENTE pode cancelar pedidos.");
         }
     }
 
     private BigDecimal percentualDoPedido(Pedido pedido) {
         return pedido.getPercentualDesconto() == null
                 ? BigDecimal.ZERO : pedido.getPercentualDesconto();
+    }
+
+    private Map<String, String> dadosPedido(Pedido pedido) {
+        return mapa("status", pedido.getStatus(),
+                "percentualDesconto", String.valueOf(pedido.getPercentualDesconto()),
+                "valorTotal", String.valueOf(pedido.getValorTotal()));
+    }
+
+    private Map<String, String> dadosPedidoAntes(Pedido pedido, BigDecimal desconto,
+            BigDecimal valorTotal) {
+        return mapa("status", pedido.getStatus(),
+                "percentualDesconto", String.valueOf(desconto),
+                "valorTotal", String.valueOf(valorTotal));
+    }
+
+    private Map<String, String> mapa(String... valores) {
+        Map<String, String> resultado = new HashMap<>();
+        for (int i = 0; i + 1 < valores.length; i += 2) {
+            resultado.put(valores[i], valores[i + 1]);
+        }
+        return resultado;
     }
 
     private void registrarAuditoria(Pedido pedido, String operacao, String statusAnterior,
