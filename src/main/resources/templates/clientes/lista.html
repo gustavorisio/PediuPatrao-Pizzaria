@@ -1,75 +1,77 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Lista de Clientes</title>
 </head>
+
 <body>
-<div th:fragment="content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">
-            <i class="bi bi-person-raised-hand me-2 text-primary"></i>Clientes
-        </h2>
-        <a href="/clientes/novo" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> Novo Cliente
-        </a>
-    </div>
-
-    <!-- Tabela de clientes -->
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Nome</th>
-                        <th>Telefone</th>
-                        <th>Endereço</th>
-                        <th class="text-end pe-4">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="clientes-tabela">
-                    <!-- Linhas carregadas via JavaScript -->
-                </tbody>
-            </table>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-person-raised-hand me-2 text-primary"></i>Clientes
+            </h2>
+            <a href="/clientes/novo" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Novo Cliente
+            </a>
         </div>
-    </div>
 
-    <script th:inline="javascript">
-        const API_URL = '/api/clientes';
-        const podeExcluir = /*[[${#authorization.expression("hasAnyRole('ADMIN', 'GERENTE')")}]]*/ false;
-        const tabelaClientes = document.getElementById('clientes-tabela');
+        <!-- Tabela de clientes -->
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                            <th>Endereço</th>
+                            <th class="text-end pe-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientes-tabela">
+                        <!-- Linhas carregadas via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-        function formatarEndereco(cliente) {
-            const partes = [
-                cliente.logradouro,
-                cliente.numero,
-                cliente.complemento,
-                cliente.bairro,
-                cliente.cidade,
-                cliente.estado
-            ].filter(p => p && p.trim() !== '');
+        <script th:inline="javascript">
+            const API_URL = '/api/clientes';
+            const podeExcluir = /*[[${#authorization.expression("hasAnyRole('ADMIN', 'GERENTE')")}]]*/ false;
+            const tabelaClientes = document.getElementById('clientes-tabela');
 
-            return partes.length > 0 ? partes.join(', ') : (cliente.endereco || '—');
-        }
+            function formatarEndereco(cliente) {
+                const partes = [
+                    cliente.logradouro,
+                    cliente.numero,
+                    cliente.complemento,
+                    cliente.bairro,
+                    cliente.cidade,
+                    cliente.estado
+                ].filter(p => p && p.trim() !== '');
 
-        async function carregarClientes() {
-            const response = await fetch(API_URL);
-            const clientes = await response.json();
-            tabelaClientes.innerHTML = '';
+                return partes.length > 0 ? partes.join(', ') : (cliente.endereco || '—');
+            }
 
-            if (clientes.length === 0) {
-                tabelaClientes.innerHTML = `
+            async function carregarClientes() {
+                const response = await fetch(API_URL);
+                const clientes = await response.json();
+                tabelaClientes.innerHTML = '';
+
+                if (clientes.length === 0) {
+                    tabelaClientes.innerHTML = `
                     <tr>
                         <td colspan="4" class="text-center text-muted py-5">
                             <i class="bi bi-inbox fs-3 d-block mb-2"></i>
                             Nenhum cliente cadastrado.
                         </td>
                     </tr>`;
-                return;
-            }
+                    return;
+                }
 
-            clientes.forEach(cliente => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
+                clientes.forEach(cliente => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
                     <td>${cliente.nome || '—'}</td>
                     <td>${cliente.telefone || '—'}</td>
                     <td>${formatarEndereco(cliente)}</td>
@@ -82,24 +84,25 @@
                         </button>` : ''}
                     </td>
                 `;
-                tabelaClientes.appendChild(row);
-            });
-        }
+                    tabelaClientes.appendChild(row);
+                });
+            }
 
-        async function excluirCliente(id) {
-            if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                if (response.ok) {
-                    alert('Cliente excluído com sucesso!');
-                    carregarClientes();
-                } else {
-                    alert('Erro ao excluir o cliente.');
+            async function excluirCliente(id) {
+                if (confirm('Tem certeza que deseja excluir este cliente?')) {
+                    const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        alert('Cliente excluído com sucesso!');
+                        carregarClientes();
+                    } else {
+                        alert('Erro ao excluir o cliente.');
+                    }
                 }
             }
-        }
 
-        carregarClientes();
-    </script>
-</div>
+            carregarClientes();
+        </script>
+    </div>
 </body>
+
 </html>

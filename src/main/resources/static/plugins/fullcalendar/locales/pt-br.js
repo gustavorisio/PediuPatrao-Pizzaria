@@ -14,7 +14,7 @@ FullCalendar.globalLocales.push(function () {
     },
     weekText: 'Sm',
     allDayText: 'dia inteiro',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return 'mais +' + n
     },
     noEventsText: 'Não há eventos para mostrar',

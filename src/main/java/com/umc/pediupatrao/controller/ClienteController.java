@@ -41,7 +41,8 @@ public class ClienteController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
-    // Mantém o ID da URL como fonte oficial para evitar alteração acidental do registro.
+    // Mantém o ID da URL como fonte oficial para evitar alteração acidental do
+    // registro.
     public ResponseEntity<Cliente> atualizarCliente(@PathVariable String id, @RequestBody Cliente cliente) {
         cliente.setId(id);
         Cliente atualizado = clienteService.salvar(cliente);

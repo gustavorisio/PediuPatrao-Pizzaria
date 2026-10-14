@@ -18,7 +18,7 @@ FullCalendar.globalLocales.push(function () {
     },
     weekText: 'Tje',
     allDayText: 'Cijeli dan',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ još ' + n
     },
     noEventsText: 'Nema događaja za prikaz',

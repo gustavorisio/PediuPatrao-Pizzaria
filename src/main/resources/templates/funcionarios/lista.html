@@ -1,30 +1,37 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <body>
-<div th:fragment="content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-person-walking me-2 text-primary"></i>Funcionários</h2>
-        <a th:href="@{/usuarios/novo}" class="btn btn-primary" sec:authorize="hasRole('ADMIN')">
-            <i class="bi bi-plus-lg me-1"></i>Novo funcionário
-        </a>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-person-walking me-2 text-primary"></i>Funcionários</h2>
+            <a th:href="@{/usuarios/novo}" class="btn btn-primary" sec:authorize="hasRole('ADMIN')">
+                <i class="bi bi-plus-lg me-1"></i>Novo funcionário
+            </a>
+        </div>
+        <div class="alert alert-info" th:if="${#lists.isEmpty(funcionarios)}">
+            Nenhum funcionário cadastrado. Crie um usuário com perfil GERENTE ou ATENDENTE.
+        </div>
+        <div class="card shadow-sm" th:if="${!#lists.isEmpty(funcionarios)}">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Perfil</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="funcionario : ${funcionarios}">
+                        <td th:text="${funcionario.username}"></td>
+                        <td th:text="${funcionario.role}"></td>
+                        <td><a th:href="@{/usuarios/editar/{id}(id=${funcionario.id})}"
+                                class="btn btn-sm btn-outline-primary">Editar</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="alert alert-info" th:if="${#lists.isEmpty(funcionarios)}">
-        Nenhum funcionário cadastrado. Crie um usuário com perfil GERENTE ou ATENDENTE.
-    </div>
-    <div class="card shadow-sm" th:if="${!#lists.isEmpty(funcionarios)}">
-        <table class="table table-hover mb-0">
-            <thead class="table-dark"><tr><th>Usuário</th><th>Perfil</th><th>Ação</th></tr></thead>
-            <tbody>
-            <tr th:each="funcionario : ${funcionarios}">
-                <td th:text="${funcionario.username}"></td>
-                <td th:text="${funcionario.role}"></td>
-                <td><a th:href="@{/usuarios/editar/{id}(id=${funcionario.id})}"
-                       class="btn btn-sm btn-outline-primary">Editar</a></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 </body>
+
 </html>

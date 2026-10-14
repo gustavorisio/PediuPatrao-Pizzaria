@@ -10,7 +10,7 @@ FullCalendar.globalLocales.push(function () {
       list: 'Kun tartibi',
     },
     allDayText: "Kun bo'yi",
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ yana ' + n
     },
     noEventsText: "Ko'rsatish uchun voqealar yo'q",

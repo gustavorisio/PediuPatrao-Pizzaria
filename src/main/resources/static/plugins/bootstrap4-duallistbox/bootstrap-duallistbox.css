@@ -42,17 +42,19 @@
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
+
 .bootstrap-duallistbox-container:not(.moveonselect) select {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
 .bootstrap-duallistbox-container .moveall,
 .bootstrap-duallistbox-container .removeall {
   width: 50%;
   box-sizing: content-box;
 }
 
-.bootstrap-duallistbox-container.bs2compatible .btn-group > .btn + .btn {
+.bootstrap-duallistbox-container.bs2compatible .btn-group>.btn+.btn {
   margin-left: 0;
 }
 
@@ -78,7 +80,7 @@
 
 .bootstrap-duallistbox-container.moveonselect .move,
 .bootstrap-duallistbox-container.moveonselect .remove {
-  display:none;
+  display: none;
 }
 
 .bootstrap-duallistbox-container.moveonselect .moveall,

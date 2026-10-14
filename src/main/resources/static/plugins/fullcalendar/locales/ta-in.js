@@ -18,7 +18,7 @@ FullCalendar.globalLocales.push(function () {
     },
     weekText: 'வாரம்',
     allDayText: 'நாள் முழுவதும்',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ மேலும் ' + n
     },
     noEventsText: 'காண்பிக்க நிகழ்வுகள் இல்லை',

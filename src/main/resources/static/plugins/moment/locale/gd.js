@@ -2,29 +2,30 @@
 //! locale : Scottish Gaelic [gd]
 //! author : Jon Ashdown : https://github.com/jonashdown
 
-;(function (global, factory) {
-   typeof exports === 'object' && typeof module !== 'undefined'
-       && typeof require === 'function' ? factory(require('../moment')) :
-   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-   factory(global.moment)
-}(this, (function (moment) { 'use strict';
+; (function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined'
+        && typeof require === 'function' ? factory(require('../moment')) :
+        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+            factory(global.moment)
+}(this, (function (moment) {
+    'use strict';
 
     //! moment.js locale configuration
 
     var months = [
-            'Am Faoilleach',
-            'An Gearran',
-            'Am Màrt',
-            'An Giblean',
-            'An Cèitean',
-            'An t-Ògmhios',
-            'An t-Iuchar',
-            'An Lùnastal',
-            'An t-Sultain',
-            'An Dàmhair',
-            'An t-Samhain',
-            'An Dùbhlachd',
-        ],
+        'Am Faoilleach',
+        'An Gearran',
+        'Am Màrt',
+        'An Giblean',
+        'An Cèitean',
+        'An t-Ògmhios',
+        'An t-Iuchar',
+        'An Lùnastal',
+        'An t-Sultain',
+        'An Dàmhair',
+        'An t-Samhain',
+        'An Dùbhlachd',
+    ],
         monthsShort = [
             'Faoi',
             'Gear',

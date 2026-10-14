@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "produtos")
 @Entity
 public class Produto {
-    
+
     @Id
     private String id;
     private String nome;
@@ -72,6 +72,5 @@ public class Produto {
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
     }
-    
-    
+
 }

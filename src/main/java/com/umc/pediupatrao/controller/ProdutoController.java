@@ -12,10 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RestController
 @RequestMapping("/api/produtos")
 public class ProdutoController {
-    
+
     @Autowired
     private ProdutoService produtoService;
-    
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     // Atendimento consulta o catálogo, enquanto a gestão controla sua manutenção.

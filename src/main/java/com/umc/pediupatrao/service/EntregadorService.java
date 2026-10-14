@@ -15,11 +15,17 @@ public class EntregadorService {
     }
 
     // Lista os entregadores cadastrados para a gestão da operação.
-    public List<Entregador> listarTodos() { return repository.findAll(); }
+    public List<Entregador> listarTodos() {
+        return repository.findAll();
+    }
 
     // Persiste tanto novos entregadores quanto alterações existentes.
-    public Entregador salvar(Entregador entregador) { return repository.save(entregador); }
+    public Entregador salvar(Entregador entregador) {
+        return repository.save(entregador);
+    }
 
     // Remove um entregador que não deve mais participar da operação.
-    public void excluir(String id) { repository.deleteById(id); }
+    public void excluir(String id) {
+        repository.deleteById(id);
+    }
 }

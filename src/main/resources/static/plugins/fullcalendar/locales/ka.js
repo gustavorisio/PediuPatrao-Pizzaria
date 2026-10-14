@@ -18,7 +18,7 @@ FullCalendar.globalLocales.push(function () {
     },
     weekText: 'კვ',
     allDayText: 'მთელი დღე',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ კიდევ ' + n
     },
     noEventsText: 'ღონისძიებები არ არის',

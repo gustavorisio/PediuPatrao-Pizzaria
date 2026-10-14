@@ -3,14 +3,14 @@
 
 // Swift mode created by Michael Kaminsky https://github.com/mkaminsky11
 
-(function(mod) {
+(function (mod) {
   if (typeof exports == "object" && typeof module == "object")
     mod(require("../../lib/codemirror"))
   else if (typeof define == "function" && define.amd)
     define(["../../lib/codemirror"], mod)
   else
     mod(CodeMirror)
-})(function(CodeMirror) {
+})(function (CodeMirror) {
   "use strict"
 
   function wordSet(words) {
@@ -19,17 +19,17 @@
     return set
   }
 
-  var keywords = wordSet(["_","var","let","class","enum","extension","import","protocol","struct","func","typealias","associatedtype",
-                          "open","public","internal","fileprivate","private","deinit","init","new","override","self","subscript","super",
-                          "convenience","dynamic","final","indirect","lazy","required","static","unowned","unowned(safe)","unowned(unsafe)","weak","as","is",
-                          "break","case","continue","default","else","fallthrough","for","guard","if","in","repeat","switch","where","while",
-                          "defer","return","inout","mutating","nonmutating","catch","do","rethrows","throw","throws","try","didSet","get","set","willSet",
-                          "assignment","associativity","infix","left","none","operator","postfix","precedence","precedencegroup","prefix","right",
-                          "Any","AnyObject","Type","dynamicType","Self","Protocol","__COLUMN__","__FILE__","__FUNCTION__","__LINE__"])
-  var definingKeywords = wordSet(["var","let","class","enum","extension","import","protocol","struct","func","typealias","associatedtype","for"])
-  var atoms = wordSet(["true","false","nil","self","super","_"])
-  var types = wordSet(["Array","Bool","Character","Dictionary","Double","Float","Int","Int8","Int16","Int32","Int64","Never","Optional","Set","String",
-                       "UInt8","UInt16","UInt32","UInt64","Void"])
+  var keywords = wordSet(["_", "var", "let", "class", "enum", "extension", "import", "protocol", "struct", "func", "typealias", "associatedtype",
+    "open", "public", "internal", "fileprivate", "private", "deinit", "init", "new", "override", "self", "subscript", "super",
+    "convenience", "dynamic", "final", "indirect", "lazy", "required", "static", "unowned", "unowned(safe)", "unowned(unsafe)", "weak", "as", "is",
+    "break", "case", "continue", "default", "else", "fallthrough", "for", "guard", "if", "in", "repeat", "switch", "where", "while",
+    "defer", "return", "inout", "mutating", "nonmutating", "catch", "do", "rethrows", "throw", "throws", "try", "didSet", "get", "set", "willSet",
+    "assignment", "associativity", "infix", "left", "none", "operator", "postfix", "precedence", "precedencegroup", "prefix", "right",
+    "Any", "AnyObject", "Type", "dynamicType", "Self", "Protocol", "__COLUMN__", "__FILE__", "__FUNCTION__", "__LINE__"])
+  var definingKeywords = wordSet(["var", "let", "class", "enum", "extension", "import", "protocol", "struct", "func", "typealias", "associatedtype", "for"])
+  var atoms = wordSet(["true", "false", "nil", "self", "super", "_"])
+  var types = wordSet(["Array", "Bool", "Character", "Dictionary", "Double", "Float", "Int", "Int8", "Int16", "Int32", "Int64", "Never", "Optional", "Set", "String",
+    "UInt8", "UInt16", "UInt32", "UInt64", "Void"])
   var operators = "+-/*%=|&<>~^?!"
   var punc = ":;,.(){}[]"
   var binary = /^\-?0b[01][01_]*/
@@ -99,7 +99,7 @@
 
   function tokenUntilClosingParen() {
     var depth = 0
-    return function(stream, state, prev) {
+    return function (stream, state, prev) {
       var inner = tokenBase(stream, state, prev)
       if (inner == "punctuation") {
         if (stream.current() == "(") ++depth
@@ -174,9 +174,9 @@
     }
   }
 
-  CodeMirror.defineMode("swift", function(config) {
+  CodeMirror.defineMode("swift", function (config) {
     return {
-      startState: function() {
+      startState: function () {
         return {
           prev: null,
           context: null,
@@ -185,7 +185,7 @@
         }
       },
 
-      token: function(stream, state) {
+      token: function (stream, state) {
         var prev = state.prev
         state.prev = null
         var tokenize = state.tokenize[state.tokenize.length - 1] || tokenBase
@@ -201,7 +201,7 @@
         return style
       },
 
-      indent: function(state, textAfter) {
+      indent: function (state, textAfter) {
         var cx = state.context
         if (!cx) return 0
         var closing = /^[\]\}\)]/.test(textAfter)
@@ -219,5 +219,5 @@
     }
   })
 
-  CodeMirror.defineMIME("text/x-swift","swift")
+  CodeMirror.defineMIME("text/x-swift", "swift")
 });

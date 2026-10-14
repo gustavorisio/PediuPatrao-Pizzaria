@@ -9,67 +9,67 @@
 // originally made for use in the mscgen_js interpreter
 // (https://sverweij.github.io/mscgen_js)
 
-(function(mod) {
-  if ( typeof exports == "object" && typeof module == "object")// CommonJS
+(function (mod) {
+  if (typeof exports == "object" && typeof module == "object")// CommonJS
     mod(require("../../lib/codemirror"));
-  else if ( typeof define == "function" && define.amd)// AMD
+  else if (typeof define == "function" && define.amd)// AMD
     define(["../../lib/codemirror"], mod);
   else// Plain browser env
     mod(CodeMirror);
-})(function(CodeMirror) {
+})(function (CodeMirror) {
   "use strict";
 
   var languages = {
     mscgen: {
-      "keywords" : ["msc"],
-      "options" : ["hscale", "width", "arcgradient", "wordwraparcs"],
-      "constants" : ["true", "false", "on", "off"],
-      "attributes" : ["label", "idurl", "id", "url", "linecolor", "linecolour", "textcolor", "textcolour", "textbgcolor", "textbgcolour", "arclinecolor", "arclinecolour", "arctextcolor", "arctextcolour", "arctextbgcolor", "arctextbgcolour", "arcskip"],
-      "brackets" : ["\\{", "\\}"], // [ and  ] are brackets too, but these get handled in with lists
-      "arcsWords" : ["note", "abox", "rbox", "box"],
-      "arcsOthers" : ["\\|\\|\\|", "\\.\\.\\.", "---", "--", "<->", "==", "<<=>>", "<=>", "\\.\\.", "<<>>", "::", "<:>", "->", "=>>", "=>", ">>", ":>", "<-", "<<=", "<=", "<<", "<:", "x-", "-x"],
-      "singlecomment" : ["//", "#"],
-      "operators" : ["="]
+      "keywords": ["msc"],
+      "options": ["hscale", "width", "arcgradient", "wordwraparcs"],
+      "constants": ["true", "false", "on", "off"],
+      "attributes": ["label", "idurl", "id", "url", "linecolor", "linecolour", "textcolor", "textcolour", "textbgcolor", "textbgcolour", "arclinecolor", "arclinecolour", "arctextcolor", "arctextcolour", "arctextbgcolor", "arctextbgcolour", "arcskip"],
+      "brackets": ["\\{", "\\}"], // [ and  ] are brackets too, but these get handled in with lists
+      "arcsWords": ["note", "abox", "rbox", "box"],
+      "arcsOthers": ["\\|\\|\\|", "\\.\\.\\.", "---", "--", "<->", "==", "<<=>>", "<=>", "\\.\\.", "<<>>", "::", "<:>", "->", "=>>", "=>", ">>", ":>", "<-", "<<=", "<=", "<<", "<:", "x-", "-x"],
+      "singlecomment": ["//", "#"],
+      "operators": ["="]
     },
     xu: {
-      "keywords" : ["msc", "xu"],
-      "options" : ["hscale", "width", "arcgradient", "wordwraparcs", "wordwrapentities", "watermark"],
-      "constants" : ["true", "false", "on", "off", "auto"],
-      "attributes" : ["label", "idurl", "id", "url", "linecolor", "linecolour", "textcolor", "textcolour", "textbgcolor", "textbgcolour", "arclinecolor", "arclinecolour", "arctextcolor", "arctextcolour", "arctextbgcolor", "arctextbgcolour", "arcskip", "title", "deactivate", "activate", "activation"],
-      "brackets" : ["\\{", "\\}"],  // [ and  ] are brackets too, but these get handled in with lists
-      "arcsWords" : ["note", "abox", "rbox", "box", "alt", "else", "opt", "break", "par", "seq", "strict", "neg", "critical", "ignore", "consider", "assert", "loop", "ref", "exc"],
-      "arcsOthers" : ["\\|\\|\\|", "\\.\\.\\.", "---", "--", "<->", "==", "<<=>>", "<=>", "\\.\\.", "<<>>", "::", "<:>", "->", "=>>", "=>", ">>", ":>", "<-", "<<=", "<=", "<<", "<:", "x-", "-x"],
-      "singlecomment" : ["//", "#"],
-      "operators" : ["="]
+      "keywords": ["msc", "xu"],
+      "options": ["hscale", "width", "arcgradient", "wordwraparcs", "wordwrapentities", "watermark"],
+      "constants": ["true", "false", "on", "off", "auto"],
+      "attributes": ["label", "idurl", "id", "url", "linecolor", "linecolour", "textcolor", "textcolour", "textbgcolor", "textbgcolour", "arclinecolor", "arclinecolour", "arctextcolor", "arctextcolour", "arctextbgcolor", "arctextbgcolour", "arcskip", "title", "deactivate", "activate", "activation"],
+      "brackets": ["\\{", "\\}"],  // [ and  ] are brackets too, but these get handled in with lists
+      "arcsWords": ["note", "abox", "rbox", "box", "alt", "else", "opt", "break", "par", "seq", "strict", "neg", "critical", "ignore", "consider", "assert", "loop", "ref", "exc"],
+      "arcsOthers": ["\\|\\|\\|", "\\.\\.\\.", "---", "--", "<->", "==", "<<=>>", "<=>", "\\.\\.", "<<>>", "::", "<:>", "->", "=>>", "=>", ">>", ":>", "<-", "<<=", "<=", "<<", "<:", "x-", "-x"],
+      "singlecomment": ["//", "#"],
+      "operators": ["="]
     },
     msgenny: {
-      "keywords" : null,
-      "options" : ["hscale", "width", "arcgradient", "wordwraparcs", "wordwrapentities", "watermark"],
-      "constants" : ["true", "false", "on", "off", "auto"],
-      "attributes" : null,
-      "brackets" : ["\\{", "\\}"],
-      "arcsWords" : ["note", "abox", "rbox", "box", "alt", "else", "opt", "break", "par", "seq", "strict", "neg", "critical", "ignore", "consider", "assert", "loop", "ref", "exc"],
-      "arcsOthers" : ["\\|\\|\\|", "\\.\\.\\.", "---", "--", "<->", "==", "<<=>>", "<=>", "\\.\\.", "<<>>", "::", "<:>", "->", "=>>", "=>", ">>", ":>", "<-", "<<=", "<=", "<<", "<:", "x-", "-x"],
-      "singlecomment" : ["//", "#"],
-      "operators" : ["="]
+      "keywords": null,
+      "options": ["hscale", "width", "arcgradient", "wordwraparcs", "wordwrapentities", "watermark"],
+      "constants": ["true", "false", "on", "off", "auto"],
+      "attributes": null,
+      "brackets": ["\\{", "\\}"],
+      "arcsWords": ["note", "abox", "rbox", "box", "alt", "else", "opt", "break", "par", "seq", "strict", "neg", "critical", "ignore", "consider", "assert", "loop", "ref", "exc"],
+      "arcsOthers": ["\\|\\|\\|", "\\.\\.\\.", "---", "--", "<->", "==", "<<=>>", "<=>", "\\.\\.", "<<>>", "::", "<:>", "->", "=>>", "=>", ">>", ":>", "<-", "<<=", "<=", "<<", "<:", "x-", "-x"],
+      "singlecomment": ["//", "#"],
+      "operators": ["="]
     }
   }
 
-  CodeMirror.defineMode("mscgen", function(_, modeConfig) {
+  CodeMirror.defineMode("mscgen", function (_, modeConfig) {
     var language = languages[modeConfig && modeConfig.language || "mscgen"]
     return {
       startState: startStateFn,
       copyState: copyStateFn,
       token: produceTokenFunction(language),
-      lineComment : "#",
-      blockCommentStart : "/*",
-      blockCommentEnd : "*/"
+      lineComment: "#",
+      blockCommentStart: "/*",
+      blockCommentEnd: "*/"
     };
   });
 
   CodeMirror.defineMIME("text/x-mscgen", "mscgen");
-  CodeMirror.defineMIME("text/x-xu", {name: "mscgen", language: "xu"});
-  CodeMirror.defineMIME("text/x-msgenny", {name: "mscgen", language: "msgenny"});
+  CodeMirror.defineMIME("text/x-xu", { name: "mscgen", language: "xu" });
+  CodeMirror.defineMIME("text/x-msgenny", { name: "mscgen", language: "msgenny" });
 
   function wordRegexpBoundary(pWords) {
     return new RegExp("^\\b(?:" + pWords.join("|") + ")\\b", "i");
@@ -81,25 +81,25 @@
 
   function startStateFn() {
     return {
-      inComment : false,
-      inString : false,
-      inAttributeList : false,
-      inScript : false
+      inComment: false,
+      inString: false,
+      inAttributeList: false,
+      inScript: false
     };
   }
 
   function copyStateFn(pState) {
     return {
-      inComment : pState.inComment,
-      inString : pState.inString,
-      inAttributeList : pState.inAttributeList,
-      inScript : pState.inScript
+      inComment: pState.inComment,
+      inString: pState.inString,
+      inAttributeList: pState.inAttributeList,
+      inScript: pState.inScript
     };
   }
 
   function produceTokenFunction(pConfig) {
 
-    return function(pStream, pState) {
+    return function (pStream, pState) {
       if (pStream.match(wordRegexp(pConfig.brackets), true, true)) {
         return "bracket";
       }
