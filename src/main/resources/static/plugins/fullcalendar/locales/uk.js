@@ -18,7 +18,7 @@ FullCalendar.globalLocales.push(function () {
     },
     weekText: 'Тиж',
     allDayText: 'Увесь день',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ще ' + n + '...'
     },
     noEventsText: 'Немає подій для відображення',

@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface PedidoRepository extends MongoRepository<Pedido, String> {
     List<Pedido> findByClienteId(String clienteId);
+
     Optional<Pedido> findTopByOrderByNumeroPedidoDesc();
 }

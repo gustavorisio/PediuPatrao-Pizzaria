@@ -86,7 +86,7 @@
   color: #F5DFA5;
 }
 
-.cm-s-moxer .CodeMirror-line .cm-def ~ .cm-def {
+.cm-s-moxer .CodeMirror-line .cm-def~.cm-def {
   color: #81C5DA;
 }
 

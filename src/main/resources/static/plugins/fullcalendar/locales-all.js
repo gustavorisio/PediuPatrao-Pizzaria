@@ -193,7 +193,7 @@
     },
     weekText: 'Həftə',
     allDayText: 'Bütün Gün',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ daha çox ' + n
     },
     noEventsText: 'Göstərmək üçün hadisə yoxdur',
@@ -215,7 +215,7 @@
       list: 'График',
     },
     allDayText: 'Цял ден',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+още ' + n
     },
     noEventsText: 'Няма събития за показване',
@@ -238,7 +238,7 @@
     },
     weekText: 'সপ্তাহ',
     allDayText: 'সারাদিন',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+অন্যান্য ' + n
     },
     noEventsText: 'কোনো ইভেন্ট নেই',
@@ -261,7 +261,7 @@
     },
     weekText: 'Sed',
     allDayText: 'Cijeli dan',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ još ' + n
     },
     noEventsText: 'Nema događaja za prikazivanje',
@@ -305,7 +305,7 @@
     },
     weekText: 'Týd',
     allDayText: 'Celý den',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+další: ' + n
     },
     noEventsText: 'Žádné akce k zobrazení',
@@ -378,7 +378,7 @@
     weekText: 'KW',
     weekTextLong: 'Woche',
     allDayText: 'Ganztägig',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ weitere ' + n
     },
     noEventsText: 'Keine Ereignisse anzuzeigen',
@@ -437,7 +437,7 @@
     weekText: 'KW',
     weekTextLong: 'Woche',
     allDayText: 'Ganztägig',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ weitere ' + n
     },
     noEventsText: 'Keine Ereignisse anzuzeigen',
@@ -646,7 +646,7 @@
     },
     weekText: 'näd',
     allDayText: 'Kogu päev',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ veel ' + n
     },
     noEventsText: 'Kuvamiseks puuduvad sündmused',
@@ -691,7 +691,7 @@
     },
     weekText: 'هف',
     allDayText: 'تمام روز',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return 'بیش از ' + n
     },
     noEventsText: 'هیچ رویدادی به نمایش',
@@ -836,7 +836,7 @@
     },
     weekText: 'हफ्ता',
     allDayText: 'सभी दिन',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+अधिक ' + n
     },
     noEventsText: 'कोई घटनाओं को प्रदर्शित करने के लिए',
@@ -859,7 +859,7 @@
     },
     weekText: 'Tje',
     allDayText: 'Cijeli dan',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ još ' + n
     },
     noEventsText: 'Nema događaja za prikaz',
@@ -903,7 +903,7 @@
     },
     weekText: 'Շաբ',
     allDayText: 'Ամբողջ օր',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ ևս ' + n
     },
     noEventsText: 'Բացակայում է իրադարձությունը ցուցադրելու',
@@ -968,7 +968,7 @@
     },
     weekText: 'Sm',
     allDayText: 'Tutto il giorno',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+altri ' + n
     },
     noEventsText: 'Non ci sono eventi da visualizzare',
@@ -987,7 +987,7 @@
     },
     weekText: '週',
     allDayText: '終日',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '他 ' + n + ' 件'
     },
     noEventsText: '表示する予定はありません',
@@ -1010,7 +1010,7 @@
     },
     weekText: 'კვ',
     allDayText: 'მთელი დღე',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ კიდევ ' + n
     },
     noEventsText: 'ღონისძიებები არ არის',
@@ -1033,7 +1033,7 @@
     },
     weekText: 'Не',
     allDayText: 'Күні бойы',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ тағы ' + n
     },
     noEventsText: 'Көрсету үшін оқиғалар жоқ',
@@ -1159,7 +1159,7 @@
     },
     weekText: 'Ned.',
     allDayText: 'Visu dienu',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+vēl ' + n
     },
     noEventsText: 'Nav notikumu',
@@ -1178,7 +1178,7 @@
     },
     weekText: 'Сед',
     allDayText: 'Цел ден',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+повеќе ' + n
     },
     noEventsText: 'Нема настани за прикажување',
@@ -1201,7 +1201,7 @@
     },
     weekText: 'Mg',
     allDayText: 'Sepanjang hari',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return 'masih ada ' + n + ' acara'
     },
     noEventsText: 'Tiada peristiwa untuk dipaparkan',
@@ -1336,7 +1336,7 @@
     },
     weekText: 'Sm',
     allDayText: 'dia inteiro',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return 'mais +' + n
     },
     noEventsText: 'Não há eventos para mostrar',
@@ -1380,7 +1380,7 @@
     },
     weekText: 'Săpt',
     allDayText: 'Toată ziua',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+alte ' + n
     },
     noEventsText: 'Nu există evenimente de afișat',
@@ -1403,7 +1403,7 @@
     },
     weekText: 'Нед',
     allDayText: 'Весь день',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ ещё ' + n
     },
     noEventsText: 'Нет событий для отображения',
@@ -1447,7 +1447,7 @@
     },
     weekText: 'Ty',
     allDayText: 'Celý deň',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ďalšie: ' + n
     },
     noEventsText: 'Žiadne akcie na zobrazenie',
@@ -1508,7 +1508,7 @@
     },
     weekText: 'Ja',
     allDayText: 'Gjithë ditën',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+më tepër ' + n
     },
     noEventsText: 'Nuk ka evente për të shfaqur',
@@ -1531,7 +1531,7 @@
     },
     weekText: 'Сед',
     allDayText: 'Цео дан',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ још ' + n
     },
     noEventsText: 'Нема догађаја за приказ',
@@ -1554,7 +1554,7 @@
     },
     weekText: 'Sed',
     allDayText: 'Cеo dan',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ još ' + n
     },
     noEventsText: 'Nеma događaja za prikaz',
@@ -1618,7 +1618,7 @@
     },
     weekText: 'வாரம்',
     allDayText: 'நாள் முழுவதும்',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ மேலும் ' + n
     },
     noEventsText: 'காண்பிக்க நிகழ்வுகள் இல்லை',
@@ -1697,7 +1697,7 @@
     },
     weekText: 'Тиж',
     allDayText: 'Увесь день',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ще ' + n + '...'
     },
     noEventsText: 'Немає подій для відображення',
@@ -1712,7 +1712,7 @@
       list: 'Kun tartibi',
     },
     allDayText: "Kun bo'yi",
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ yana ' + n
     },
     noEventsText: "Ko'rsatish uchun voqealar yo'q",
@@ -1735,7 +1735,7 @@
     },
     weekText: 'Tu',
     allDayText: 'Cả ngày',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ thêm ' + n
     },
     noEventsText: 'Không có sự kiện để hiển thị',
@@ -1759,7 +1759,7 @@
     },
     weekText: '周',
     allDayText: '全天',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '另外 ' + n + ' 个'
     },
     noEventsText: '没有事件显示',
@@ -1785,7 +1785,7 @@
   /* eslint max-len: off */
 
   var localesAll = [
-    l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, l23, l24, l25, l26, l27, l28, l29, l30, l31, l32, l33, l34, l35, l36, l37, l38, l39, l40, l41, l42, l43, l44, l45, l46, l47, l48, l49, l50, l51, l52, l53, l54, l55, l56, l57, l58, l59, l60, l61, l62, l63, l64, l65, l66, l67, l68, l69, l70, l71, l72, l73, l74, l75, l76, l77, 
+    l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, l23, l24, l25, l26, l27, l28, l29, l30, l31, l32, l33, l34, l35, l36, l37, l38, l39, l40, l41, l42, l43, l44, l45, l46, l47, l48, l49, l50, l51, l52, l53, l54, l55, l56, l57, l58, l59, l60, l61, l62, l63, l64, l65, l66, l67, l68, l69, l70, l71, l72, l73, l74, l75, l76, l77,
   ];
 
   return localesAll;

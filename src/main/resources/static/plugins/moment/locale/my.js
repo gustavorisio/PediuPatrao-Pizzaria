@@ -4,27 +4,28 @@
 //! author : David Rossellat : https://github.com/gholadr
 //! author : Tin Aung Lin : https://github.com/thanyawzinmin
 
-;(function (global, factory) {
-   typeof exports === 'object' && typeof module !== 'undefined'
-       && typeof require === 'function' ? factory(require('../moment')) :
-   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-   factory(global.moment)
-}(this, (function (moment) { 'use strict';
+; (function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined'
+        && typeof require === 'function' ? factory(require('../moment')) :
+        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+            factory(global.moment)
+}(this, (function (moment) {
+    'use strict';
 
     //! moment.js locale configuration
 
     var symbolMap = {
-            1: '၁',
-            2: '၂',
-            3: '၃',
-            4: '၄',
-            5: '၅',
-            6: '၆',
-            7: '၇',
-            8: '၈',
-            9: '၉',
-            0: '၀',
-        },
+        1: '၁',
+        2: '၂',
+        3: '၃',
+        4: '၄',
+        5: '၅',
+        6: '၆',
+        7: '၇',
+        8: '၈',
+        9: '၉',
+        0: '၀',
+    },
         numberMap = {
             '၁': '1',
             '၂': '2',

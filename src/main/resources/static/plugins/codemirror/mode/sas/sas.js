@@ -21,14 +21,14 @@
 //  atom
 //  def
 
-(function(mod) {
+(function (mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function(CodeMirror) {
+})(function (CodeMirror) {
   "use strict";
 
   CodeMirror.defineMode("sas", function () {
@@ -52,7 +52,7 @@
       if (context) {
         var split = string.split(' ');
         for (var i = 0; i < split.length; i++) {
-          words[split[i]] = {style: style, state: context};
+          words[split[i]] = { style: style, state: context };
         }
       }
     }
@@ -192,8 +192,8 @@
         }
         // do we have a DATA Step keyword
         if (word && words.hasOwnProperty(word) &&
-            (words[word].state.indexOf("inDataStep") !== -1 ||
-             words[word].state.indexOf("ALL") !== -1)) {
+          (words[word].state.indexOf("inDataStep") !== -1 ||
+            words[word].state.indexOf("ALL") !== -1)) {
           //backup to the start of the word
           if (stream.start < stream.pos)
             stream.backUp(stream.pos - stream.start);
@@ -210,8 +210,8 @@
         }
         // do we have a proc keyword
         if (word && words.hasOwnProperty(word) &&
-            (words[word].state.indexOf("inProc") !== -1 ||
-             words[word].state.indexOf("ALL") !== -1)) {
+          (words[word].state.indexOf("inProc") !== -1 ||
+            words[word].state.indexOf("ALL") !== -1)) {
           stream.match(/[\w]+/);
           return words[word].style;
         }
@@ -224,8 +224,8 @@
           return 'builtin';
         }
         if (word && words.hasOwnProperty(word) &&
-            (words[word].state.indexOf("inMacro") !== -1 ||
-             words[word].state.indexOf("ALL") !== -1)) {
+          (words[word].state.indexOf("inMacro") !== -1 ||
+            words[word].state.indexOf("ALL") !== -1)) {
           stream.match(/[\w]+/);
           return words[word].style;
         }

@@ -181,7 +181,8 @@ public class PedidoService {
     private int proximoNumeroPedido() {
         return pedidoRepository.findTopByOrderByNumeroPedidoDesc()
                 .map(pedido -> pedido.getNumeroPedido() == null
-                        ? 1 : pedido.getNumeroPedido() + 1)
+                        ? 1
+                        : pedido.getNumeroPedido() + 1)
                 .orElse(1);
     }
 
@@ -242,7 +243,8 @@ public class PedidoService {
                 valorAnterior, pedido.getValorTotal());
         Pedido salvo = pedidoRepository.save(pedido);
         String operacao = descontoAnterior.compareTo(salvo.getPercentualDesconto()) != 0
-                ? "DESCONTO" : "ALTERACAO";
+                ? "DESCONTO"
+                : "ALTERACAO";
         auditoriaService.registrar(operacao, "PEDIDO", salvo.getId(),
                 dadosPedidoAntes(pedido, descontoAnterior, valorAnterior),
                 dadosPedido(salvo), null);
@@ -314,9 +316,9 @@ public class PedidoService {
         boolean valida = ("RECEBIDO".equals(statusAtual) && "EM_PREPARACAO".equals(novoStatus))
                 || ("EM_PREPARACAO".equals(statusAtual) && "PRONTO".equals(novoStatus))
                 || ("PRONTO".equals(statusAtual)
-                && List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(novoStatus))
+                        && List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(novoStatus))
                 || (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(statusAtual)
-                && "FINALIZADO".equals(novoStatus));
+                        && "FINALIZADO".equals(novoStatus));
         if (!valida) {
             throw erro("Transição de status inválida.");
         }
@@ -331,7 +333,8 @@ public class PedidoService {
 
     private BigDecimal percentualDoPedido(Pedido pedido) {
         return pedido.getPercentualDesconto() == null
-                ? BigDecimal.ZERO : pedido.getPercentualDesconto();
+                ? BigDecimal.ZERO
+                : pedido.getPercentualDesconto();
     }
 
     private Map<String, String> dadosPedido(Pedido pedido) {
