@@ -29,20 +29,16 @@
                     <small id="cliente-selecionado" class="text-success"></small>
                     <div id="clientes-sugestoes" class="list-group mt-1"></div>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Produto</label>
-                    <select id="produto-id" class="form-select">
-                        <option value="">Selecione um produto</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Quantidade</label>
-                    <input id="quantidade-item" type="number" min="1" value="1" class="form-control">
-                </div>
             </div>
             <div class="mt-3">
-                <label class="form-label">Descrição do item</label>
-                <input id="descricao-item" class="form-control" placeholder="Nome ou observação do item">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0">Itens do pedido</label>
+                    <button type="button" class="btn btn-sm btn-outline-success"
+                            onclick="adicionarItem()">
+                        <i class="bi bi-plus-lg me-1"></i>Adicionar item
+                    </button>
+                </div>
+                <div id="itens-formulario"></div>
             </div>
             <div class="mt-3">
                 <button class="btn btn-success" onclick="salvarPedido()">Salvar</button>
@@ -82,6 +78,8 @@
         const entregador = /*[[${#authorization.expression("hasRole('ENTREGADOR')")}]]*/ false;
         const tabela = document.getElementById('pedidos-tabela');
         let pedidos = [];
+        let produtos = [];
+        let produtosCarregados = false;
         let percentualDesconto = 0;
 
         function mostrarValor(valor, padrao) {
@@ -107,21 +105,74 @@
 
         async function carregarProdutos() {
             const resposta = await fetch('/api/produtos');
-            if (!resposta.ok) return;
-            const produtos = await resposta.json();
-            const select = document.getElementById('produto-id');
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível carregar o catálogo de produtos.', true);
+                return;
+            }
+            produtos = await resposta.json();
+            produtosCarregados = true;
+            document.querySelectorAll('.produto-item').forEach(select => {
+                preencherProdutos(select, select.value);
+            });
+        }
+
+        function preencherProdutos(select, produtoSelecionado) {
+            select.innerHTML = '<option value="">Selecione um produto</option>';
             produtos.forEach(produto => {
                 const option = document.createElement('option');
                 option.value = produto.id;
                 option.textContent = produto.nome + ' - R$ ' + produto.preco;
-                option.dataset.preco = produto.preco;
                 option.dataset.descricao = produto.nome;
+                option.selected = produto.id === produtoSelecionado;
                 select.appendChild(option);
             });
+        }
+
+        function adicionarItem(item = {}) {
+            const linha = document.createElement('div');
+            linha.className = 'row g-2 align-items-end mb-2 item-formulario';
+            linha.innerHTML =
+                '<div class="col-md-5"><label class="form-label">Produto</label>' +
+                '<select class="form-select produto-item"></select></div>' +
+                '<div class="col-md-2"><label class="form-label">Quantidade</label>' +
+                '<input class="form-control quantidade-item" type="number" min="1" value="' +
+                (item.quantidade ?? 1) + '"></div>' +
+                '<div class="col-md-4"><label class="form-label">Descrição</label>' +
+                '<input class="form-control descricao-item" placeholder="Nome ou observação"></div>' +
+                '<div class="col-md-1"><button type="button" class="btn btn-outline-danger remover-item" ' +
+                'title="Remover item"><i class="bi bi-trash"></i></button></div>';
+
+            const select = linha.querySelector('.produto-item');
+            const descricao = linha.querySelector('.descricao-item');
+            preencherProdutos(select, item.produtoId);
+            descricao.value = item.descricao ?? '';
             select.onchange = function () {
                 const option = this.options[this.selectedIndex];
-                document.getElementById('descricao-item').value = option.dataset.descricao ?? '';
+                if (!descricao.value.trim() || descricao.value === option.dataset.descricao) {
+                    descricao.value = option.dataset.descricao ?? '';
+                }
             };
+            linha.querySelector('.remover-item').onclick = function () {
+                linha.remove();
+                atualizarBotoesRemover();
+            };
+            document.getElementById('itens-formulario').appendChild(linha);
+            atualizarBotoesRemover();
+        }
+
+        function atualizarBotoesRemover() {
+            const linhas = document.querySelectorAll('.item-formulario');
+            document.querySelectorAll('.remover-item').forEach(botao => {
+                botao.disabled = linhas.length === 1;
+            });
+        }
+
+        function coletarItens() {
+            return Array.from(document.querySelectorAll('.item-formulario')).map(linha => ({
+                produtoId: linha.querySelector('.produto-item').value,
+                descricao: linha.querySelector('.descricao-item').value,
+                quantidade: Number(linha.querySelector('.quantidade-item').value)
+            }));
         }
 
         async function carregarPedidos() {
@@ -144,14 +195,21 @@
                     tabela.appendChild(linhaEntrega);
                     return;
                 }
-                const item = pedido.itens && pedido.itens.length ? pedido.itens[0] : {};
+                const itens = pedido.itens ?? [];
+                const descricaoItens = itens.length
+                    ? itens.map(item => mostrarValor(item.descricao ?? item.produtoId, '-')
+                        + ' x ' + mostrarValor(item.quantidade, 0)).join('<br>')
+                    : '-';
+                const quantidadeTotal = itens.reduce((total, item) => total + (item.quantidade ?? 0), 0);
+                const subtotal = itens.reduce((total, item) =>
+                    total + (Number(item.precoUnitario ?? 0) * Number(item.quantidade ?? 0)), 0);
                 const linha = document.createElement('tr');
                 linha.innerHTML =
                     '<td class="ps-4">' + numeroPedido(pedido) + '</td>' +
                     '<td>' + nomeCliente(pedido.clienteId) + '</td>' +
-                    '<td>' + mostrarValor(item.descricao ?? item.produtoId, '-') + '</td>' +
-                    '<td>' + mostrarValor(item.quantidade, '-') + '</td>' +
-                    '<td>R$ ' + mostrarValor(item.precoUnitario, '0.00') + '</td>' +
+                    '<td>' + descricaoItens + '</td>' +
+                    '<td>' + mostrarValor(quantidadeTotal, '-') + '</td>' +
+                    '<td>R$ ' + subtotal.toFixed(2) + '</td>' +
                     '<td>R$ ' + mostrarValor(pedido.valorTotal, '0.00') + '</td>' +
                     '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
                     '<td><span class="badge bg-secondary">' + pedido.status + '</span></td>' +
@@ -208,10 +266,9 @@
             percentualDesconto = pedido?.percentualDesconto ?? 0;
             document.getElementById('desconto-selecionado').textContent = percentualDesconto > 0
                 ? 'Desconto: ' + percentualDesconto + '%' : '';
-            const item = pedido && pedido.itens && pedido.itens.length ? pedido.itens[0] : {};
-            document.getElementById('produto-id').value = item.produtoId ?? '';
-            document.getElementById('quantidade-item').value = item.quantidade ?? 1;
-            document.getElementById('descricao-item').value = item.descricao ?? '';
+            const itens = pedido?.itens?.length ? pedido.itens : [{}];
+            document.getElementById('itens-formulario').innerHTML = '';
+            itens.forEach(item => adicionarItem(item));
         }
 
         function editarPedido(id) {
@@ -223,15 +280,29 @@
         }
 
         async function salvarPedido() {
+            if (!produtosCarregados) {
+                mostrarMensagem('Aguarde o carregamento dos produtos e tente novamente.', true);
+                return;
+            }
             const id = document.getElementById('pedido-id').value;
+            const clienteId = document.getElementById('cliente-id').value.trim();
+            const itens = coletarItens();
+            if (!clienteId) {
+                mostrarMensagem('Selecione um cliente cadastrado.', true);
+                return;
+            }
+            if (!itens.length || itens.some(item => !item.produtoId)) {
+                mostrarMensagem('Selecione um produto para cada item do pedido.', true);
+                return;
+            }
+            if (itens.some(item => !Number.isInteger(item.quantidade) || item.quantidade <= 0)) {
+                mostrarMensagem('A quantidade de cada item deve ser maior que zero.', true);
+                return;
+            }
             const dados = {
-                clienteId: document.getElementById('cliente-id').value,
+                clienteId: clienteId,
                 percentualDesconto: percentualDesconto,
-                itens: [{
-                    produtoId: document.getElementById('produto-id').value,
-                    descricao: document.getElementById('descricao-item').value,
-                    quantidade: Number(document.getElementById('quantidade-item').value)
-                }]
+                itens: itens
             };
             const resposta = await fetch(id ? API_URL + '/' + id : API_URL, {
                 method: id ? 'PUT' : 'POST',
@@ -239,8 +310,14 @@
                 body: JSON.stringify(dados)
             });
             if (!resposta.ok) {
-                const erro = await resposta.text();
-                mostrarMensagem(erro || 'Não foi possível salvar o pedido.', true);
+                let mensagem = 'Não foi possível salvar o pedido.';
+                try {
+                    const corpo = await resposta.json();
+                    mensagem = corpo.message || mensagem;
+                } catch (e) {
+                    // Mantém uma mensagem útil quando a resposta não é JSON.
+                }
+                mostrarMensagem(mensagem, true);
                 return;
             }
             fecharFormulario();

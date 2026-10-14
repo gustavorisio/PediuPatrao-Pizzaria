@@ -1,5 +1,10 @@
 package com.umc.pediupatrao.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,15 +18,15 @@ public class Pedido {
     private int quantidade;
     private String sabor;
     private String status;
-    private java.util.List<ItemPedido> itens;
-    private java.math.BigDecimal percentualDesconto;
-    private java.math.BigDecimal valorTotal;
+    private List<ItemPedido> itens;
+    private BigDecimal percentualDesconto;
+    private BigDecimal valorTotal;
     private String responsavelRegistro;
-    private java.time.LocalDateTime dataHoraEntrada;
+    private LocalDateTime dataHoraEntrada;
     private String responsavelSaida;
-    private java.time.LocalDateTime dataHoraSaida;
+    private LocalDateTime dataHoraSaida;
     private String justificativaCancelamento;
-    private java.util.List<PedidoAuditoria> auditoria = new java.util.ArrayList<>();
+    private List<PedidoAuditoria> auditoria = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -79,27 +84,27 @@ public class Pedido {
         this.status = status;
     }
 
-    public java.util.List<ItemPedido> getItens() {
+    public List<ItemPedido> getItens() {
         return itens;
     }
 
-    public void setItens(java.util.List<ItemPedido> itens) {
+    public void setItens(List<ItemPedido> itens) {
         this.itens = itens;
     }
 
-    public java.math.BigDecimal getPercentualDesconto() {
+    public BigDecimal getPercentualDesconto() {
         return percentualDesconto;
     }
 
-    public void setPercentualDesconto(java.math.BigDecimal percentualDesconto) {
+    public void setPercentualDesconto(BigDecimal percentualDesconto) {
         this.percentualDesconto = percentualDesconto;
     }
 
-    public java.math.BigDecimal getValorTotal() {
+    public BigDecimal getValorTotal() {
         return valorTotal;
     }
 
-    public void setValorTotal(java.math.BigDecimal valorTotal) {
+    public void setValorTotal(BigDecimal valorTotal) {
         this.valorTotal = valorTotal;
     }
 
@@ -111,11 +116,11 @@ public class Pedido {
         this.responsavelRegistro = responsavelRegistro;
     }
 
-    public java.time.LocalDateTime getDataHoraEntrada() {
+    public LocalDateTime getDataHoraEntrada() {
         return dataHoraEntrada;
     }
 
-    public void setDataHoraEntrada(java.time.LocalDateTime dataHoraEntrada) {
+    public void setDataHoraEntrada(LocalDateTime dataHoraEntrada) {
         this.dataHoraEntrada = dataHoraEntrada;
     }
 
@@ -127,11 +132,11 @@ public class Pedido {
         this.responsavelSaida = responsavelSaida;
     }
 
-    public java.time.LocalDateTime getDataHoraSaida() {
+    public LocalDateTime getDataHoraSaida() {
         return dataHoraSaida;
     }
 
-    public void setDataHoraSaida(java.time.LocalDateTime dataHoraSaida) {
+    public void setDataHoraSaida(LocalDateTime dataHoraSaida) {
         this.dataHoraSaida = dataHoraSaida;
     }
 
@@ -143,11 +148,11 @@ public class Pedido {
         this.justificativaCancelamento = justificativaCancelamento;
     }
 
-    public java.util.List<PedidoAuditoria> getAuditoria() {
+    public List<PedidoAuditoria> getAuditoria() {
         return auditoria;
     }
 
-    public void setAuditoria(java.util.List<PedidoAuditoria> auditoria) {
+    public void setAuditoria(List<PedidoAuditoria> auditoria) {
         this.auditoria = auditoria;
     }
 }

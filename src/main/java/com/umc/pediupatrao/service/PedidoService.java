@@ -2,6 +2,9 @@ package com.umc.pediupatrao.service;
 
 import com.umc.pediupatrao.entity.Pedido;
 import com.umc.pediupatrao.entity.PedidoAuditoria;
+import com.umc.pediupatrao.entity.ItemPedido;
+import com.umc.pediupatrao.entity.Produto;
+import com.umc.pediupatrao.entity.Cliente;
 import com.umc.pediupatrao.dto.PedidoEntregaDTO;
 import com.umc.pediupatrao.repository.PedidoRepository;
 import com.umc.pediupatrao.repository.ClienteRepository;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
+import org.springframework.security.core.GrantedAuthority;
 
 @Service
 public class PedidoService {
@@ -68,14 +72,14 @@ public class PedidoService {
             throw erro("Selecione um cliente cadastrado.");
         }
 
-        for (var item : pedido.getItens()) {
+        for (ItemPedido item : pedido.getItens()) {
             if (item == null || isBlank(item.getProdutoId())) {
                 throw erro("Selecione um produto cadastrado para cada item.");
             }
             if (item.getQuantidade() <= 0) {
                 throw erro("A quantidade de cada item deve ser maior que zero.");
             }
-            var produto = produtoRepository.findById(item.getProdutoId())
+            Produto produto = produtoRepository.findById(item.getProdutoId())
                     .orElseThrow(() -> erro("Produto não encontrado."));
             if (produto.getPreco() == null || produto.getPreco() < 0) {
                 throw erro("O produto selecionado não possui preço válido.");
@@ -94,14 +98,17 @@ public class PedidoService {
                 && !podeAplicarDesconto()) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Somente o ADMIN ou GERENTE pode aplicar descontos.");
+                "Somente o GERENTE pode aplicar descontos.");
         }
     }
 
     private BigDecimal calcularValorTotal(Pedido pedido) {
-        BigDecimal subtotal = pedido.getItens().stream()
-                .map(item -> item.getPrecoUnitario().multiply(BigDecimal.valueOf(item.getQuantidade())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (ItemPedido item : pedido.getItens()) {
+            BigDecimal valorItem = item.getPrecoUnitario()
+                    .multiply(BigDecimal.valueOf(item.getQuantidade()));
+            subtotal = subtotal.add(valorItem);
+        }
         BigDecimal fatorDesconto = BigDecimal.ONE.subtract(
                 pedido.getPercentualDesconto().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
         return subtotal.multiply(fatorDesconto).setScale(2, RoundingMode.HALF_UP);
@@ -122,12 +129,19 @@ public class PedidoService {
 
     private boolean usuarioTemRole(String role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(authority -> ("ROLE_" + role).equals(authority.getAuthority()));
+        if (authentication == null) {
+            return false;
+        }
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if (("ROLE_" + role).equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean podeAplicarDesconto() {
-        return usuarioTemRole("ADMIN") || usuarioTemRole("GERENTE");
+        return usuarioTemRole("GERENTE");
     }
 
     public boolean usuarioEhEntregador() {
@@ -152,9 +166,11 @@ public class PedidoService {
     public List<PedidoEntregaDTO> listarPedidosParaEntrega() {
         List<Pedido> pedidos = pedidoRepository.findAll();
         preencherNumerosAntigos(pedidos);
-        return pedidos.stream()
-                .map(this::transformarParaEntrega)
-                .toList();
+        List<PedidoEntregaDTO> resultado = new ArrayList<>();
+        for (Pedido pedido : pedidos) {
+            resultado.add(transformarParaEntrega(pedido));
+        }
+        return resultado;
     }
 
     public PedidoEntregaDTO pedidoParaEntrega(String id) {
@@ -162,7 +178,7 @@ public class PedidoService {
     }
 
     private PedidoEntregaDTO transformarParaEntrega(Pedido pedido) {
-        var cliente = clienteRepository.findById(pedido.getClienteId()).orElse(null);
+        Cliente cliente = clienteRepository.findById(pedido.getClienteId()).orElse(null);
         if (cliente == null) {
             return new PedidoEntregaDTO(numeroParaExibicao(pedido), "-", "-",
                     pedido.getDataHoraEntrada());
@@ -323,9 +339,9 @@ public class PedidoService {
     }
 
     private void exigirGerente() {
-        if (!usuarioTemRole("ADMIN") && !usuarioTemRole("GERENTE")) {
+        if (!usuarioTemRole("GERENTE")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Somente o ADMIN ou GERENTE pode cancelar pedidos.");
+                    "Somente o GERENTE pode cancelar pedidos.");
         }
     }
 

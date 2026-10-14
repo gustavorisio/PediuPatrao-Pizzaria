@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RequestMapping("/api/pedidos")
 public class PedidoController {
 
-    private PedidoService pedidoService;
+    private final PedidoService pedidoService;
 
     public PedidoController(PedidoService pedidoService) {
         this.pedidoService = pedidoService;
@@ -59,7 +59,7 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}/cancelar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    @PreAuthorize("hasRole('GERENTE')")
     public Pedido cancelarPedido(@PathVariable String id, @RequestParam String justificativa) {
         return pedidoService.cancelarPedido(id, justificativa);
     }
