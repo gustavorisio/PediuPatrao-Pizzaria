@@ -46,7 +46,7 @@
             </div>
             <div class="mt-3">
                 <button class="btn btn-success" onclick="salvarPedido()">Salvar</button>
-                <button sec:authorize="hasAnyRole('ADMIN', 'ATENDENTE', 'GERENTE')" type="button"
+                <button sec:authorize="hasAnyRole('ADMIN', 'GERENTE')" type="button"
                         class="btn btn-warning" onclick="definirDescontoNoFormulario()">
                     Desconto
                 </button>
