@@ -8,7 +8,8 @@
 <div th:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0"><i class="bi bi-bag me-2 text-primary"></i>Pedidos</h2>
-        <button sec:authorize="hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')" class="btn btn-primary" onclick="abrirFormulario()">
+        <button sec:authorize="hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')"
+                class="btn btn-primary" onclick="abrirFormulario()">
             <i class="bi bi-plus-lg me-1"></i> Novo Pedido
         </button>
     </div>
@@ -30,6 +31,7 @@
                     <div id="clientes-sugestoes" class="list-group mt-1"></div>
                 </div>
             </div>
+
             <div class="mt-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="form-label mb-0">Itens do pedido</label>
@@ -40,9 +42,10 @@
                 </div>
                 <div id="itens-formulario"></div>
             </div>
+
             <div class="mt-3">
                 <button class="btn btn-success" onclick="salvarPedido()">Salvar</button>
-                <button sec:authorize="hasAnyRole('ADMIN', 'GERENTE')" type="button"
+                <button sec:authorize="hasRole('GERENTE')" type="button"
                         class="btn btn-warning" onclick="definirDescontoNoFormulario()">
                     Desconto
                 </button>
@@ -56,15 +59,7 @@
         <div class="card-body p-0">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark">
-                <tr id="pedidos-cabecalho">
-                    <th class="ps-4">Cliente</th>
-                    <th>Item</th>
-                    <th>Qtd.</th>
-                    <th>Preço original</th>
-                    <th>Valor total</th>
-                    <th>Status</th>
-                    <th class="text-end pe-4">Ações</th>
-                </tr>
+                <tr id="pedidos-cabecalho"></tr>
                 </thead>
                 <tbody id="pedidos-tabela"></tbody>
             </table>
@@ -86,21 +81,25 @@
             return valor ?? padrao;
         }
 
-        if (entregador) {
-            document.getElementById('pedidos-cabecalho').innerHTML =
-                '<th class="ps-4">Número do pedido</th><th>Data e hora</th>' +
-                '<th>Endereço</th><th>Telefone</th>';
-        } else {
-            document.getElementById('pedidos-cabecalho').innerHTML =
-                '<th class="ps-4">Número</th><th>Cliente</th><th>Item</th>' +
-                '<th>Qtd.</th><th>Preço original</th><th>Valor total</th>' +
-                '<th>Data e hora</th><th>Status</th><th class="text-end pe-4">Ações</th>';
-        }
-
         function mostrarMensagem(texto, erro) {
             const mensagem = document.getElementById('mensagem');
             mensagem.textContent = texto;
             mensagem.className = 'alert ' + (erro ? 'alert-danger' : 'alert-success');
+        }
+
+        function configurarCabecalho() {
+            const cabecalho = document.getElementById('pedidos-cabecalho');
+            if (entregador) {
+                cabecalho.innerHTML =
+                    '<th class="ps-4">Número do pedido</th><th>Data e hora</th>' +
+                    '<th>Endereço</th><th>Telefone</th>';
+                return;
+            }
+            cabecalho.innerHTML =
+                '<th class="ps-4">Número</th><th>Cliente</th><th>Item</th>' +
+                '<th>Qtd.</th><th>Preço original</th><th>Valor total</th>' +
+                '<th>Data e hora</th><th>Status</th>' +
+                '<th class="text-end pe-4">Ações</th>';
         }
 
         async function carregarProdutos() {
@@ -139,16 +138,18 @@
                 (item.quantidade ?? 1) + '"></div>' +
                 '<div class="col-md-4"><label class="form-label">Descrição</label>' +
                 '<input class="form-control descricao-item" placeholder="Nome ou observação"></div>' +
-                '<div class="col-md-1"><button type="button" class="btn btn-outline-danger remover-item" ' +
-                'title="Remover item"><i class="bi bi-trash"></i></button></div>';
+                '<div class="col-md-1"><button type="button" ' +
+                'class="btn btn-outline-danger remover-item" title="Remover item">' +
+                '<i class="bi bi-trash"></i></button></div>';
 
             const select = linha.querySelector('.produto-item');
             const descricao = linha.querySelector('.descricao-item');
             preencherProdutos(select, item.produtoId);
             descricao.value = item.descricao ?? '';
+
             select.onchange = function () {
                 const option = this.options[this.selectedIndex];
-                if (!descricao.value.trim() || descricao.value === option.dataset.descricao) {
+                if (!descricao.value.trim()) {
                     descricao.value = option.dataset.descricao ?? '';
                 }
             };
@@ -177,38 +178,45 @@
 
         async function carregarPedidos() {
             const resposta = await fetch(API_URL);
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível carregar os pedidos.', true);
+                return;
+            }
             pedidos = await resposta.json();
             tabela.innerHTML = '';
             if (pedidos.length === 0) {
-                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '4' : '9')
-                    + '" class="text-center text-muted py-5">Nenhum pedido cadastrado.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '4' : '9') +
+                    '" class="text-center text-muted py-5">Nenhum pedido cadastrado.</td></tr>';
                 return;
             }
+
             pedidos.forEach(pedido => {
                 if (entregador) {
-                    const linhaEntrega = document.createElement('tr');
-                    linhaEntrega.innerHTML =
+                    const linha = document.createElement('tr');
+                    linha.innerHTML =
                         '<td class="ps-4">' + mostrarValor(pedido.numeroPedido, '-') + '</td>' +
                         '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
                         '<td>' + mostrarValor(pedido.endereco, '-') + '</td>' +
                         '<td>' + mostrarValor(pedido.telefone, '-') + '</td>';
-                    tabela.appendChild(linhaEntrega);
+                    tabela.appendChild(linha);
                     return;
                 }
+
                 const itens = pedido.itens ?? [];
                 const descricaoItens = itens.length
-                    ? itens.map(item => mostrarValor(item.descricao ?? item.produtoId, '-')
-                        + ' x ' + mostrarValor(item.quantidade, 0)).join('<br>')
+                    ? itens.map(item => mostrarValor(item.descricao ?? item.produtoId, '-') +
+                        ' x ' + mostrarValor(item.quantidade, 0)).join('<br>')
                     : '-';
-                const quantidadeTotal = itens.reduce((total, item) => total + (item.quantidade ?? 0), 0);
+                const quantidadeTotal = itens.reduce((total, item) =>
+                    total + Number(item.quantidade ?? 0), 0);
                 const subtotal = itens.reduce((total, item) =>
-                    total + (Number(item.precoUnitario ?? 0) * Number(item.quantidade ?? 0)), 0);
+                    total + Number(item.precoUnitario ?? 0) * Number(item.quantidade ?? 0), 0);
                 const linha = document.createElement('tr');
                 linha.innerHTML =
                     '<td class="ps-4">' + numeroPedido(pedido) + '</td>' +
                     '<td>' + nomeCliente(pedido.clienteId) + '</td>' +
                     '<td>' + descricaoItens + '</td>' +
-                    '<td>' + mostrarValor(quantidadeTotal, '-') + '</td>' +
+                    '<td>' + quantidadeTotal + '</td>' +
                     '<td>R$ ' + subtotal.toFixed(2) + '</td>' +
                     '<td>R$ ' + mostrarValor(pedido.valorTotal, '0.00') + '</td>' +
                     '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
@@ -221,10 +229,12 @@
         function botoes(pedido) {
             let html = '';
             if (podeEditar && pedido.status === 'RECEBIDO') {
-                html += '<button class="btn btn-sm btn-outline-primary me-1" onclick="editarPedido(\'' + pedido.id + '\')">Editar</button>';
+                html += '<button class="btn btn-sm btn-outline-primary me-1" ' +
+                    'onclick="editarPedido(\'' + pedido.id + '\')">Editar</button>';
             }
             if (podeExcluir && pedido.status === 'RECEBIDO') {
-                html += '<button class="btn btn-sm btn-outline-danger me-1" onclick="excluirPedido(\'' + pedido.id + '\')">Excluir</button>';
+                html += '<button class="btn btn-sm btn-outline-danger me-1" ' +
+                    'onclick="excluirPedido(\'' + pedido.id + '\')">Excluir</button>';
             }
             const proximos = {
                 RECEBIDO: 'EM_PREPARACAO',
@@ -234,7 +244,9 @@
                 RETIRADO: 'FINALIZADO'
             };
             if (proximos[pedido.status]) {
-                html += '<button class="btn btn-sm btn-outline-success" onclick="alterarStatus(\'' + pedido.id + '\', \'' + proximos[pedido.status] + '\')">' + proximos[pedido.status] + '</button>';
+                html += '<button class="btn btn-sm btn-outline-success" ' +
+                    'onclick="alterarStatus(\'' + pedido.id + '\', \'' +
+                    proximos[pedido.status] + '\')">' + proximos[pedido.status] + '</button>';
             }
             return html;
         }
@@ -249,23 +261,20 @@
         }
 
         function formatarData(data) {
-            if (!data) return '-';
-            return new Date(data).toLocaleString('pt-BR');
+            return data ? new Date(data).toLocaleString('pt-BR') : '-';
         }
 
         function abrirFormulario(pedido) {
             document.getElementById('formulario').classList.remove('d-none');
-            document.getElementById('pedido-id').value = pedido ? pedido.id : '';
-            document.getElementById('cliente-id').value = pedido ? pedido.clienteId ?? '' : '';
-            const clienteAtual = pedido && pedido.clienteId
-                ? (window.clientes ?? []).find(cliente => cliente.id === pedido.clienteId) : null;
-            document.getElementById('cliente-pesquisa').value = clienteAtual
-                ? clienteAtual.nome : '';
-            document.getElementById('cliente-selecionado').textContent = pedido && pedido.clienteId
-                ? 'Cliente selecionado.' : '';
+            document.getElementById('pedido-id').value = pedido?.id ?? '';
+            document.getElementById('cliente-id').value = pedido?.clienteId ?? '';
+            const cliente = (window.clientes ?? []).find(item => item.id === pedido?.clienteId);
+            document.getElementById('cliente-pesquisa').value = cliente?.nome ?? '';
+            document.getElementById('cliente-selecionado').textContent =
+                pedido?.clienteId ? 'Cliente selecionado.' : '';
             percentualDesconto = pedido?.percentualDesconto ?? 0;
-            document.getElementById('desconto-selecionado').textContent = percentualDesconto > 0
-                ? 'Desconto: ' + percentualDesconto + '%' : '';
+            document.getElementById('desconto-selecionado').textContent =
+                percentualDesconto > 0 ? 'Desconto: ' + percentualDesconto + '%' : '';
             const itens = pedido?.itens?.length ? pedido.itens : [{}];
             document.getElementById('itens-formulario').innerHTML = '';
             itens.forEach(item => adicionarItem(item));
@@ -299,23 +308,23 @@
                 mostrarMensagem('A quantidade de cada item deve ser maior que zero.', true);
                 return;
             }
-            const dados = {
-                clienteId: clienteId,
-                percentualDesconto: percentualDesconto,
-                itens: itens
-            };
+
             const resposta = await fetch(id ? API_URL + '/' + id : API_URL, {
                 method: id ? 'PUT' : 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(dados)
+                body: JSON.stringify({
+                    clienteId: clienteId,
+                    percentualDesconto: percentualDesconto,
+                    itens: itens
+                })
             });
             if (!resposta.ok) {
                 let mensagem = 'Não foi possível salvar o pedido.';
                 try {
                     const corpo = await resposta.json();
                     mensagem = corpo.message || mensagem;
-                } catch (e) {
-                    // Mantém uma mensagem útil quando a resposta não é JSON.
+                } catch (erro) {
+                    console.error('Resposta inválida ao salvar pedido.', erro);
                 }
                 mostrarMensagem(mensagem, true);
                 return;
@@ -326,8 +335,13 @@
         }
 
         async function alterarStatus(id, status) {
-            const resposta = await fetch(API_URL + '/' + id + '/status?status=' + status, {method: 'PUT'});
-            if (!resposta.ok) mostrarMensagem('Transição de status inválida.', true);
+            const resposta = await fetch(API_URL + '/' + id + '/status?status=' + status, {
+                method: 'PUT'
+            });
+            if (!resposta.ok) {
+                mostrarMensagem('Transição de status inválida.', true);
+                return;
+            }
             carregarPedidos();
         }
 
@@ -344,20 +358,21 @@
 
         async function carregarClientes() {
             const resposta = await fetch('/api/clientes');
-            if (!resposta.ok) return;
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível carregar os clientes.', true);
+                return;
+            }
             window.clientes = await resposta.json();
-            mostrarSugestoesClientes();
         }
 
         function mostrarSugestoesClientes() {
             const pesquisa = document.getElementById('cliente-pesquisa');
             const sugestoes = document.getElementById('clientes-sugestoes');
-            if (!pesquisa || !sugestoes) return;
             const texto = pesquisa.value.trim().toLowerCase();
             sugestoes.innerHTML = '';
             document.getElementById('cliente-id').value = '';
             document.getElementById('cliente-selecionado').textContent = '';
-            if (texto === '') return;
+            if (!texto) return;
 
             (window.clientes ?? []).filter(cliente =>
                 (cliente.nome ?? '').toLowerCase().includes(texto)
@@ -367,9 +382,7 @@
                 opcao.className = 'list-group-item list-group-item-action';
                 opcao.textContent = cliente.nome + (cliente.telefone
                     ? ' - ' + cliente.telefone : '');
-                opcao.onclick = function () {
-                    selecionarCliente(cliente);
-                };
+                opcao.onclick = () => selecionarCliente(cliente);
                 sugestoes.appendChild(opcao);
             });
         }
@@ -395,6 +408,7 @@
                 'Desconto: ' + numero + '%';
         }
 
+        configurarCabecalho();
         if (!entregador) {
             carregarClientes();
             carregarProdutos();
