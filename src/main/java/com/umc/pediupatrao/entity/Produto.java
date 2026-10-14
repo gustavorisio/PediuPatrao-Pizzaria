@@ -12,6 +12,8 @@ public class Produto {
     private String id;
     private String nome;
     private String tipo; // Pizza, Esfiha, Bebida, Lanche
+    private String tipoPizza;
+    private String sabor;
     private Double preco;
     private Boolean ativo;
 
@@ -37,6 +39,22 @@ public class Produto {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    public String getTipoPizza() {
+        return tipoPizza;
+    }
+
+    public void setTipoPizza(String tipoPizza) {
+        this.tipoPizza = tipoPizza;
+    }
+
+    public String getSabor() {
+        return sabor;
+    }
+
+    public void setSabor(String sabor) {
+        this.sabor = sabor;
     }
 
     public Double getPreco() {

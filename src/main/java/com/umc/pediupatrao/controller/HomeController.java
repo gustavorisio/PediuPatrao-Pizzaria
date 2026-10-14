@@ -216,6 +216,44 @@ public class HomeController {
         return "layout";
     }
 
+    @PostMapping("/produtos/salvar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public String salvarProduto(@ModelAttribute Produto produto,
+            RedirectAttributes redirectAttributes) {
+        produtoService.salvar(produto);
+        redirectAttributes.addFlashAttribute("sucesso", "Produto salvo com sucesso!");
+        return "redirect:/produtos";
+    }
+
+    @GetMapping("/produtos/editar/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public String editarProduto(@PathVariable String id, Model model,
+            RedirectAttributes redirectAttributes) {
+        return produtoService.buscarPorId(id)
+                .map(produto -> {
+                    model.addAttribute("produto", produto);
+                    model.addAttribute("content", "produtos/produto-form :: content");
+                    return "layout";
+                })
+                .orElseGet(() -> {
+                    redirectAttributes.addFlashAttribute("erro", "Produto não encontrado.");
+                    return "redirect:/produtos";
+                });
+    }
+
+    @PostMapping("/produtos/deletar/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public String deletarProduto(@PathVariable String id,
+            RedirectAttributes redirectAttributes) {
+        if (produtoService.buscarPorId(id).isEmpty()) {
+            redirectAttributes.addFlashAttribute("erro", "Produto não encontrado.");
+        } else {
+            produtoService.excluir(id);
+            redirectAttributes.addFlashAttribute("sucesso", "Produto excluído com sucesso!");
+        }
+        return "redirect:/produtos";
+    }
+
     // Renderiza a lista de clientes para o atendimento.
     @GetMapping("/clientes")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")

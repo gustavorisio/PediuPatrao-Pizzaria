@@ -1,20 +1,22 @@
 package com.umc.pediupatrao.entity;
 
-import jakarta.persistence.Entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "pedidos")
-@Entity
 public class Pedido {
     @Id
     private String id;
     private String clienteId;
     private String tipoPizza;
-    // Status utilizado pelo atendimento, preparo e entrega do pedido.
-    private String status;
     private int quantidade;
     private String sabor;
+    private String status;
+    private java.util.List<ItemPedido> itens;
+    private java.math.BigDecimal percentualDesconto;
+    private java.math.BigDecimal valorTotal;
+    private String responsavelRegistro;
+    private java.time.LocalDateTime dataHoraEntrada;
 
     public String getId() {
         return id;
@@ -40,14 +42,6 @@ public class Pedido {
         this.tipoPizza = tipoPizza;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public int getQuantidade() {
         return quantidade;
     }
@@ -63,6 +57,52 @@ public class Pedido {
     public void setSabor(String sabor) {
         this.sabor = sabor;
     }
-    
-    
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public java.util.List<ItemPedido> getItens() {
+        return itens;
+    }
+
+    public void setItens(java.util.List<ItemPedido> itens) {
+        this.itens = itens;
+    }
+
+    public java.math.BigDecimal getPercentualDesconto() {
+        return percentualDesconto;
+    }
+
+    public void setPercentualDesconto(java.math.BigDecimal percentualDesconto) {
+        this.percentualDesconto = percentualDesconto;
+    }
+
+    public java.math.BigDecimal getValorTotal() {
+        return valorTotal;
+    }
+
+    public void setValorTotal(java.math.BigDecimal valorTotal) {
+        this.valorTotal = valorTotal;
+    }
+
+    public String getResponsavelRegistro() {
+        return responsavelRegistro;
+    }
+
+    public void setResponsavelRegistro(String responsavelRegistro) {
+        this.responsavelRegistro = responsavelRegistro;
+    }
+
+    public java.time.LocalDateTime getDataHoraEntrada() {
+        return dataHoraEntrada;
+    }
+
+    public void setDataHoraEntrada(java.time.LocalDateTime dataHoraEntrada) {
+        this.dataHoraEntrada = dataHoraEntrada;
+    }
 }
