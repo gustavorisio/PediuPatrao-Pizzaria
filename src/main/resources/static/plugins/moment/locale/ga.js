@@ -2,29 +2,30 @@
 //! locale : Irish or Irish Gaelic [ga]
 //! author : André Silva : https://github.com/askpt
 
-;(function (global, factory) {
-   typeof exports === 'object' && typeof module !== 'undefined'
-       && typeof require === 'function' ? factory(require('../moment')) :
-   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-   factory(global.moment)
-}(this, (function (moment) { 'use strict';
+; (function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined'
+        && typeof require === 'function' ? factory(require('../moment')) :
+        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+            factory(global.moment)
+}(this, (function (moment) {
+    'use strict';
 
     //! moment.js locale configuration
 
     var months = [
-            'Eanáir',
-            'Feabhra',
-            'Márta',
-            'Aibreán',
-            'Bealtaine',
-            'Meitheamh',
-            'Iúil',
-            'Lúnasa',
-            'Meán Fómhair',
-            'Deireadh Fómhair',
-            'Samhain',
-            'Nollaig',
-        ],
+        'Eanáir',
+        'Feabhra',
+        'Márta',
+        'Aibreán',
+        'Bealtaine',
+        'Meitheamh',
+        'Iúil',
+        'Lúnasa',
+        'Meán Fómhair',
+        'Deireadh Fómhair',
+        'Samhain',
+        'Nollaig',
+    ],
         monthsShort = [
             'Ean',
             'Feabh',

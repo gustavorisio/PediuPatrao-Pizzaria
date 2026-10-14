@@ -5,14 +5,14 @@
 
 // declare global: HTMLHint
 
-(function(mod) {
+(function (mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"), require("htmlhint"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror", "htmlhint"], mod);
   else // Plain browser env
     mod(CodeMirror, window.HTMLHint);
-})(function(CodeMirror, HTMLHint) {
+})(function (CodeMirror, HTMLHint) {
   "use strict";
 
   var defaultRules = {
@@ -27,10 +27,10 @@
     "attr-no-duplication": true
   };
 
-  CodeMirror.registerHelper("lint", "html", function(text, options) {
+  CodeMirror.registerHelper("lint", "html", function (text, options) {
     var found = [];
     if (HTMLHint && !HTMLHint.verify) {
-      if(typeof HTMLHint.default !== 'undefined') {
+      if (typeof HTMLHint.default !== 'undefined') {
         HTMLHint = HTMLHint.default;
       } else {
         HTMLHint = HTMLHint.HTMLHint;
@@ -39,7 +39,7 @@
     if (!HTMLHint) HTMLHint = window.HTMLHint;
     if (!HTMLHint) {
       if (window.console) {
-          window.console.error("Error: HTMLHint not found, not defined on window, or not available through define/require, CodeMirror HTML linting cannot run.");
+        window.console.error("Error: HTMLHint not found, not defined on window, or not available through define/require, CodeMirror HTML linting cannot run.");
       }
       return found;
     }
@@ -51,7 +51,7 @@
         from: CodeMirror.Pos(startLine, startCol),
         to: CodeMirror.Pos(endLine, endCol),
         message: message.message,
-        severity : message.type
+        severity: message.type
       });
     }
     return found;

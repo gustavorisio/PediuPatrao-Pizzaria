@@ -18,7 +18,7 @@ FullCalendar.globalLocales.push(function () {
     },
     weekText: 'Շաբ',
     allDayText: 'Ամբողջ օր',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ ևս ' + n
     },
     noEventsText: 'Բացակայում է իրադարձությունը ցուցադրելու',

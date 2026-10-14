@@ -18,7 +18,7 @@ FullCalendar.globalLocales.push(function () {
     },
     weekText: 'näd',
     allDayText: 'Kogu päev',
-    moreLinkText: function(n) {
+    moreLinkText: function (n) {
       return '+ veel ' + n
     },
     noEventsText: 'Kuvamiseks puuduvad sündmused',

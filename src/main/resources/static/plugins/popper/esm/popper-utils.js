@@ -77,9 +77,9 @@ function getScrollParent(element) {
   // Firefox want us to check `-x` and `-y` variations as well
 
   var _getStyleComputedProp = getStyleComputedProperty(element),
-      overflow = _getStyleComputedProp.overflow,
-      overflowX = _getStyleComputedProp.overflowX,
-      overflowY = _getStyleComputedProp.overflowY;
+    overflow = _getStyleComputedProp.overflow,
+    overflowX = _getStyleComputedProp.overflowX,
+    overflowY = _getStyleComputedProp.overflowY;
 
   if (/(auto|scroll|overlay)/.test(overflow + overflowY + overflowX)) {
     return element;
@@ -355,7 +355,7 @@ function getBoundingClientRect(element) {
     } else {
       rect = element.getBoundingClientRect();
     }
-  } catch (e) {}
+  } catch (e) { }
 
   var result = {
     left: rect.left,
@@ -543,8 +543,8 @@ function getBoundaries(popper, reference, padding, boundariesElement) {
     // In case of HTML, we need a different computation
     if (boundariesNode.nodeName === 'HTML' && !isFixed(offsetParent)) {
       var _getWindowSizes = getWindowSizes(popper.ownerDocument),
-          height = _getWindowSizes.height,
-          width = _getWindowSizes.width;
+        height = _getWindowSizes.height,
+        width = _getWindowSizes.width;
 
       boundaries.top += offsets.top - offsets.marginTop;
       boundaries.bottom = height + offsets.top;
@@ -569,7 +569,7 @@ function getBoundaries(popper, reference, padding, boundariesElement) {
 
 function getArea(_ref) {
   var width = _ref.width,
-      height = _ref.height;
+    height = _ref.height;
 
   return width * height;
 }
@@ -623,7 +623,7 @@ function computeAutoPlacement(placement, refRect, popper, reference, boundariesE
 
   var filteredAreas = sortedAreas.filter(function (_ref2) {
     var width = _ref2.width,
-        height = _ref2.height;
+      height = _ref2.height;
     return width >= popper.clientWidth && height >= popper.clientHeight;
   });
 
@@ -738,8 +738,8 @@ function getOffsetRect(element) {
   var elementRect = void 0;
   if (element.nodeName === 'HTML') {
     var _getWindowSizes = getWindowSizes(element.ownerDocument),
-        width = _getWindowSizes.width,
-        height = _getWindowSizes.height;
+      width = _getWindowSizes.width,
+      height = _getWindowSizes.height;
 
     elementRect = {
       width: width,
@@ -891,7 +891,7 @@ function isFunction(functionToCheck) {
 function isModifierEnabled(modifiers, modifierName) {
   return modifiers.some(function (_ref) {
     var name = _ref.name,
-        enabled = _ref.enabled;
+      enabled = _ref.enabled;
     return enabled && name === modifierName;
   });
 }

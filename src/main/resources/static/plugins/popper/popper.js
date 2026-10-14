@@ -406,7 +406,7 @@ function getBoundingClientRect(element) {
     } else {
       rect = element.getBoundingClientRect();
     }
-  } catch (e) {}
+  } catch (e) { }
 
   const result = {
     left: rect.left,
@@ -1664,23 +1664,23 @@ function parseOffset(offset, popperOffsets, referenceOffsets, basePlacement) {
     const measurement = (index === 1 ? !useHeight : useHeight) ? 'height' : 'width';
     let mergeWithPrevious = false;
     return op
-    // This aggregates any `+` or `-` sign that aren't considered operators
-    // e.g.: 10 + +5 => [10, +, +5]
-    .reduce((a, b) => {
-      if (a[a.length - 1] === '' && ['+', '-'].indexOf(b) !== -1) {
-        a[a.length - 1] = b;
-        mergeWithPrevious = true;
-        return a;
-      } else if (mergeWithPrevious) {
-        a[a.length - 1] += b;
-        mergeWithPrevious = false;
-        return a;
-      } else {
-        return a.concat(b);
-      }
-    }, [])
-    // Here we convert the string values into number values (in px)
-    .map(str => toValue(str, measurement, popperOffsets, referenceOffsets));
+      // This aggregates any `+` or `-` sign that aren't considered operators
+      // e.g.: 10 + +5 => [10, +, +5]
+      .reduce((a, b) => {
+        if (a[a.length - 1] === '' && ['+', '-'].indexOf(b) !== -1) {
+          a[a.length - 1] = b;
+          mergeWithPrevious = true;
+          return a;
+        } else if (mergeWithPrevious) {
+          a[a.length - 1] += b;
+          mergeWithPrevious = false;
+          return a;
+        } else {
+          return a.concat(b);
+        }
+      }, [])
+      // Here we convert the string values into number values (in px)
+      .map(str => toValue(str, measurement, popperOffsets, referenceOffsets));
   });
 
   // Loop trough the offsets arrays and execute the operations
@@ -2298,7 +2298,7 @@ var Defaults = {
    * Access Popper.js instance with `data.instance`.
    * @prop {onCreate}
    */
-  onCreate: () => {},
+  onCreate: () => { },
 
   /**
    * Callback called when the popper is updated. This callback is not called
@@ -2308,7 +2308,7 @@ var Defaults = {
    * Access Popper.js instance with `data.instance`.
    * @prop {onUpdate}
    */
-  onUpdate: () => {},
+  onUpdate: () => { },
 
   /**
    * List of modifiers used to modify the offsets before they are applied to the popper.
@@ -2369,8 +2369,8 @@ class Popper {
     this.modifiers = Object.keys(this.options.modifiers).map(name => _extends({
       name
     }, this.options.modifiers[name]))
-    // sort the modifiers by order
-    .sort((a, b) => a.order - b.order);
+      // sort the modifiers by order
+      .sort((a, b) => a.order - b.order);
 
     // modifiers have the ability to execute arbitrary code when Popper.js get inited
     // such code is executed in the same order of its modifier

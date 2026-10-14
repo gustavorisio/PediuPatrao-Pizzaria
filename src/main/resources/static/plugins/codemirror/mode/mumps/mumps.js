@@ -5,17 +5,17 @@
   This MUMPS Language script was constructed using vbscript.js as a template.
 */
 
-(function(mod) {
+(function (mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function(CodeMirror) {
+})(function (CodeMirror) {
   "use strict";
 
-  CodeMirror.defineMode("mumps", function() {
+  CodeMirror.defineMode("mumps", function () {
     function wordRegexp(words) {
       return new RegExp("^((" + words.join(")|(") + "))\\b", "i");
     }
@@ -25,7 +25,7 @@
     var singleDelimiters = new RegExp("^[\\.,:]");
     var brackets = new RegExp("[()]");
     var identifiers = new RegExp("^[%A-Za-z][A-Za-z0-9]*");
-    var commandKeywords = ["break","close","do","else","for","goto", "halt", "hang", "if", "job","kill","lock","merge","new","open", "quit", "read", "set", "tcommit", "trollback", "tstart", "use", "view", "write", "xecute", "b","c","d","e","f","g", "h", "i", "j","k","l","m","n","o", "q", "r", "s", "tc", "tro", "ts", "u", "v", "w", "x"];
+    var commandKeywords = ["break", "close", "do", "else", "for", "goto", "halt", "hang", "if", "job", "kill", "lock", "merge", "new", "open", "quit", "read", "set", "tcommit", "trollback", "tstart", "use", "view", "write", "xecute", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "q", "r", "s", "tc", "tro", "ts", "u", "v", "w", "x"];
     // The following list includes intrinsic functions _and_ special variables
     var intrinsicFuncsWords = ["\\$ascii", "\\$char", "\\$data", "\\$ecode", "\\$estack", "\\$etrap", "\\$extract", "\\$find", "\\$fnumber", "\\$get", "\\$horolog", "\\$io", "\\$increment", "\\$job", "\\$justify", "\\$length", "\\$name", "\\$next", "\\$order", "\\$piece", "\\$qlength", "\\$qsubscript", "\\$query", "\\$quit", "\\$random", "\\$reverse", "\\$select", "\\$stack", "\\$test", "\\$text", "\\$translate", "\\$view", "\\$x", "\\$y", "\\$a", "\\$c", "\\$d", "\\$e", "\\$ec", "\\$es", "\\$et", "\\$f", "\\$fn", "\\$g", "\\$h", "\\$i", "\\$j", "\\$l", "\\$n", "\\$na", "\\$o", "\\$p", "\\$q", "\\$ql", "\\$qs", "\\$r", "\\$re", "\\$s", "\\$st", "\\$t", "\\$tr", "\\$v", "\\$z"];
     var intrinsicFuncs = wordRegexp(intrinsicFuncsWords);
@@ -129,14 +129,14 @@
     }
 
     return {
-      startState: function() {
+      startState: function () {
         return {
           label: false,
           commandMode: 0
         };
       },
 
-      token: function(stream, state) {
+      token: function (stream, state) {
         var style = tokenBase(stream, state);
         if (state.label) return "tag";
         return style;

@@ -2,29 +2,30 @@
 //! locale : Sindhi [sd]
 //! author : Narain Sagar : https://github.com/narainsagar
 
-;(function (global, factory) {
-   typeof exports === 'object' && typeof module !== 'undefined'
-       && typeof require === 'function' ? factory(require('../moment')) :
-   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-   factory(global.moment)
-}(this, (function (moment) { 'use strict';
+; (function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined'
+        && typeof require === 'function' ? factory(require('../moment')) :
+        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+            factory(global.moment)
+}(this, (function (moment) {
+    'use strict';
 
     //! moment.js locale configuration
 
     var months = [
-            'جنوري',
-            'فيبروري',
-            'مارچ',
-            'اپريل',
-            'مئي',
-            'جون',
-            'جولاءِ',
-            'آگسٽ',
-            'سيپٽمبر',
-            'آڪٽوبر',
-            'نومبر',
-            'ڊسمبر',
-        ],
+        'جنوري',
+        'فيبروري',
+        'مارچ',
+        'اپريل',
+        'مئي',
+        'جون',
+        'جولاءِ',
+        'آگسٽ',
+        'سيپٽمبر',
+        'آڪٽوبر',
+        'نومبر',
+        'ڊسمبر',
+    ],
         days = ['آچر', 'سومر', 'اڱارو', 'اربع', 'خميس', 'جمع', 'ڇنڇر'];
 
     var sd = moment.defineLocale('sd', {

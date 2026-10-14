@@ -778,7 +778,7 @@
     labelWidth: 'auto',
     baseClass: 'bootstrap-switch',
     wrapperClass: 'wrapper',
-    onInit: function onInit() {},
-    onSwitchChange: function onSwitchChange() {}
+    onInit: function onInit() { },
+    onSwitchChange: function onSwitchChange() { }
   };
 });

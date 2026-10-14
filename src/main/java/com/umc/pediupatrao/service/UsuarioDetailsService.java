@@ -17,7 +17,8 @@ public class UsuarioDetailsService implements UserDetailsService {
     }
 
     @Override
-    // Converte o usuário persistido em credenciais reconhecidas pelo Spring Security.
+    // Converte o usuário persistido em credenciais reconhecidas pelo Spring
+    // Security.
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return usuarioRepository.findByUsername(username)
                 .map(usuario -> User.builder()

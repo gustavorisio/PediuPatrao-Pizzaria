@@ -11,8 +11,7 @@ import java.util.Set;
 @Service
 public class ProdutoService {
 
-    private static final Set<String> TIPOS_PERMITIDOS =
-            Set.of("Pizza", "Lanche", "Bebida", "Opcional");
+    private static final Set<String> TIPOS_PERMITIDOS = Set.of("Pizza", "Lanche", "Bebida", "Opcional");
 
     @Autowired
     private ProdutoRepository produtoRepository;
@@ -43,12 +42,12 @@ public class ProdutoService {
 
         // Se o cliente não tem ID (novo cliente), salva como novo
         if (produto.getId() == null) {
-            return produtoRepository.save(produto);  // Cria um novo cliente
+            return produtoRepository.save(produto); // Cria um novo cliente
         } // Se já tem ID (cliente existente), atualiza
         else {
             // Verifica se o cliente existe antes de atualizar
             if (produtoRepository.existsById(produto.getId())) {
-                return produtoRepository.save(produto);  // Atualiza o cliente existente
+                return produtoRepository.save(produto); // Atualiza o cliente existente
             } else {
                 throw new IllegalArgumentException("Cliente não encontrado para atualização.");
             }
@@ -65,7 +64,7 @@ public class ProdutoService {
         }
         if ("Pizza".equals(produto.getTipo())
                 && (produto.getTipoPizza() == null || produto.getTipoPizza().isBlank()
-                || produto.getSabor() == null || produto.getSabor().isBlank())) {
+                        || produto.getSabor() == null || produto.getSabor().isBlank())) {
             throw new IllegalArgumentException(
                     "Tipo de pizza e sabor são obrigatórios para produtos do tipo Pizza.");
         }

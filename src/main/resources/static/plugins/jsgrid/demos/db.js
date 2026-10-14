@@ -1,9 +1,9 @@
-(function() {
+(function () {
 
     var db = {
 
-        loadData: function(filter) {
-            return $.grep(this.clients, function(client) {
+        loadData: function (filter) {
+            return $.grep(this.clients, function (client) {
                 return (!filter.Name || client.Name.indexOf(filter.Name) > -1)
                     && (filter.Age === undefined || client.Age === filter.Age)
                     && (!filter.Address || client.Address.indexOf(filter.Address) > -1)
@@ -12,13 +12,13 @@
             });
         },
 
-        insertItem: function(insertingClient) {
+        insertItem: function (insertingClient) {
             this.clients.push(insertingClient);
         },
 
-        updateItem: function(updatingClient) { },
+        updateItem: function (updatingClient) { },
 
-        deleteItem: function(deletingClient) {
+        deleteItem: function (deletingClient) {
             var clientIndex = $.inArray(deletingClient, this.clients);
             this.clients.splice(clientIndex, 1);
         }
@@ -879,6 +879,6 @@
             "Name": "Solomon Green",
             "RegisterDate": "2013-09-04T01:44:47-07:00"
         }
-     ];
+    ];
 
 }());
