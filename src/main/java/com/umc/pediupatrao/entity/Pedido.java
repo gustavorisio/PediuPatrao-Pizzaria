@@ -17,6 +17,10 @@ public class Pedido {
     private java.math.BigDecimal valorTotal;
     private String responsavelRegistro;
     private java.time.LocalDateTime dataHoraEntrada;
+    private String responsavelSaida;
+    private java.time.LocalDateTime dataHoraSaida;
+    private String justificativaCancelamento;
+    private java.util.List<PedidoAuditoria> auditoria = new java.util.ArrayList<>();
 
     public String getId() {
         return id;
@@ -104,5 +108,37 @@ public class Pedido {
 
     public void setDataHoraEntrada(java.time.LocalDateTime dataHoraEntrada) {
         this.dataHoraEntrada = dataHoraEntrada;
+    }
+
+    public String getResponsavelSaida() {
+        return responsavelSaida;
+    }
+
+    public void setResponsavelSaida(String responsavelSaida) {
+        this.responsavelSaida = responsavelSaida;
+    }
+
+    public java.time.LocalDateTime getDataHoraSaida() {
+        return dataHoraSaida;
+    }
+
+    public void setDataHoraSaida(java.time.LocalDateTime dataHoraSaida) {
+        this.dataHoraSaida = dataHoraSaida;
+    }
+
+    public String getJustificativaCancelamento() {
+        return justificativaCancelamento;
+    }
+
+    public void setJustificativaCancelamento(String justificativaCancelamento) {
+        this.justificativaCancelamento = justificativaCancelamento;
+    }
+
+    public java.util.List<PedidoAuditoria> getAuditoria() {
+        return auditoria;
+    }
+
+    public void setAuditoria(java.util.List<PedidoAuditoria> auditoria) {
+        this.auditoria = auditoria;
     }
 }
