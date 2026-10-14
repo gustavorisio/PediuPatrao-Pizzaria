@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Pedido {
     @Id
     private String id;
+    private Integer numeroPedido;
     private String clienteId;
     private String tipoPizza;
     private int quantidade;
@@ -17,6 +18,10 @@ public class Pedido {
     private java.math.BigDecimal valorTotal;
     private String responsavelRegistro;
     private java.time.LocalDateTime dataHoraEntrada;
+    private String responsavelSaida;
+    private java.time.LocalDateTime dataHoraSaida;
+    private String justificativaCancelamento;
+    private java.util.List<PedidoAuditoria> auditoria = new java.util.ArrayList<>();
 
     public String getId() {
         return id;
@@ -24,6 +29,14 @@ public class Pedido {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getNumeroPedido() {
+        return numeroPedido;
+    }
+
+    public void setNumeroPedido(Integer numeroPedido) {
+        this.numeroPedido = numeroPedido;
     }
 
     public String getClienteId() {
@@ -104,5 +117,37 @@ public class Pedido {
 
     public void setDataHoraEntrada(java.time.LocalDateTime dataHoraEntrada) {
         this.dataHoraEntrada = dataHoraEntrada;
+    }
+
+    public String getResponsavelSaida() {
+        return responsavelSaida;
+    }
+
+    public void setResponsavelSaida(String responsavelSaida) {
+        this.responsavelSaida = responsavelSaida;
+    }
+
+    public java.time.LocalDateTime getDataHoraSaida() {
+        return dataHoraSaida;
+    }
+
+    public void setDataHoraSaida(java.time.LocalDateTime dataHoraSaida) {
+        this.dataHoraSaida = dataHoraSaida;
+    }
+
+    public String getJustificativaCancelamento() {
+        return justificativaCancelamento;
+    }
+
+    public void setJustificativaCancelamento(String justificativaCancelamento) {
+        this.justificativaCancelamento = justificativaCancelamento;
+    }
+
+    public java.util.List<PedidoAuditoria> getAuditoria() {
+        return auditoria;
+    }
+
+    public void setAuditoria(java.util.List<PedidoAuditoria> auditoria) {
+        this.auditoria = auditoria;
     }
 }

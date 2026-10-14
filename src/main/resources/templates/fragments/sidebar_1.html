@@ -26,7 +26,7 @@
             </li>
 
             <!-- Clientes -->
-            <li class="nav-item">
+            <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')">
                 <a class="nav-link sidebar-link" th:href="@{/clientes}"
                    th:classappend="${#httpServletRequest.requestURI.startsWith('/clientes')} ? ' active'">
                     <i class="bi bi-person-raised-hand me-2"></i>

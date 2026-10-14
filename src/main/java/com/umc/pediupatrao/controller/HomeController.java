@@ -3,7 +3,6 @@ package com.umc.pediupatrao.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.umc.pediupatrao.entity.Cliente;
-import com.umc.pediupatrao.entity.Pedido;
 import com.umc.pediupatrao.entity.Produto;
 import com.umc.pediupatrao.entity.Usuario;
 import com.umc.pediupatrao.entity.Entregador;
@@ -133,8 +132,11 @@ public class HomeController {
     @GetMapping("/pedidos")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE', 'ENTREGADOR')")
     public String pedidos(Model model) {
-        List<Pedido> pedidos = pedidoService.listarPedidos();
-        model.addAttribute("pedidos", pedidos);
+        if (pedidoService.usuarioEhEntregador()) {
+            model.addAttribute("pedidos", pedidoService.listarPedidosParaEntrega());
+        } else {
+            model.addAttribute("pedidos", pedidoService.listarPedidos());
+        }
         model.addAttribute("content", "pedidos :: content");
         log.info("Carregando fragmento: pedidos :: content");
         return "layout";
