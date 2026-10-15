@@ -15,7 +15,10 @@ public enum StatusPedido {
 
     @JsonCreator
     public static StatusPedido fromValue(String value) {
-        if (value == null || value.isBlank()) {
+        if (value == null) {
+            return null;
+        }
+        if (value.isBlank()) {
             return null;
         }
         try {

@@ -1,7 +1,6 @@
 package com.umc.pediupatrao.service;
 
 import com.umc.pediupatrao.entity.Pedido;
-import com.umc.pediupatrao.entity.PedidoAuditoria;
 import com.umc.pediupatrao.entity.ItemPedido;
 import com.umc.pediupatrao.entity.Produto;
 import com.umc.pediupatrao.entity.Cliente;
@@ -22,8 +21,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 import org.springframework.security.core.GrantedAuthority;
 
 @Service
@@ -34,14 +31,14 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ClienteRepository clienteRepository;
     private final ProdutoRepository produtoRepository;
-    private final AuditoriaService auditoriaService;
+    private final PedidoAuditoriaService pedidoAuditoriaService;
 
     public PedidoService(PedidoRepository pedidoRepository, ClienteRepository clienteRepository,
-            ProdutoRepository produtoRepository, AuditoriaService auditoriaService) {
+            ProdutoRepository produtoRepository, PedidoAuditoriaService pedidoAuditoriaService) {
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
         this.produtoRepository = produtoRepository;
-        this.auditoriaService = auditoriaService;
+        this.pedidoAuditoriaService = pedidoAuditoriaService;
     }
 
     // Persiste um pedido recém-criado pelo atendimento.
@@ -57,11 +54,9 @@ public class PedidoService {
         pedido.setDataHoraSaida(null);
         pedido.setJustificativaCancelamento(null);
         pedido.setAuditoria(new ArrayList<>());
-        registrarAuditoria(pedido, "RECEBIMENTO", null, statusValue(pedido.getStatus()), null,
-                BigDecimal.ZERO, pedido.getPercentualDesconto(), null, pedido.getValorTotal());
+        pedidoAuditoriaService.prepararRecebimento(pedido);
         Pedido salvo = pedidoRepository.save(pedido);
-        auditoriaService.registrar("INCLUSAO", "PEDIDO", salvo.getId(),
-                new HashMap<>(), dadosPedido(salvo), null);
+        pedidoAuditoriaService.registrarRecebimento(salvo);
         return salvo;
     }
 
@@ -291,16 +286,9 @@ public class PedidoService {
         BigDecimal valorAnterior = pedido.getValorTotal();
         pedido.setPercentualDesconto(dados.getPercentualDesconto());
         pedido.setValorTotal(calcularValorTotal(pedido));
-        registrarAuditoria(pedido, "ALTERACAO_PEDIDO", statusValue(pedido.getStatus()), statusValue(pedido.getStatus()),
-                null, descontoAnterior, pedido.getPercentualDesconto(),
-                valorAnterior, pedido.getValorTotal());
+        pedidoAuditoriaService.prepararAlteracao(pedido, descontoAnterior, valorAnterior);
         Pedido salvo = pedidoRepository.save(pedido);
-        String operacao = descontoAnterior.compareTo(salvo.getPercentualDesconto()) != 0
-                ? "DESCONTO"
-                : "ALTERACAO";
-        auditoriaService.registrar(operacao, "PEDIDO", salvo.getId(),
-                dadosPedidoAntes(pedido, descontoAnterior, valorAnterior),
-                dadosPedido(salvo), null);
+        pedidoAuditoriaService.registrarAlteracao(salvo, descontoAnterior, valorAnterior);
         return salvo;
     }
 
@@ -329,12 +317,9 @@ public class PedidoService {
             pedido.setResponsavelSaida(usuario);
             pedido.setDataHoraSaida(LocalDateTime.now());
         }
-        registrarAuditoria(pedido, "ALTERACAO_STATUS", statusValue(statusAnterior), statusValue(novoStatus),
-                null, pedido.getPercentualDesconto(), pedido.getPercentualDesconto(),
-                pedido.getValorTotal(), pedido.getValorTotal());
+        pedidoAuditoriaService.prepararAlteracaoStatus(pedido, statusAnterior);
         Pedido salvo = pedidoRepository.save(pedido);
-        auditoriaService.registrar("ALTERACAO_STATUS", "PEDIDO", salvo.getId(),
-                mapa("status", statusValue(statusAnterior)), mapa("status", statusValue(novoStatus)), null);
+        pedidoAuditoriaService.registrarAlteracaoStatus(salvo, statusAnterior);
         return salvo;
     }
 
@@ -351,13 +336,9 @@ public class PedidoService {
         StatusPedido statusAnterior = pedido.getStatus();
         pedido.setStatus(StatusPedido.CANCELADO);
         pedido.setJustificativaCancelamento(justificativa.trim());
-        registrarAuditoria(pedido, "CANCELAMENTO", statusValue(statusAnterior), statusValue(StatusPedido.CANCELADO),
-                pedido.getJustificativaCancelamento(), pedido.getPercentualDesconto(),
-                pedido.getPercentualDesconto(), pedido.getValorTotal(), pedido.getValorTotal());
+        pedidoAuditoriaService.prepararCancelamento(pedido, statusAnterior, justificativa);
         Pedido salvo = pedidoRepository.save(pedido);
-        auditoriaService.registrar("CANCELAMENTO", "PEDIDO", salvo.getId(),
-                mapa("status", statusValue(statusAnterior)), mapa("status", statusValue(StatusPedido.CANCELADO)),
-                justificativa);
+        pedidoAuditoriaService.registrarCancelamento(salvo, statusAnterior, justificativa);
         return salvo;
     }
 
@@ -430,51 +411,6 @@ public class PedidoService {
         return pedido.getPercentualDesconto() == null
                 ? BigDecimal.ZERO
                 : pedido.getPercentualDesconto();
-    }
-
-    private Map<String, String> dadosPedido(Pedido pedido) {
-        return mapa("status", statusValue(pedido.getStatus()),
-                "percentualDesconto", String.valueOf(pedido.getPercentualDesconto()),
-                "valorTotal", String.valueOf(pedido.getValorTotal()));
-    }
-
-    private Map<String, String> dadosPedidoAntes(Pedido pedido, BigDecimal desconto,
-            BigDecimal valorTotal) {
-        return mapa("status", statusValue(pedido.getStatus()),
-                "percentualDesconto", String.valueOf(desconto),
-                "valorTotal", String.valueOf(valorTotal));
-    }
-
-    private String statusValue(StatusPedido status) {
-        return status == null ? null : status.name();
-    }
-
-    private Map<String, String> mapa(String... valores) {
-        Map<String, String> resultado = new HashMap<>();
-        for (int i = 0; i + 1 < valores.length; i += 2) {
-            resultado.put(valores[i], valores[i + 1]);
-        }
-        return resultado;
-    }
-
-    private void registrarAuditoria(Pedido pedido, String operacao, String statusAnterior,
-            String statusPosterior, String justificativa, BigDecimal descontoAnterior,
-            BigDecimal descontoPosterior, BigDecimal valorAnterior, BigDecimal valorPosterior) {
-        if (pedido.getAuditoria() == null) {
-            pedido.setAuditoria(new ArrayList<>());
-        }
-        PedidoAuditoria registro = new PedidoAuditoria();
-        registro.setOperacao(operacao);
-        registro.setUsuario(usuarioAutenticado());
-        registro.setDataHora(LocalDateTime.now());
-        registro.setStatusAnterior(statusAnterior);
-        registro.setStatusPosterior(statusPosterior);
-        registro.setJustificativa(justificativa);
-        registro.setDescontoAnterior(descontoAnterior);
-        registro.setDescontoPosterior(descontoPosterior);
-        registro.setValorTotalAnterior(valorAnterior);
-        registro.setValorTotalPosterior(valorPosterior);
-        pedido.getAuditoria().add(registro);
     }
 
 }
