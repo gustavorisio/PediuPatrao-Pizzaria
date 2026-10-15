@@ -29,4 +29,13 @@ public enum TipoProduto {
     public String getValue() {
         return name();
     }
+
+    public String getLabel() {
+        return switch (this) {
+            case PIZZA -> "Pizza";
+            case LANCHE -> "Lanche";
+            case BEBIDA -> "Bebida";
+            case OPCIONAL -> "Opcional";
+        };
+    }
 }

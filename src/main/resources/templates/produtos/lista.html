@@ -100,7 +100,7 @@
                         <tr th:each="produto : ${produtos}"
                             th:attr="data-pesquisa=${produto.nome + ' ' + produto.tipo + ' ' + produto.tipoPizza + ' ' + produto.sabor}">
                             <td th:text="${produto.nome}">Produto</td>
-                            <td th:text="${produto.tipo}">Pizza</td>
+                            <td th:text="${produto.tipo != null ? produto.tipo.label : '-'}">Pizza</td>
                             <td th:text="${produto.tipoPizza != null ? produto.tipoPizza : '-'}">-</td>
                             <td th:text="${produto.sabor != null ? produto.sabor : '-'}">-</td>
                             <td th:text="${produto.preco != null
