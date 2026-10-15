@@ -2,6 +2,9 @@ package com.umc.pediupatrao.service;
 
 import com.umc.pediupatrao.entity.Pedido;
 import com.umc.pediupatrao.entity.PedidoAuditoria;
+import com.umc.pediupatrao.entity.ItemPedido;
+import com.umc.pediupatrao.entity.Produto;
+import com.umc.pediupatrao.entity.Cliente;
 import com.umc.pediupatrao.dto.PedidoEntregaDTO;
 import com.umc.pediupatrao.repository.PedidoRepository;
 import com.umc.pediupatrao.repository.ClienteRepository;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
+import org.springframework.security.core.GrantedAuthority;
 
 @Service
 public class PedidoService {
@@ -61,23 +65,38 @@ public class PedidoService {
     }
 
     private void validarPedido(Pedido pedido) {
-        if (pedido == null || pedido.getItens() == null || pedido.getItens().isEmpty()) {
+        if (pedido == null) {
             throw erro("O pedido deve possuir ao menos um item.");
         }
-        if (isBlank(pedido.getClienteId()) || !clienteRepository.existsById(pedido.getClienteId())) {
+        if (pedido.getItens() == null) {
+            throw erro("O pedido deve possuir ao menos um item.");
+        }
+        if (pedido.getItens().isEmpty()) {
+            throw erro("O pedido deve possuir ao menos um item.");
+        }
+        if (isBlank(pedido.getClienteId())) {
+            throw erro("Selecione um cliente cadastrado.");
+        }
+        if (!clienteRepository.existsById(pedido.getClienteId())) {
             throw erro("Selecione um cliente cadastrado.");
         }
 
-        for (var item : pedido.getItens()) {
-            if (item == null || isBlank(item.getProdutoId())) {
+        for (ItemPedido item : pedido.getItens()) {
+            if (item == null) {
+                throw erro("Selecione um produto cadastrado para cada item.");
+            }
+            if (isBlank(item.getProdutoId())) {
                 throw erro("Selecione um produto cadastrado para cada item.");
             }
             if (item.getQuantidade() <= 0) {
                 throw erro("A quantidade de cada item deve ser maior que zero.");
             }
-            var produto = produtoRepository.findById(item.getProdutoId())
+            Produto produto = produtoRepository.findById(item.getProdutoId())
                     .orElseThrow(() -> erro("Produto não encontrado."));
-            if (produto.getPreco() == null || produto.getPreco() < 0) {
+            if (produto.getPreco() == null) {
+                throw erro("O produto selecionado não possui preço válido.");
+            }
+            if (produto.getPreco() < 0) {
                 throw erro("O produto selecionado não possui preço válido.");
             }
             item.setPrecoUnitario(BigDecimal.valueOf(produto.getPreco()));
@@ -87,21 +106,30 @@ public class PedidoService {
         BigDecimal desconto = pedido.getPercentualDesconto();
         if (desconto == null) {
             pedido.setPercentualDesconto(BigDecimal.ZERO);
-        } else if (desconto.compareTo(BigDecimal.ZERO) < 0
-                || desconto.compareTo(DESCONTO_MAXIMO) > 0) {
-            throw erro("O desconto deve estar entre 0% e 20%.");
-        } else if (desconto.compareTo(BigDecimal.ZERO) > 0
-                && !podeAplicarDesconto()) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Somente o ADMIN ou GERENTE pode aplicar descontos.");
+        } else {
+            if (desconto.compareTo(BigDecimal.ZERO) < 0) {
+                throw erro("O desconto deve estar entre 0% e 20%.");
+            }
+            if (desconto.compareTo(DESCONTO_MAXIMO) > 0) {
+                throw erro("O desconto deve estar entre 0% e 20%.");
+            }
+            if (desconto.compareTo(BigDecimal.ZERO) > 0) {
+                if (!podeAplicarDesconto()) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Somente o GERENTE pode aplicar descontos.");
+                }
+            }
         }
     }
 
     private BigDecimal calcularValorTotal(Pedido pedido) {
-        BigDecimal subtotal = pedido.getItens().stream()
-                .map(item -> item.getPrecoUnitario().multiply(BigDecimal.valueOf(item.getQuantidade())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (ItemPedido item : pedido.getItens()) {
+            BigDecimal valorItem = item.getPrecoUnitario()
+                    .multiply(BigDecimal.valueOf(item.getQuantidade()));
+            subtotal = subtotal.add(valorItem);
+        }
         BigDecimal fatorDesconto = BigDecimal.ONE.subtract(
                 pedido.getPercentualDesconto().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
         return subtotal.multiply(fatorDesconto).setScale(2, RoundingMode.HALF_UP);
@@ -109,11 +137,23 @@ public class PedidoService {
 
     private String usuarioAutenticado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null
-                || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken
-                || authentication.getName() == null
-                || authentication.getName().isBlank()) {
+        if (authentication == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
+        }
+        if (!authentication.isAuthenticated()) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
+        }
+        if (authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
+        }
+        if (authentication.getName() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
+        }
+        if (authentication.getName().isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
         }
@@ -122,12 +162,19 @@ public class PedidoService {
 
     private boolean usuarioTemRole(String role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(authority -> ("ROLE_" + role).equals(authority.getAuthority()));
+        if (authentication == null) {
+            return false;
+        }
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if (("ROLE_" + role).equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean podeAplicarDesconto() {
-        return usuarioTemRole("ADMIN") || usuarioTemRole("GERENTE");
+        return usuarioTemRole("GERENTE");
     }
 
     public boolean usuarioEhEntregador() {
@@ -139,7 +186,10 @@ public class PedidoService {
     }
 
     private boolean isBlank(String valor) {
-        return valor == null || valor.isBlank();
+        if (valor == null) {
+            return true;
+        }
+        return valor.isBlank();
     }
 
     // Entrega à aplicação os pedidos necessários para acompanhamento.
@@ -152,9 +202,11 @@ public class PedidoService {
     public List<PedidoEntregaDTO> listarPedidosParaEntrega() {
         List<Pedido> pedidos = pedidoRepository.findAll();
         preencherNumerosAntigos(pedidos);
-        return pedidos.stream()
-                .map(this::transformarParaEntrega)
-                .toList();
+        List<PedidoEntregaDTO> resultado = new ArrayList<>();
+        for (Pedido pedido : pedidos) {
+            resultado.add(transformarParaEntrega(pedido));
+        }
+        return resultado;
     }
 
     public PedidoEntregaDTO pedidoParaEntrega(String id) {
@@ -162,13 +214,13 @@ public class PedidoService {
     }
 
     private PedidoEntregaDTO transformarParaEntrega(Pedido pedido) {
-        var cliente = clienteRepository.findById(pedido.getClienteId()).orElse(null);
+        Cliente cliente = clienteRepository.findById(pedido.getClienteId()).orElse(null);
         if (cliente == null) {
-            return new PedidoEntregaDTO(numeroParaExibicao(pedido), "-", "-",
+            return new PedidoEntregaDTO(numeroParaExibicao(pedido), "-",
                     pedido.getDataHoraEntrada());
         }
         return new PedidoEntregaDTO(numeroParaExibicao(pedido), enderecoCliente(cliente),
-                cliente.getTelefone(), pedido.getDataHoraEntrada());
+                pedido.getDataHoraEntrada());
     }
 
     private String numeroParaExibicao(Pedido pedido) {
@@ -268,7 +320,11 @@ public class PedidoService {
         String statusAnterior = pedido.getStatus();
         String usuario = usuarioAutenticado();
         pedido.setStatus(novoStatus);
-        if ("SAIU_PARA_ENTREGA".equals(novoStatus) || "RETIRADO".equals(novoStatus)) {
+        if ("SAIU_PARA_ENTREGA".equals(novoStatus)) {
+            pedido.setResponsavelSaida(usuario);
+            pedido.setDataHoraSaida(LocalDateTime.now());
+        }
+        if ("RETIRADO".equals(novoStatus)) {
             pedido.setResponsavelSaida(usuario);
             pedido.setDataHoraSaida(LocalDateTime.now());
         }
@@ -310,24 +366,62 @@ public class PedidoService {
     }
 
     private void validarTransicao(String statusAtual, String novoStatus) {
-        if (statusAtual == null || novoStatus.isBlank()) {
+        if (statusAtual == null) {
             throw erro("O status do pedido deve ser informado.");
         }
-        boolean valida = ("RECEBIDO".equals(statusAtual) && "EM_PREPARACAO".equals(novoStatus))
-                || ("EM_PREPARACAO".equals(statusAtual) && "PRONTO".equals(novoStatus))
-                || ("PRONTO".equals(statusAtual)
-                        && List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(novoStatus))
-                || (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(statusAtual)
-                        && "FINALIZADO".equals(novoStatus));
+        if (novoStatus.isBlank()) {
+            throw erro("O status do pedido deve ser informado.");
+        }
+        if (usuarioEhEntregador()) {
+            boolean podeSair = false;
+            boolean podeFinalizar = false;
+            if ("PRONTO".equals(statusAtual)) {
+                if ("SAIU_PARA_ENTREGA".equals(novoStatus)) {
+                    podeSair = true;
+                }
+            }
+            if (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(statusAtual)) {
+                if ("FINALIZADO".equals(novoStatus)) {
+                    podeFinalizar = true;
+                }
+            }
+            if (!podeSair) {
+                if (!podeFinalizar) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "O entregador só pode atualizar o status da entrega.");
+                }
+            }
+        }
+        boolean valida = false;
+        if ("RECEBIDO".equals(statusAtual)) {
+            if ("EM_PREPARACAO".equals(novoStatus)) {
+                valida = true;
+            }
+        }
+        if ("EM_PREPARACAO".equals(statusAtual)) {
+            if ("PRONTO".equals(novoStatus)) {
+                valida = true;
+            }
+        }
+        if ("PRONTO".equals(statusAtual)) {
+            if (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(novoStatus)) {
+                valida = true;
+            }
+        }
+        if (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(statusAtual)) {
+            if ("FINALIZADO".equals(novoStatus)) {
+                valida = true;
+            }
+        }
         if (!valida) {
             throw erro("Transição de status inválida.");
         }
     }
 
     private void exigirGerente() {
-        if (!usuarioTemRole("ADMIN") && !usuarioTemRole("GERENTE")) {
+        if (!usuarioTemRole("GERENTE")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Somente o ADMIN ou GERENTE pode cancelar pedidos.");
+                    "Somente o GERENTE pode cancelar pedidos.");
         }
     }
 

@@ -4,13 +4,12 @@
 //! author : Onorio De J. Afonso : https://github.com/marobo
 //! author : Sonia Simoes : https://github.com/soniasimoes
 
-; (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        && typeof require === 'function' ? factory(require('../moment')) :
-        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-            factory(global.moment)
-}(this, (function (moment) {
-    'use strict';
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
 
     //! moment.js locale configuration
 
@@ -61,12 +60,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {

@@ -1,5 +1,5 @@
 /*! =======================================================
-					  VERSION  11.0.2              
+                      VERSION  11.0.2              
 ========================================================= */
 "use strict";
 
@@ -75,10 +75,10 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		window.console = {};
 	}
 	if (windowIsDefined && !window.console.log) {
-		window.console.log = function () { };
+		window.console.log = function () {};
 	}
 	if (windowIsDefined && !window.console.warn) {
-		window.console.warn = function () { };
+		window.console.warn = function () {};
 	}
 
 	// Reference to Slider constructor
@@ -92,7 +92,7 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 
 		var slice = Array.prototype.slice;
 
-		function noop() { }
+		function noop() {}
 
 		// -------------------------- definition -------------------------- //
 
@@ -106,9 +106,9 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			// -------------------------- addOptionMethod -------------------------- //
 
 			/**
-	* adds option method -> $().plugin('option', {...})
-	* @param {Function} PluginClass - constructor class
-	*/
+    * adds option method -> $().plugin('option', {...})
+    * @param {Function} PluginClass - constructor class
+    */
 			function addOptionMethod(PluginClass) {
 				// don't overwrite original option method
 				if (PluginClass.prototype.option) {
@@ -134,10 +134,10 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			};
 
 			/**
-	* jQuery plugin bridge, access methods like $elem.plugin('method')
-	* @param {String} namespace - plugin name
-	* @param {Function} PluginClass - constructor class
-	*/
+    * jQuery plugin bridge, access methods like $elem.plugin('method')
+    * @param {String} namespace - plugin name
+    * @param {Function} PluginClass - constructor class
+    */
 			function bridge(namespace, PluginClass) {
 				// add to jQuery fn namespace
 				$.fn[namespace] = function (options) {
@@ -194,11 +194,11 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			// -------------------------- bridget -------------------------- //
 
 			/**
-	* converts a Prototypical class into a proper jQuery plugin
-	*   the class must have a ._init method
-	* @param {String} namespace - plugin name, used in $().pluginName
-	* @param {Function} PluginClass - constructor class
-	*/
+    * converts a Prototypical class into a proper jQuery plugin
+    *   the class must have a ._init method
+    * @param {String} namespace - plugin name, used in $().pluginName
+    * @param {Function} PluginClass - constructor class
+    */
 			$.bridget = function (namespace, PluginClass) {
 				addOptionMethod(PluginClass);
 				bridge(namespace, PluginClass);
@@ -212,8 +212,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 	})($);
 
 	/*************************************************
-				BOOTSTRAP-SLIDER SOURCE CODE
-	  **************************************************/
+ 			BOOTSTRAP-SLIDER SOURCE CODE
+ 	**************************************************/
 
 	(function ($) {
 		var autoRegisterNamespace = void 0;
@@ -241,9 +241,9 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 					var shouldAdjustWithBase = true;
 					if (this.options.ticks_positions.length > 0) {
 						var minv,
-							maxv,
-							minp,
-							maxp = 0;
+						    maxv,
+						    minp,
+						    maxp = 0;
 						for (var i = 1; i < this.options.ticks_positions.length; i++) {
 							if (percentage <= this.options.ticks_positions[i]) {
 								minv = this.options.ticks[i - 1];
@@ -270,9 +270,9 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 
 					if (this.options.ticks_positions.length > 0) {
 						var minv,
-							maxv,
-							minp,
-							maxp = 0;
+						    maxv,
+						    minp,
+						    maxp = 0;
 						for (var i = 0; i < this.options.ticks.length; i++) {
 							if (value <= this.options.ticks[i]) {
 								minv = i > 0 ? this.options.ticks[i - 1] : 0;
@@ -305,7 +305,7 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 					}
 					value = this.options.min + Math.round((value - this.options.min) / this.options.step) * this.options.step;
 					/* Rounding to the nearest step could exceed the min or
-	  * max, so clip to those values. */
+      * max, so clip to those values. */
 					return SliderScale.linear.getValue(value, this.options);
 				},
 				toPercentage: function toPercentage(value) {
@@ -323,8 +323,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		};
 
 		/*************************************************
-							CONSTRUCTOR
-		**************************************************/
+  						CONSTRUCTOR
+  	**************************************************/
 		Slider = function Slider(element, options) {
 			createNewSlider.call(this, element, options);
 			return this;
@@ -333,8 +333,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		function createNewSlider(element, options) {
 
 			/*
-		  The internal state object is used to store data about the current 'state' of slider.
-		  This includes values such as the `value`, `enabled`, etc...
+   	The internal state object is used to store data about the current 'state' of slider.
+   	This includes values such as the `value`, `enabled`, etc...
    */
 			this._state = {
 				value: null,
@@ -358,8 +358,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			}
 
 			/*************************************************
-							Process Options
-		  **************************************************/
+   					Process Options
+   	**************************************************/
 			options = options ? options : {};
 			var optionTypes = Object.keys(this.defaultOptions);
 
@@ -404,10 +404,10 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			}
 
 			/*
-		  Validate `tooltip_position` against 'orientation`
-		  - if `tooltip_position` is incompatible with orientation, switch it to a default compatible with specified `orientation`
-				-- default for "vertical" -> "right", "left" if rtl
-				-- default for "horizontal" -> "top"
+   	Validate `tooltip_position` against 'orientation`
+   	- if `tooltip_position` is incompatible with orientation, switch it to a default compatible with specified `orientation`
+   		-- default for "vertical" -> "right", "left" if rtl
+   		-- default for "horizontal" -> "top"
    */
 			if (this.options.orientation === "vertical" && (this.options.tooltip_position === "top" || this.options.tooltip_position === "bottom")) {
 				if (this.options.rtl) {
@@ -432,8 +432,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			}
 
 			/*************************************************
-							Create Markup
-		  **************************************************/
+   					Create Markup
+   	**************************************************/
 
 			var origWidth = this.element.style.width;
 			var updateSlider = false;
@@ -604,8 +604,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			}
 
 			/*************************************************
-								Setup
-		  **************************************************/
+   						Setup
+   	**************************************************/
 			this.eventToCallbackMap = {};
 			this.sliderElem.id = this.options.id;
 
@@ -747,8 +747,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			this.setValue(this._state.value);
 
 			/******************************************
-						Bind Event Listeners
-		  ******************************************/
+   				Bind Event Listeners
+   	******************************************/
 
 			// Bind keyboard handlers
 			this.handle1Keydown = this._keydown.bind(this, 0);
@@ -836,12 +836,12 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		}
 
 		/*************************************************
-					INSTANCE PROPERTIES/METHODS
-		- Any methods bound to the prototype are considered
+  				INSTANCE PROPERTIES/METHODS
+  	- Any methods bound to the prototype are considered
   part of the plugin's `public` interface
-		**************************************************/
+  	**************************************************/
 		Slider.prototype = {
-			_init: function _init() { }, // NOTE: Must exist to support bridget
+			_init: function _init() {}, // NOTE: Must exist to support bridget
 
 			constructor: Slider,
 
@@ -1074,11 +1074,11 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 			},
 
 			/******************************+
-						HELPERS
-		  - Any method that is not part of the public interface.
+   				HELPERS
+   	- Any method that is not part of the public interface.
    - Place it underneath this comment block and write its signature like so:
-				_fnName : function() {...}
-		  ********************************/
+   		_fnName : function() {...}
+   	********************************/
 			_removeTooltipListener: function _removeTooltipListener(event, handler) {
 				this.handle1.removeEventListener(event, handler, false);
 				this.handle2.removeEventListener(event, handler, false);
@@ -1831,8 +1831,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				return parseFloat(truncatedNum);
 			},
 			/*
-		  Credits to Mike Samuel for the following method!
-		  Source: http://stackoverflow.com/questions/10454518/javascript-how-to-retrieve-the-number-of-decimals-of-a-string-number
+   	Credits to Mike Samuel for the following method!
+   	Source: http://stackoverflow.com/questions/10454518/javascript-how-to-retrieve-the-number-of-decimals-of-a-string-number
    */
 			_getPercentage: function _getPercentage(ev) {
 				if (this.touchCapable && (ev.type === 'touchstart' || ev.type === 'touchmove' || ev.type === 'touchend')) {
@@ -2025,9 +2025,9 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 				return index;
 			},
 			/**
-	* Attempts to find the index in `ticks[]` the slider values are set at.
-	* The indexes can be -1 to indicate the slider value is not set at a value in `ticks[]`.
-	*/
+    * Attempts to find the index in `ticks[]` the slider values are set at.
+    * The indexes can be -1 to indicate the slider value is not set at a value in `ticks[]`.
+    */
 			_setTickIndex: function _setTickIndex() {
 				if (this.ticksAreValid) {
 					this._state.tickIndex = [this.options.ticks.indexOf(this._state.value[0]), this.options.ticks.indexOf(this._state.value[1])];
@@ -2036,8 +2036,8 @@ var windowIsDefined = (typeof window === "undefined" ? "undefined" : _typeof(win
 		};
 
 		/*********************************
-			Attach to global namespace
-		*********************************/
+  		Attach to global namespace
+  	*********************************/
 		if ($ && $.fn) {
 			if (!$.fn.slider) {
 				$.bridget(NAMESPACE_MAIN, Slider);

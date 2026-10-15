@@ -10,10 +10,7 @@
     font-size: 1em;
 }
 
-.jsgrid,
-.jsgrid *,
-.jsgrid *:before,
-.jsgrid *:after {
+.jsgrid, .jsgrid *, .jsgrid *:before, .jsgrid *:after {
     box-sizing: border-box;
 }
 

@@ -1,21 +1,21 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
-  CodeMirror.defineOption("placeholder", "", function (cm, val, old) {
+})(function(CodeMirror) {
+  CodeMirror.defineOption("placeholder", "", function(cm, val, old) {
     var prev = old && old != CodeMirror.Init;
     if (val && !prev) {
       cm.on("blur", onBlur);
       cm.on("change", onChange);
       cm.on("swapDoc", onChange);
-      CodeMirror.on(cm.getInputField(), "compositionupdate", cm.state.placeholderCompose = function () { onComposition(cm) })
+      CodeMirror.on(cm.getInputField(), "compositionupdate", cm.state.placeholderCompose = function() { onComposition(cm) })
       onChange(cm);
     } else if (!val && prev) {
       cm.off("blur", onBlur);
@@ -49,7 +49,7 @@
   }
 
   function onComposition(cm) {
-    setTimeout(function () {
+    setTimeout(function() {
       var empty = false
       if (cm.lineCount() == 1) {
         var input = cm.getInputField()

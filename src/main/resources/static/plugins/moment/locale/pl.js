@@ -2,19 +2,18 @@
 //! locale : Polish [pl]
 //! author : Rafal Hirsz : https://github.com/evoL
 
-; (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        && typeof require === 'function' ? factory(require('../moment')) :
-        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-            factory(global.moment)
-}(this, (function (moment) {
-    'use strict';
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
 
     //! moment.js locale configuration
 
     var monthsNominative = 'styczeń_luty_marzec_kwiecień_maj_czerwiec_lipiec_sierpień_wrzesień_październik_listopad_grudzień'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsSubjective = 'stycznia_lutego_marca_kwietnia_maja_czerwca_lipca_sierpnia_września_października_listopada_grudnia'.split(
             '_'
         ),

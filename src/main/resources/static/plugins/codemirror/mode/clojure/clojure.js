@@ -1,21 +1,21 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-(function (mod) {
+(function(mod) {
   if (typeof exports === "object" && typeof module === "object") // CommonJS
     mod(require("../../lib/codemirror"));
   else if (typeof define === "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
-  "use strict";
+})(function(CodeMirror) {
+"use strict";
 
-  CodeMirror.defineMode("clojure", function (options) {
-    var atoms = ["false", "nil", "true"];
-    var specialForms = [".", "catch", "def", "do", "if", "monitor-enter",
+CodeMirror.defineMode("clojure", function (options) {
+  var atoms = ["false", "nil", "true"];
+  var specialForms = [".", "catch", "def", "do", "if", "monitor-enter",
       "monitor-exit", "new", "quote", "recur", "set!", "throw", "try", "var"];
-    var coreSymbols = ["*", "*'", "*1", "*2", "*3", "*agent*",
+  var coreSymbols = ["*", "*'", "*1", "*2", "*3", "*agent*",
       "*allow-unresolved-vars*", "*assert*", "*clojure-version*",
       "*command-line-args*", "*compile-files*", "*compile-path*",
       "*compiler-options*", "*data-readers*", "*default-data-reader-fn*", "*e",
@@ -137,7 +137,7 @@
       "with-local-vars", "with-meta", "with-open", "with-out-str",
       "with-precision", "with-redefs", "with-redefs-fn", "xml-seq", "zero?",
       "zipmap"];
-    var haveBodyParameter = [
+  var haveBodyParameter = [
       "->", "->>", "as->", "binding", "bound-fn", "case", "catch", "comment",
       "cond", "cond->", "cond->>", "condp", "def", "definterface", "defmethod",
       "defn", "defmacro", "defprotocol", "defrecord", "defstruct", "deftype",
@@ -149,144 +149,144 @@
       "with-loading-context", "with-local-vars", "with-meta", "with-open",
       "with-out-str", "with-precision", "with-redefs", "with-redefs-fn"];
 
-    CodeMirror.registerHelper("hintWords", "clojure",
-      [].concat(atoms, specialForms, coreSymbols));
+  CodeMirror.registerHelper("hintWords", "clojure",
+    [].concat(atoms, specialForms, coreSymbols));
 
-    var atom = createLookupMap(atoms);
-    var specialForm = createLookupMap(specialForms);
-    var coreSymbol = createLookupMap(coreSymbols);
-    var hasBodyParameter = createLookupMap(haveBodyParameter);
-    var delimiter = /^(?:[\\\[\]\s"(),;@^`{}~]|$)/;
-    var numberLiteral = /^(?:[+\-]?\d+(?:(?:N|(?:[eE][+\-]?\d+))|(?:\.?\d*(?:M|(?:[eE][+\-]?\d+))?)|\/\d+|[xX][0-9a-fA-F]+|r[0-9a-zA-Z]+)?(?=[\\\[\]\s"#'(),;@^`{}~]|$))/;
-    var characterLiteral = /^(?:\\(?:backspace|formfeed|newline|return|space|tab|o[0-7]{3}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{4}|.)?(?=[\\\[\]\s"(),;@^`{}~]|$))/;
+  var atom = createLookupMap(atoms);
+  var specialForm = createLookupMap(specialForms);
+  var coreSymbol = createLookupMap(coreSymbols);
+  var hasBodyParameter = createLookupMap(haveBodyParameter);
+  var delimiter = /^(?:[\\\[\]\s"(),;@^`{}~]|$)/;
+  var numberLiteral = /^(?:[+\-]?\d+(?:(?:N|(?:[eE][+\-]?\d+))|(?:\.?\d*(?:M|(?:[eE][+\-]?\d+))?)|\/\d+|[xX][0-9a-fA-F]+|r[0-9a-zA-Z]+)?(?=[\\\[\]\s"#'(),;@^`{}~]|$))/;
+  var characterLiteral = /^(?:\\(?:backspace|formfeed|newline|return|space|tab|o[0-7]{3}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{4}|.)?(?=[\\\[\]\s"(),;@^`{}~]|$))/;
 
-    // simple-namespace := /^[^\\\/\[\]\d\s"#'(),;@^`{}~.][^\\\[\]\s"(),;@^`{}~.\/]*/
-    // simple-symbol    := /^(?:\/|[^\\\/\[\]\d\s"#'(),;@^`{}~][^\\\[\]\s"(),;@^`{}~]*)/
-    // qualified-symbol := (<simple-namespace>(<.><simple-namespace>)*</>)?<simple-symbol>
-    var qualifiedSymbol = /^(?:(?:[^\\\/\[\]\d\s"#'(),;@^`{}~.][^\\\[\]\s"(),;@^`{}~.\/]*(?:\.[^\\\/\[\]\d\s"#'(),;@^`{}~.][^\\\[\]\s"(),;@^`{}~.\/]*)*\/)?(?:\/|[^\\\/\[\]\d\s"#'(),;@^`{}~][^\\\[\]\s"(),;@^`{}~]*)*(?=[\\\[\]\s"(),;@^`{}~]|$))/;
+  // simple-namespace := /^[^\\\/\[\]\d\s"#'(),;@^`{}~.][^\\\[\]\s"(),;@^`{}~.\/]*/
+  // simple-symbol    := /^(?:\/|[^\\\/\[\]\d\s"#'(),;@^`{}~][^\\\[\]\s"(),;@^`{}~]*)/
+  // qualified-symbol := (<simple-namespace>(<.><simple-namespace>)*</>)?<simple-symbol>
+  var qualifiedSymbol = /^(?:(?:[^\\\/\[\]\d\s"#'(),;@^`{}~.][^\\\[\]\s"(),;@^`{}~.\/]*(?:\.[^\\\/\[\]\d\s"#'(),;@^`{}~.][^\\\[\]\s"(),;@^`{}~.\/]*)*\/)?(?:\/|[^\\\/\[\]\d\s"#'(),;@^`{}~][^\\\[\]\s"(),;@^`{}~]*)*(?=[\\\[\]\s"(),;@^`{}~]|$))/;
 
-    function base(stream, state) {
-      if (stream.eatSpace() || stream.eat(",")) return ["space", null];
-      if (stream.match(numberLiteral)) return [null, "number"];
-      if (stream.match(characterLiteral)) return [null, "string-2"];
-      if (stream.eat(/^"/)) return (state.tokenize = inString)(stream, state);
-      if (stream.eat(/^[(\[{]/)) return ["open", "bracket"];
-      if (stream.eat(/^[)\]}]/)) return ["close", "bracket"];
-      if (stream.eat(/^;/)) { stream.skipToEnd(); return ["space", "comment"]; }
-      if (stream.eat(/^[#'@^`~]/)) return [null, "meta"];
+  function base(stream, state) {
+    if (stream.eatSpace() || stream.eat(",")) return ["space", null];
+    if (stream.match(numberLiteral)) return [null, "number"];
+    if (stream.match(characterLiteral)) return [null, "string-2"];
+    if (stream.eat(/^"/)) return (state.tokenize = inString)(stream, state);
+    if (stream.eat(/^[(\[{]/)) return ["open", "bracket"];
+    if (stream.eat(/^[)\]}]/)) return ["close", "bracket"];
+    if (stream.eat(/^;/)) {stream.skipToEnd(); return ["space", "comment"];}
+    if (stream.eat(/^[#'@^`~]/)) return [null, "meta"];
 
-      var matches = stream.match(qualifiedSymbol);
-      var symbol = matches && matches[0];
+    var matches = stream.match(qualifiedSymbol);
+    var symbol = matches && matches[0];
 
-      if (!symbol) {
-        // advance stream by at least one character so we don't get stuck.
-        stream.next();
-        stream.eatWhile(function (c) { return !is(c, delimiter); });
-        return [null, "error"];
+    if (!symbol) {
+      // advance stream by at least one character so we don't get stuck.
+      stream.next();
+      stream.eatWhile(function (c) {return !is(c, delimiter);});
+      return [null, "error"];
+    }
+
+    if (symbol === "comment" && state.lastToken === "(")
+      return (state.tokenize = inComment)(stream, state);
+    if (is(symbol, atom) || symbol.charAt(0) === ":") return ["symbol", "atom"];
+    if (is(symbol, specialForm) || is(symbol, coreSymbol)) return ["symbol", "keyword"];
+    if (state.lastToken === "(") return ["symbol", "builtin"]; // other operator
+
+    return ["symbol", "variable"];
+  }
+
+  function inString(stream, state) {
+    var escaped = false, next;
+
+    while (next = stream.next()) {
+      if (next === "\"" && !escaped) {state.tokenize = base; break;}
+      escaped = !escaped && next === "\\";
+    }
+
+    return [null, "string"];
+  }
+
+  function inComment(stream, state) {
+    var parenthesisCount = 1;
+    var next;
+
+    while (next = stream.next()) {
+      if (next === ")") parenthesisCount--;
+      if (next === "(") parenthesisCount++;
+      if (parenthesisCount === 0) {
+        stream.backUp(1);
+        state.tokenize = base;
+        break;
       }
-
-      if (symbol === "comment" && state.lastToken === "(")
-        return (state.tokenize = inComment)(stream, state);
-      if (is(symbol, atom) || symbol.charAt(0) === ":") return ["symbol", "atom"];
-      if (is(symbol, specialForm) || is(symbol, coreSymbol)) return ["symbol", "keyword"];
-      if (state.lastToken === "(") return ["symbol", "builtin"]; // other operator
-
-      return ["symbol", "variable"];
     }
 
-    function inString(stream, state) {
-      var escaped = false, next;
+    return ["space", "comment"];
+  }
 
-      while (next = stream.next()) {
-        if (next === "\"" && !escaped) { state.tokenize = base; break; }
-        escaped = !escaped && next === "\\";
-      }
+  function createLookupMap(words) {
+    var obj = {};
 
-      return [null, "string"];
-    }
+    for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
 
-    function inComment(stream, state) {
-      var parenthesisCount = 1;
-      var next;
+    return obj;
+  }
 
-      while (next = stream.next()) {
-        if (next === ")") parenthesisCount--;
-        if (next === "(") parenthesisCount++;
-        if (parenthesisCount === 0) {
-          stream.backUp(1);
-          state.tokenize = base;
-          break;
-        }
-      }
+  function is(value, test) {
+    if (test instanceof RegExp) return test.test(value);
+    if (test instanceof Object) return test.propertyIsEnumerable(value);
+  }
 
-      return ["space", "comment"];
-    }
+  return {
+    startState: function () {
+      return {
+        ctx: {prev: null, start: 0, indentTo: 0},
+        lastToken: null,
+        tokenize: base
+      };
+    },
 
-    function createLookupMap(words) {
-      var obj = {};
+    token: function (stream, state) {
+      if (stream.sol() && (typeof state.ctx.indentTo !== "number"))
+        state.ctx.indentTo = state.ctx.start + 1;
 
-      for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
+      var typeStylePair = state.tokenize(stream, state);
+      var type = typeStylePair[0];
+      var style = typeStylePair[1];
+      var current = stream.current();
 
-      return obj;
-    }
-
-    function is(value, test) {
-      if (test instanceof RegExp) return test.test(value);
-      if (test instanceof Object) return test.propertyIsEnumerable(value);
-    }
-
-    return {
-      startState: function () {
-        return {
-          ctx: { prev: null, start: 0, indentTo: 0 },
-          lastToken: null,
-          tokenize: base
-        };
-      },
-
-      token: function (stream, state) {
-        if (stream.sol() && (typeof state.ctx.indentTo !== "number"))
-          state.ctx.indentTo = state.ctx.start + 1;
-
-        var typeStylePair = state.tokenize(stream, state);
-        var type = typeStylePair[0];
-        var style = typeStylePair[1];
-        var current = stream.current();
-
-        if (type !== "space") {
-          if (state.lastToken === "(" && state.ctx.indentTo === null) {
-            if (type === "symbol" && is(current, hasBodyParameter))
-              state.ctx.indentTo = state.ctx.start + options.indentUnit;
-            else state.ctx.indentTo = "next";
-          } else if (state.ctx.indentTo === "next") {
-            state.ctx.indentTo = stream.column();
-          }
-
-          state.lastToken = current;
+      if (type !== "space") {
+        if (state.lastToken === "(" && state.ctx.indentTo === null) {
+          if (type === "symbol" && is(current, hasBodyParameter))
+            state.ctx.indentTo = state.ctx.start + options.indentUnit;
+          else state.ctx.indentTo = "next";
+        } else if (state.ctx.indentTo === "next") {
+          state.ctx.indentTo = stream.column();
         }
 
-        if (type === "open")
-          state.ctx = { prev: state.ctx, start: stream.column(), indentTo: null };
-        else if (type === "close") state.ctx = state.ctx.prev || state.ctx;
+        state.lastToken = current;
+      }
 
-        return style;
-      },
+      if (type === "open")
+        state.ctx = {prev: state.ctx, start: stream.column(), indentTo: null};
+      else if (type === "close") state.ctx = state.ctx.prev || state.ctx;
 
-      indent: function (state) {
-        var i = state.ctx.indentTo;
+      return style;
+    },
 
-        return (typeof i === "number") ?
-          i :
-          state.ctx.start + 1;
-      },
+    indent: function (state) {
+      var i = state.ctx.indentTo;
 
-      closeBrackets: { pairs: "()[]{}\"\"" },
-      lineComment: ";;"
-    };
-  });
+      return (typeof i === "number") ?
+        i :
+        state.ctx.start + 1;
+    },
 
-  CodeMirror.defineMIME("text/x-clojure", "clojure");
-  CodeMirror.defineMIME("text/x-clojurescript", "clojure");
-  CodeMirror.defineMIME("application/edn", "clojure");
+    closeBrackets: {pairs: "()[]{}\"\""},
+    lineComment: ";;"
+  };
+});
+
+CodeMirror.defineMIME("text/x-clojure", "clojure");
+CodeMirror.defineMIME("text/x-clojurescript", "clojure");
+CodeMirror.defineMIME("application/edn", "clojure");
 
 });

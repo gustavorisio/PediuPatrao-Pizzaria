@@ -19,14 +19,14 @@
 // highlighting the matches. If annotateScrollbar is enabled, the occurrences
 // will be highlighted on the scrollbar via the matchesonscrollbar addon.
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"), require("./matchesonscrollbar"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror", "./matchesonscrollbar"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
+})(function(CodeMirror) {
   "use strict";
 
   var defaults = {
@@ -48,7 +48,7 @@
     this.active = false;
   }
 
-  CodeMirror.defineOption("highlightSelectionMatches", false, function (cm, val, old) {
+  CodeMirror.defineOption("highlightSelectionMatches", false, function(cm, val, old) {
     if (old && old != CodeMirror.Init) {
       removeOverlay(cm);
       clearTimeout(cm.state.matchHighlighter.timeout);
@@ -83,7 +83,7 @@
 
   function scheduleHighlight(cm, state) {
     clearTimeout(state.timeout);
-    state.timeout = setTimeout(function () { highlightMatches(cm); }, state.options.delay);
+    state.timeout = setTimeout(function() {highlightMatches(cm);}, state.options.delay);
   }
 
   function addOverlay(cm, query, hasBoundary, style) {
@@ -91,10 +91,10 @@
     cm.addOverlay(state.overlay = makeOverlay(query, hasBoundary, style));
     if (state.options.annotateScrollbar && cm.showMatchesOnScrollbar) {
       var searchFor = hasBoundary ? new RegExp((/\w/.test(query.charAt(0)) ? "\\b" : "") +
-        query.replace(/[\\\[.+*?(){|^$]/g, "\\$&") +
-        (/\w/.test(query.charAt(query.length - 1)) ? "\\b" : "")) : query;
+                                               query.replace(/[\\\[.+*?(){|^$]/g, "\\$&") +
+                                               (/\w/.test(query.charAt(query.length - 1)) ? "\\b" : "")) : query;
       state.matchesonscroll = cm.showMatchesOnScrollbar(searchFor, false,
-        { className: "CodeMirror-selection-highlight-scrollbar" });
+        {className: "CodeMirror-selection-highlight-scrollbar"});
     }
   }
 
@@ -111,7 +111,7 @@
   }
 
   function highlightMatches(cm) {
-    cm.operation(function () {
+    cm.operation(function() {
       var state = cm.state.matchHighlighter;
       removeOverlay(cm);
       if (!cm.somethingSelected() && state.options.showToken) {
@@ -136,17 +136,17 @@
   function isWord(cm, from, to) {
     var str = cm.getRange(from, to);
     if (str.match(/^\w+$/) !== null) {
-      if (from.ch > 0) {
-        var pos = { line: from.line, ch: from.ch - 1 };
-        var chr = cm.getRange(pos, from);
-        if (chr.match(/\W/) === null) return false;
-      }
-      if (to.ch < cm.getLine(from.line).length) {
-        var pos = { line: to.line, ch: to.ch + 1 };
-        var chr = cm.getRange(to, pos);
-        if (chr.match(/\W/) === null) return false;
-      }
-      return true;
+        if (from.ch > 0) {
+            var pos = {line: from.line, ch: from.ch - 1};
+            var chr = cm.getRange(pos, from);
+            if (chr.match(/\W/) === null) return false;
+        }
+        if (to.ch < cm.getLine(from.line).length) {
+            var pos = {line: to.line, ch: to.ch + 1};
+            var chr = cm.getRange(to, pos);
+            if (chr.match(/\W/) === null) return false;
+        }
+        return true;
     } else return false;
   }
 
@@ -156,14 +156,12 @@
   }
 
   function makeOverlay(query, hasBoundary, style) {
-    return {
-      token: function (stream) {
-        if (stream.match(query) &&
+    return {token: function(stream) {
+      if (stream.match(query) &&
           (!hasBoundary || boundariesAround(stream, hasBoundary)))
-          return style;
-        stream.next();
-        stream.skipTo(query.charAt(0)) || stream.skipToEnd();
-      }
-    };
+        return style;
+      stream.next();
+      stream.skipTo(query.charAt(0)) || stream.skipToEnd();
+    }};
   }
 });

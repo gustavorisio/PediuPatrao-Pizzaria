@@ -11,7 +11,7 @@ public class Usuario {
     private String username; // Nome de usuário para login
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password; // Senha criptografada
-    private String role; // ADMIN, GERENTE, ATENDENTE ou ENTREGADOR
+    private String role;     // ADMIN, GERENTE, ATENDENTE ou ENTREGADOR
 
     public String getId() {
         return id;
@@ -44,5 +44,6 @@ public class Usuario {
     public void setRole(String role) {
         this.role = role;
     }
-
+    
+    
 }

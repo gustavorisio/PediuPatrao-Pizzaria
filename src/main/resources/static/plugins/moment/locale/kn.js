@@ -2,28 +2,27 @@
 //! locale : Kannada [kn]
 //! author : Rajeev Naik : https://github.com/rajeevnaikte
 
-; (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        && typeof require === 'function' ? factory(require('../moment')) :
-        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-            factory(global.moment)
-}(this, (function (moment) {
-    'use strict';
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
 
     //! moment.js locale configuration
 
     var symbolMap = {
-        1: '೧',
-        2: '೨',
-        3: '೩',
-        4: '೪',
-        5: '೫',
-        6: '೬',
-        7: '೭',
-        8: '೮',
-        9: '೯',
-        0: '೦',
-    },
+            1: '೧',
+            2: '೨',
+            3: '೩',
+            4: '೪',
+            5: '೫',
+            6: '೬',
+            7: '೭',
+            8: '೮',
+            9: '೯',
+            0: '೦',
+        },
         numberMap = {
             '೧': '1',
             '೨': '2',

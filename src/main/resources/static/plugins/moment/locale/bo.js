@@ -2,28 +2,27 @@
 //! locale : Tibetan [bo]
 //! author : Thupten N. Chakrishar : https://github.com/vajradog
 
-; (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        && typeof require === 'function' ? factory(require('../moment')) :
-        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-            factory(global.moment)
-}(this, (function (moment) {
-    'use strict';
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
 
     //! moment.js locale configuration
 
     var symbolMap = {
-        1: '༡',
-        2: '༢',
-        3: '༣',
-        4: '༤',
-        5: '༥',
-        6: '༦',
-        7: '༧',
-        8: '༨',
-        9: '༩',
-        0: '༠',
-    },
+            1: '༡',
+            2: '༢',
+            3: '༣',
+            4: '༤',
+            5: '༥',
+            6: '༦',
+            7: '༧',
+            8: '༨',
+            9: '༩',
+            0: '༠',
+        },
         numberMap = {
             '༡': '1',
             '༢': '2',

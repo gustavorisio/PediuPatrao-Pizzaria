@@ -40,8 +40,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-            throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -50,21 +49,23 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Desativa CSRF para REST APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/dist/**", "/plugins/**", "/js/**", "/images/**")
-                        .permitAll()
+                        .requestMatchers("/login", "/css/**", "/dist/**", "/plugins/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/api/usuarios/**").authenticated()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
-                        .successHandler(authenticationSuccessHandler()))
+                        .successHandler(authenticationSuccessHandler())
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/login?logout")
-                        .permitAll());
+                        .permitAll()
+                );
 
         return http.build();
     }

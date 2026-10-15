@@ -1,9 +1,8 @@
-; (function (global, factory) {
+;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-        typeof define === 'function' && define.amd ? define(factory) :
-            global.moment = factory()
-}(this, (function () {
-    'use strict';
+    typeof define === 'function' && define.amd ? define(factory) :
+    global.moment = factory()
+}(this, (function () { 'use strict';
 
     var hookCallback;
 
@@ -308,10 +307,10 @@
                 }
                 warn(
                     msg +
-                    '\nArguments: ' +
-                    Array.prototype.slice.call(args).join('') +
-                    '\n' +
-                    new Error().stack
+                        '\nArguments: ' +
+                        Array.prototype.slice.call(args).join('') +
+                        '\n' +
+                        new Error().stack
                 );
                 firstTime = false;
             }
@@ -359,8 +358,8 @@
         // TODO: Remove "ordinalParse" fallback in next major release.
         this._dayOfMonthOrdinalParseLenient = new RegExp(
             (this._dayOfMonthOrdinalParse.source || this._ordinalParse.source) +
-            '|' +
-            /\d{1,2}/.source
+                '|' +
+                /\d{1,2}/.source
         );
     }
 
@@ -785,8 +784,8 @@
         regexes[token] = isFunction(regex)
             ? regex
             : function (isStrict, localeData) {
-                return isStrict && strictRegex ? strictRegex : regex;
-            };
+                  return isStrict && strictRegex ? strictRegex : regex;
+              };
     }
 
     function getParseRegexForToken(token, config) {
@@ -943,8 +942,8 @@
     // LOCALES
 
     var defaultLocaleMonths = 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
-        '_'
-    ),
+            '_'
+        ),
         defaultLocaleMonthsShort = 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split(
             '_'
         ),
@@ -961,10 +960,10 @@
         return isArray(this._months)
             ? this._months[m.month()]
             : this._months[
-            (this._months.isFormat || MONTHS_IN_FORMAT).test(format)
-                ? 'format'
-                : 'standalone'
-            ][m.month()];
+                  (this._months.isFormat || MONTHS_IN_FORMAT).test(format)
+                      ? 'format'
+                      : 'standalone'
+              ][m.month()];
     }
 
     function localeMonthsShort(m, format) {
@@ -976,8 +975,8 @@
         return isArray(this._monthsShort)
             ? this._monthsShort[m.month()]
             : this._monthsShort[
-            MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'
-            ][m.month()];
+                  MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'
+              ][m.month()];
     }
 
     function handleStrictParse(monthName, format, strict) {
@@ -1522,8 +1521,8 @@
     }
 
     var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split(
-        '_'
-    ),
+            '_'
+        ),
         defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),
         defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),
         defaultWeekdaysRegex = matchWord,
@@ -1534,31 +1533,31 @@
         var weekdays = isArray(this._weekdays)
             ? this._weekdays
             : this._weekdays[
-            m && m !== true && this._weekdays.isFormat.test(format)
-                ? 'format'
-                : 'standalone'
-            ];
+                  m && m !== true && this._weekdays.isFormat.test(format)
+                      ? 'format'
+                      : 'standalone'
+              ];
         return m === true
             ? shiftWeekdays(weekdays, this._week.dow)
             : m
-                ? weekdays[m.day()]
-                : weekdays;
+            ? weekdays[m.day()]
+            : weekdays;
     }
 
     function localeWeekdaysShort(m) {
         return m === true
             ? shiftWeekdays(this._weekdaysShort, this._week.dow)
             : m
-                ? this._weekdaysShort[m.day()]
-                : this._weekdaysShort;
+            ? this._weekdaysShort[m.day()]
+            : this._weekdaysShort;
     }
 
     function localeWeekdaysMin(m) {
         return m === true
             ? shiftWeekdays(this._weekdaysMin, this._week.dow)
             : m
-                ? this._weekdaysMin[m.day()]
-                : this._weekdaysMin;
+            ? this._weekdaysMin[m.day()]
+            : this._weekdaysMin;
     }
 
     function handleStrictParse$1(weekdayName, format, strict) {
@@ -2132,9 +2131,9 @@
                 deprecateSimple(
                     'defineLocaleOverride',
                     'use moment.updateLocale(localeName, config) to change ' +
-                    'an existing locale. moment.defineLocale(localeName, ' +
-                    'config) should only be used for creating a new locale ' +
-                    'See http://momentjs.com/guides/#/warnings/define-locale/ for more info.'
+                        'an existing locale. moment.defineLocale(localeName, ' +
+                        'config) should only be used for creating a new locale ' +
+                        'See http://momentjs.com/guides/#/warnings/define-locale/ for more info.'
                 );
                 parentConfig = locales[name]._config;
             } else if (config.parentLocale != null) {
@@ -2259,21 +2258,21 @@
                 a[MONTH] < 0 || a[MONTH] > 11
                     ? MONTH
                     : a[DATE] < 1 || a[DATE] > daysInMonth(a[YEAR], a[MONTH])
-                        ? DATE
-                        : a[HOUR] < 0 ||
-                            a[HOUR] > 24 ||
-                            (a[HOUR] === 24 &&
-                                (a[MINUTE] !== 0 ||
-                                    a[SECOND] !== 0 ||
-                                    a[MILLISECOND] !== 0))
-                            ? HOUR
-                            : a[MINUTE] < 0 || a[MINUTE] > 59
-                                ? MINUTE
-                                : a[SECOND] < 0 || a[SECOND] > 59
-                                    ? SECOND
-                                    : a[MILLISECOND] < 0 || a[MILLISECOND] > 999
-                                        ? MILLISECOND
-                                        : -1;
+                    ? DATE
+                    : a[HOUR] < 0 ||
+                      a[HOUR] > 24 ||
+                      (a[HOUR] === 24 &&
+                          (a[MINUTE] !== 0 ||
+                              a[SECOND] !== 0 ||
+                              a[MILLISECOND] !== 0))
+                    ? HOUR
+                    : a[MINUTE] < 0 || a[MINUTE] > 59
+                    ? MINUTE
+                    : a[SECOND] < 0 || a[SECOND] > 59
+                    ? SECOND
+                    : a[MILLISECOND] < 0 || a[MILLISECOND] > 999
+                    ? MILLISECOND
+                    : -1;
 
             if (
                 getParsingFlags(m)._overflowDayOfYear &&
@@ -2534,8 +2533,8 @@
 
     hooks.createFromInputFallback = deprecate(
         'value provided is not in a recognized RFC2822 or ISO format. moment construction falls back to js Date(), ' +
-        'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' +
-        'discouraged. Please refer to http://momentjs.com/guides/#/warnings/js-date/ for more info.',
+            'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' +
+            'discouraged. Please refer to http://momentjs.com/guides/#/warnings/js-date/ for more info.',
         function (config) {
             config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
         }
@@ -2720,10 +2719,10 @@
     }
 
     // constant that refers to the ISO standard
-    hooks.ISO_8601 = function () { };
+    hooks.ISO_8601 = function () {};
 
     // constant that refers to the RFC 2822 form
-    hooks.RFC_2822 = function () { };
+    hooks.RFC_2822 = function () {};
 
     // date from string and format string
     function configFromStringAndFormat(config) {
@@ -3021,16 +3020,16 @@
     }
 
     var prototypeMin = deprecate(
-        'moment().min is deprecated, use moment.max instead. http://momentjs.com/guides/#/warnings/min-max/',
-        function () {
-            var other = createLocal.apply(null, arguments);
-            if (this.isValid() && other.isValid()) {
-                return other < this ? this : other;
-            } else {
-                return createInvalid();
+            'moment().min is deprecated, use moment.max instead. http://momentjs.com/guides/#/warnings/min-max/',
+            function () {
+                var other = createLocal.apply(null, arguments);
+                if (this.isValid() && other.isValid()) {
+                    return other < this ? this : other;
+                } else {
+                    return createInvalid();
+                }
             }
-        }
-    ),
+        ),
         prototypeMax = deprecate(
             'moment().max is deprecated, use moment.min instead. http://momentjs.com/guides/#/warnings/min-max/',
             function () {
@@ -3279,7 +3278,7 @@
 
     // This function will be called whenever a moment is mutated.
     // It is intended to keep the offset in sync with the timezone.
-    hooks.updateOffset = function () { };
+    hooks.updateOffset = function () {};
 
     // MOMENTS
 
@@ -3562,11 +3561,11 @@
                 deprecateSimple(
                     name,
                     'moment().' +
-                    name +
-                    '(period, number) is deprecated. Please use moment().' +
-                    name +
-                    '(number, period). ' +
-                    'See http://momentjs.com/guides/#/warnings/add-inverted-param/ for more info.'
+                        name +
+                        '(period, number) is deprecated. Please use moment().' +
+                        name +
+                        '(number, period). ' +
+                        'See http://momentjs.com/guides/#/warnings/add-inverted-param/ for more info.'
                 );
                 tmp = val;
                 val = period;
@@ -3705,16 +3704,16 @@
         return diff < -6
             ? 'sameElse'
             : diff < -1
-                ? 'lastWeek'
-                : diff < 0
-                    ? 'lastDay'
-                    : diff < 1
-                        ? 'sameDay'
-                        : diff < 2
-                            ? 'nextDay'
-                            : diff < 7
-                                ? 'nextWeek'
-                                : 'sameElse';
+            ? 'lastWeek'
+            : diff < 0
+            ? 'lastDay'
+            : diff < 1
+            ? 'sameDay'
+            : diff < 2
+            ? 'nextDay'
+            : diff < 7
+            ? 'nextWeek'
+            : 'sameElse';
     }
 
     function calendar$1(time, formats) {
@@ -5141,12 +5140,12 @@
                     toInt((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
     });
@@ -5731,18 +5730,18 @@
     //! moment.js locale configuration
 
     var pluralForm = function (n) {
-        return n === 0
-            ? 0
-            : n === 1
+            return n === 0
+                ? 0
+                : n === 1
                 ? 1
                 : n === 2
-                    ? 2
-                    : n % 100 >= 3 && n % 100 <= 10
-                        ? 3
-                        : n % 100 >= 11
-                            ? 4
-                            : 5;
-    },
+                ? 2
+                : n % 100 >= 3 && n % 100 <= 10
+                ? 3
+                : n % 100 >= 11
+                ? 4
+                : 5;
+        },
         plurals = {
             s: [
                 'أقل من ثانية',
@@ -5931,29 +5930,29 @@
     //! moment.js locale configuration
 
     var symbolMap = {
-        1: '1',
-        2: '2',
-        3: '3',
-        4: '4',
-        5: '5',
-        6: '6',
-        7: '7',
-        8: '8',
-        9: '9',
-        0: '0',
-    },
+            1: '1',
+            2: '2',
+            3: '3',
+            4: '4',
+            5: '5',
+            6: '6',
+            7: '7',
+            8: '8',
+            9: '9',
+            0: '0',
+        },
         pluralForm$1 = function (n) {
             return n === 0
                 ? 0
                 : n === 1
-                    ? 1
-                    : n === 2
-                        ? 2
-                        : n % 100 >= 3 && n % 100 <= 10
-                            ? 3
-                            : n % 100 >= 11
-                                ? 4
-                                : 5;
+                ? 1
+                : n === 2
+                ? 2
+                : n % 100 >= 3 && n % 100 <= 10
+                ? 3
+                : n % 100 >= 11
+                ? 4
+                : 5;
         },
         plurals$1 = {
             s: [
@@ -6150,17 +6149,17 @@
     //! moment.js locale configuration
 
     var symbolMap$1 = {
-        1: '١',
-        2: '٢',
-        3: '٣',
-        4: '٤',
-        5: '٥',
-        6: '٦',
-        7: '٧',
-        8: '٨',
-        9: '٩',
-        0: '٠',
-    },
+            1: '١',
+            2: '٢',
+            3: '٣',
+            4: '٤',
+            5: '٥',
+            6: '٦',
+            7: '٧',
+            8: '٨',
+            9: '٩',
+            0: '٠',
+        },
         numberMap = {
             '١': '1',
             '٢': '2',
@@ -6302,17 +6301,17 @@
     //! moment.js locale configuration
 
     var symbolMap$2 = {
-        1: '١',
-        2: '٢',
-        3: '٣',
-        4: '٤',
-        5: '٥',
-        6: '٦',
-        7: '٧',
-        8: '٨',
-        9: '٩',
-        0: '٠',
-    },
+            1: '١',
+            2: '٢',
+            3: '٣',
+            4: '٤',
+            5: '٥',
+            6: '٦',
+            7: '٧',
+            8: '٨',
+            9: '٩',
+            0: '٠',
+        },
         numberMap$1 = {
             '١': '1',
             '٢': '2',
@@ -6329,14 +6328,14 @@
             return n === 0
                 ? 0
                 : n === 1
-                    ? 1
-                    : n === 2
-                        ? 2
-                        : n % 100 >= 3 && n % 100 <= 10
-                            ? 3
-                            : n % 100 >= 11
-                                ? 4
-                                : 5;
+                ? 1
+                : n === 2
+                ? 2
+                : n % 100 >= 3 && n % 100 <= 10
+                ? 3
+                : n % 100 >= 11
+                ? 4
+                : 5;
         },
         plurals$2 = {
             s: [
@@ -6588,8 +6587,8 @@
         return num % 10 === 1 && num % 100 !== 11
             ? forms[0]
             : num % 10 >= 2 && num % 10 <= 4 && (num % 100 < 10 || num % 100 >= 20)
-                ? forms[1]
-                : forms[2];
+            ? forms[1]
+            : forms[2];
     }
     function relativeTimeWithPlural(number, withoutSuffix, key) {
         var format = {
@@ -6852,17 +6851,17 @@
     //! moment.js locale configuration
 
     var symbolMap$3 = {
-        1: '১',
-        2: '২',
-        3: '৩',
-        4: '৪',
-        5: '৫',
-        6: '৬',
-        7: '৭',
-        8: '৮',
-        9: '৯',
-        0: '০',
-    },
+            1: '১',
+            2: '২',
+            3: '৩',
+            4: '৪',
+            5: '৫',
+            6: '৬',
+            7: '৭',
+            8: '৮',
+            9: '৯',
+            0: '০',
+        },
         numberMap$2 = {
             '১': '1',
             '২': '2',
@@ -6977,17 +6976,17 @@
     //! moment.js locale configuration
 
     var symbolMap$4 = {
-        1: '১',
-        2: '২',
-        3: '৩',
-        4: '৪',
-        5: '৫',
-        6: '৬',
-        7: '৭',
-        8: '৮',
-        9: '৯',
-        0: '০',
-    },
+            1: '১',
+            2: '২',
+            3: '৩',
+            4: '৪',
+            5: '৫',
+            6: '৬',
+            7: '৭',
+            8: '৮',
+            9: '৯',
+            0: '০',
+        },
         numberMap$3 = {
             '১': '1',
             '২': '2',
@@ -7092,17 +7091,17 @@
     //! moment.js locale configuration
 
     var symbolMap$5 = {
-        1: '༡',
-        2: '༢',
-        3: '༣',
-        4: '༤',
-        5: '༥',
-        6: '༦',
-        7: '༧',
-        8: '༨',
-        9: '༩',
-        0: '༠',
-    },
+            1: '༡',
+            2: '༢',
+            3: '༣',
+            4: '༤',
+            5: '༥',
+            6: '༦',
+            7: '༧',
+            8: '༨',
+            9: '༩',
+            0: '༠',
+        },
         numberMap$4 = {
             '༡': '1',
             '༢': '2',
@@ -7255,19 +7254,19 @@
     }
 
     var monthsParse = [
-        /^gen/i,
-        /^c[ʼ\']hwe/i,
-        /^meu/i,
-        /^ebr/i,
-        /^mae/i,
-        /^(mez|eve)/i,
-        /^gou/i,
-        /^eos/i,
-        /^gwe/i,
-        /^her/i,
-        /^du/i,
-        /^ker/i,
-    ],
+            /^gen/i,
+            /^c[ʼ\']hwe/i,
+            /^meu/i,
+            /^ebr/i,
+            /^mae/i,
+            /^(mez|eve)/i,
+            /^gou/i,
+            /^eos/i,
+            /^gwe/i,
+            /^her/i,
+            /^du/i,
+            /^ker/i,
+        ],
         monthsRegex$1 = /^(genver|c[ʼ\']hwevrer|meurzh|ebrel|mae|mezheven|gouere|eost|gwengolo|here|du|kerzu|gen|c[ʼ\']hwe|meu|ebr|mae|eve|gou|eos|gwe|her|du|ker)/i,
         monthsStrictRegex = /^(genver|c[ʼ\']hwevrer|meurzh|ebrel|mae|mezheven|gouere|eost|gwengolo|here|du|kerzu)/i,
         monthsShortStrictRegex = /^(gen|c[ʼ\']hwe|meu|ebr|mae|eve|gou|eos|gwe|her|du|ker)/i,
@@ -7592,12 +7591,12 @@
                 number === 1
                     ? 'r'
                     : number === 2
-                        ? 'n'
-                        : number === 3
-                            ? 'r'
-                            : number === 4
-                                ? 't'
-                                : 'è';
+                    ? 'n'
+                    : number === 3
+                    ? 'r'
+                    : number === 4
+                    ? 't'
+                    : 'è';
             if (period === 'w' || period === 'W') {
                 output = 'a';
             }
@@ -7612,8 +7611,8 @@
     //! moment.js locale configuration
 
     var months$4 = 'leden_únor_březen_duben_květen_červen_červenec_srpen_září_říjen_listopad_prosinec'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShort = 'led_úno_bře_dub_kvě_čvn_čvc_srp_zář_říj_lis_pro'.split('_'),
         monthsParse$1 = [
             /^led/i,
@@ -7810,8 +7809,8 @@
                 var affix = /сехет$/i.exec(output)
                     ? 'рен'
                     : /ҫул$/i.exec(output)
-                        ? 'тан'
-                        : 'ран';
+                    ? 'тан'
+                    : 'ран';
                 return output + affix;
             },
             past: '%s каялла',
@@ -8201,19 +8200,19 @@
     //! moment.js locale configuration
 
     var months$5 = [
-        'ޖެނުއަރީ',
-        'ފެބްރުއަރީ',
-        'މާރިޗު',
-        'އޭޕްރީލު',
-        'މޭ',
-        'ޖޫން',
-        'ޖުލައި',
-        'އޯގަސްޓު',
-        'ސެޕްޓެމްބަރު',
-        'އޮކްޓޯބަރު',
-        'ނޮވެމްބަރު',
-        'ޑިސެމްބަރު',
-    ],
+            'ޖެނުއަރީ',
+            'ފެބްރުއަރީ',
+            'މާރިޗު',
+            'އޭޕްރީލު',
+            'މޭ',
+            'ޖޫން',
+            'ޖުލައި',
+            'އޯގަސްޓު',
+            'ސެޕްޓެމްބަރު',
+            'އޮކްޓޯބަރު',
+            'ނޮވެމްބަރު',
+            'ޑިސެމްބަރު',
+        ],
         weekdays = [
             'އާދިއްތަ',
             'ހޯމަ',
@@ -8437,12 +8436,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {
@@ -8502,12 +8501,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
     });
@@ -8563,12 +8562,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {
@@ -8628,12 +8627,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {
@@ -8693,12 +8692,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
     });
@@ -8754,12 +8753,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {
@@ -8819,12 +8818,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {
@@ -8884,12 +8883,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {
@@ -8963,8 +8962,8 @@
     //! moment.js locale configuration
 
     var monthsShortDot = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShort$1 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_'),
         monthsParse$2 = [
             /^ene/i,
@@ -9065,8 +9064,8 @@
     //! moment.js locale configuration
 
     var monthsShortDot$1 = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShort$2 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_'),
         monthsParse$3 = [
             /^ene/i,
@@ -9168,8 +9167,8 @@
     //! moment.js locale configuration
 
     var monthsShortDot$2 = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShort$3 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_'),
         monthsParse$4 = [
             /^ene/i,
@@ -9270,8 +9269,8 @@
     //! moment.js locale configuration
 
     var monthsShortDot$3 = 'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShort$4 = 'ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic'.split('_'),
         monthsParse$5 = [
             /^ene/i,
@@ -9507,17 +9506,17 @@
     //! moment.js locale configuration
 
     var symbolMap$6 = {
-        1: '۱',
-        2: '۲',
-        3: '۳',
-        4: '۴',
-        5: '۵',
-        6: '۶',
-        7: '۷',
-        8: '۸',
-        9: '۹',
-        0: '۰',
-    },
+            1: '۱',
+            2: '۲',
+            3: '۳',
+            4: '۴',
+            5: '۵',
+            6: '۶',
+            7: '۷',
+            8: '۸',
+            9: '۹',
+            0: '۰',
+        },
         numberMap$5 = {
             '۱': '1',
             '۲': '2',
@@ -9614,8 +9613,8 @@
     //! moment.js locale configuration
 
     var numbersPast = 'nolla yksi kaksi kolme neljä viisi kuusi seitsemän kahdeksan yhdeksän'.split(
-        ' '
-    ),
+            ' '
+        ),
         numbersFuture = [
             'nolla',
             'yhden',
@@ -10075,8 +10074,8 @@
     //! moment.js locale configuration
 
     var monthsShortWithDots = 'jan._feb._mrt._apr._mai_jun._jul._aug._sep._okt._nov._des.'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShortWithoutDots = 'jan_feb_mrt_apr_mai_jun_jul_aug_sep_okt_nov_des'.split(
             '_'
         );
@@ -10149,19 +10148,19 @@
     //! moment.js locale configuration
 
     var months$6 = [
-        'Eanáir',
-        'Feabhra',
-        'Márta',
-        'Aibreán',
-        'Bealtaine',
-        'Meitheamh',
-        'Iúil',
-        'Lúnasa',
-        'Meán Fómhair',
-        'Deireadh Fómhair',
-        'Samhain',
-        'Nollaig',
-    ],
+            'Eanáir',
+            'Feabhra',
+            'Márta',
+            'Aibreán',
+            'Bealtaine',
+            'Meitheamh',
+            'Iúil',
+            'Lúnasa',
+            'Meán Fómhair',
+            'Deireadh Fómhair',
+            'Samhain',
+            'Nollaig',
+        ],
         monthsShort$5 = [
             'Ean',
             'Feabh',
@@ -10241,19 +10240,19 @@
     //! moment.js locale configuration
 
     var months$7 = [
-        'Am Faoilleach',
-        'An Gearran',
-        'Am Màrt',
-        'An Giblean',
-        'An Cèitean',
-        'An t-Ògmhios',
-        'An t-Iuchar',
-        'An Lùnastal',
-        'An t-Sultain',
-        'An Dàmhair',
-        'An t-Samhain',
-        'An Dùbhlachd',
-    ],
+            'Am Faoilleach',
+            'An Gearran',
+            'Am Màrt',
+            'An Giblean',
+            'An Cèitean',
+            'An t-Ògmhios',
+            'An t-Iuchar',
+            'An Lùnastal',
+            'An t-Sultain',
+            'An Dàmhair',
+            'An t-Samhain',
+            'An Dùbhlachd',
+        ],
         monthsShort$6 = [
             'Faoi',
             'Gear',
@@ -10646,17 +10645,17 @@
     //! moment.js locale configuration
 
     var symbolMap$7 = {
-        1: '૧',
-        2: '૨',
-        3: '૩',
-        4: '૪',
-        5: '૫',
-        6: '૬',
-        7: '૭',
-        8: '૮',
-        9: '૯',
-        0: '૦',
-    },
+            1: '૧',
+            2: '૨',
+            3: '૩',
+            4: '૪',
+            5: '૫',
+            6: '૬',
+            7: '૭',
+            8: '૮',
+            9: '૯',
+            0: '૦',
+        },
         numberMap$6 = {
             '૧': '1',
             '૨': '2',
@@ -10853,17 +10852,17 @@
     //! moment.js locale configuration
 
     var symbolMap$8 = {
-        1: '१',
-        2: '२',
-        3: '३',
-        4: '४',
-        5: '५',
-        6: '६',
-        7: '७',
-        8: '८',
-        9: '९',
-        0: '०',
-    },
+            1: '१',
+            2: '२',
+            3: '३',
+            4: '४',
+            5: '५',
+            6: '६',
+            7: '७',
+            8: '८',
+            9: '९',
+            0: '०',
+        },
         numberMap$7 = {
             '१': '1',
             '२': '2',
@@ -11691,8 +11690,8 @@
                             (this.hours() > 1
                                 ? 'lle '
                                 : this.hours() === 0
-                                    ? ' '
-                                    : "ll'") +
+                                ? ' '
+                                : "ll'") +
                             ']LT'
                         );
                     default:
@@ -11701,8 +11700,8 @@
                             (this.hours() > 1
                                 ? 'lle '
                                 : this.hours() === 0
-                                    ? ' '
-                                    : "ll'") +
+                                ? ' '
+                                : "ll'") +
                             ']LT'
                         );
                 }
@@ -12123,17 +12122,17 @@
     //! moment.js locale configuration
 
     var symbolMap$9 = {
-        1: '១',
-        2: '២',
-        3: '៣',
-        4: '៤',
-        5: '៥',
-        6: '៦',
-        7: '៧',
-        8: '៨',
-        9: '៩',
-        0: '០',
-    },
+            1: '១',
+            2: '២',
+            3: '៣',
+            4: '៤',
+            5: '៥',
+            6: '៦',
+            7: '៧',
+            8: '៨',
+            9: '៩',
+            0: '០',
+        },
         numberMap$8 = {
             '១': '1',
             '២': '2',
@@ -12222,17 +12221,17 @@
     //! moment.js locale configuration
 
     var symbolMap$a = {
-        1: '೧',
-        2: '೨',
-        3: '೩',
-        4: '೪',
-        5: '೫',
-        6: '೬',
-        7: '೭',
-        8: '೮',
-        9: '೯',
-        0: '೦',
-    },
+            1: '೧',
+            2: '೨',
+            3: '೩',
+            4: '೪',
+            5: '೫',
+            6: '೬',
+            7: '೭',
+            8: '೮',
+            9: '೯',
+            0: '೦',
+        },
         numberMap$9 = {
             '೧': '1',
             '೨': '2',
@@ -12413,17 +12412,17 @@
     //! moment.js locale configuration
 
     var symbolMap$b = {
-        1: '١',
-        2: '٢',
-        3: '٣',
-        4: '٤',
-        5: '٥',
-        6: '٦',
-        7: '٧',
-        8: '٨',
-        9: '٩',
-        0: '٠',
-    },
+            1: '١',
+            2: '٢',
+            3: '٣',
+            4: '٤',
+            5: '٥',
+            6: '٦',
+            7: '٧',
+            8: '٨',
+            9: '٩',
+            0: '٠',
+        },
         numberMap$a = {
             '١': '1',
             '٢': '2',
@@ -12825,8 +12824,8 @@
         return withoutSuffix
             ? forms(key)[0]
             : isFuture
-                ? forms(key)[1]
-                : forms(key)[2];
+            ? forms(key)[1]
+            : forms(key)[2];
     }
     function special(number) {
         return number % 10 === 0 || (number > 10 && number < 20);
@@ -13026,8 +13025,8 @@
             return number === 1
                 ? wordKey[0]
                 : number >= 2 && number <= 4
-                    ? wordKey[1]
-                    : wordKey[2];
+                ? wordKey[1]
+                : wordKey[2];
         },
         translate: function (number, withoutSuffix, key) {
             var wordKey = translator.words[key];
@@ -13437,17 +13436,17 @@
     //! moment.js locale configuration
 
     var symbolMap$c = {
-        1: '१',
-        2: '२',
-        3: '३',
-        4: '४',
-        5: '५',
-        6: '६',
-        7: '७',
-        8: '८',
-        9: '९',
-        0: '०',
-    },
+            1: '१',
+            2: '२',
+            3: '३',
+            4: '४',
+            5: '५',
+            6: '६',
+            7: '७',
+            8: '८',
+            9: '९',
+            0: '०',
+        },
         numberMap$b = {
             '१': '1',
             '२': '2',
@@ -13831,17 +13830,17 @@
     //! moment.js locale configuration
 
     var symbolMap$d = {
-        1: '၁',
-        2: '၂',
-        3: '၃',
-        4: '၄',
-        5: '၅',
-        6: '၆',
-        7: '၇',
-        8: '၈',
-        9: '၉',
-        0: '၀',
-    },
+            1: '၁',
+            2: '၂',
+            3: '၃',
+            4: '၄',
+            5: '၅',
+            6: '၆',
+            7: '၇',
+            8: '၈',
+            9: '၉',
+            0: '၀',
+        },
         numberMap$c = {
             '၁': '1',
             '၂': '2',
@@ -13973,17 +13972,17 @@
     //! moment.js locale configuration
 
     var symbolMap$e = {
-        1: '१',
-        2: '२',
-        3: '३',
-        4: '४',
-        5: '५',
-        6: '६',
-        7: '७',
-        8: '८',
-        9: '९',
-        0: '०',
-    },
+            1: '१',
+            2: '२',
+            3: '३',
+            4: '४',
+            5: '५',
+            6: '६',
+            7: '७',
+            8: '८',
+            9: '९',
+            0: '०',
+        },
         numberMap$d = {
             '१': '1',
             '२': '2',
@@ -14090,8 +14089,8 @@
     //! moment.js locale configuration
 
     var monthsShortWithDots$1 = 'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShortWithoutDots$1 = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split(
             '_'
         ),
@@ -14188,8 +14187,8 @@
     //! moment.js locale configuration
 
     var monthsShortWithDots$2 = 'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShortWithoutDots$2 = 'jan_feb_mrt_apr_mei_jun_jul_aug_sep_okt_nov_dec'.split(
             '_'
         ),
@@ -14404,12 +14403,12 @@
                 number === 1
                     ? 'r'
                     : number === 2
-                        ? 'n'
-                        : number === 3
-                            ? 'r'
-                            : number === 4
-                                ? 't'
-                                : 'è';
+                    ? 'n'
+                    : number === 3
+                    ? 'r'
+                    : number === 4
+                    ? 't'
+                    : 'è';
             if (period === 'w' || period === 'W') {
                 output = 'a';
             }
@@ -14424,17 +14423,17 @@
     //! moment.js locale configuration
 
     var symbolMap$f = {
-        1: '੧',
-        2: '੨',
-        3: '੩',
-        4: '੪',
-        5: '੫',
-        6: '੬',
-        7: '੭',
-        8: '੮',
-        9: '੯',
-        0: '੦',
-    },
+            1: '੧',
+            2: '੨',
+            3: '੩',
+            4: '੪',
+            5: '੫',
+            6: '੬',
+            7: '੭',
+            8: '੮',
+            9: '੯',
+            0: '੦',
+        },
         numberMap$e = {
             '੧': '1',
             '੨': '2',
@@ -14542,8 +14541,8 @@
     //! moment.js locale configuration
 
     var monthsNominative = 'styczeń_luty_marzec_kwiecień_maj_czerwiec_lipiec_sierpień_wrzesień_październik_listopad_grudzień'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsSubjective = 'stycznia_lutego_marca_kwietnia_maja_czerwca_lipca_sierpnia_września_października_listopada_grudnia'.split(
             '_'
         ),
@@ -14792,14 +14791,14 @@
 
     function relativeTimeWithPlural$2(number, withoutSuffix, key) {
         var format = {
-            ss: 'secunde',
-            mm: 'minute',
-            hh: 'ore',
-            dd: 'zile',
-            ww: 'săptămâni',
-            MM: 'luni',
-            yy: 'ani',
-        },
+                ss: 'secunde',
+                mm: 'minute',
+                hh: 'ore',
+                dd: 'zile',
+                ww: 'săptămâni',
+                MM: 'luni',
+                yy: 'ani',
+            },
             separator = ' ';
         if (number % 100 >= 20 || (number >= 100 && number % 100 === 0)) {
             separator = ' de ';
@@ -14865,8 +14864,8 @@
         return num % 10 === 1 && num % 100 !== 11
             ? forms[0]
             : num % 10 >= 2 && num % 10 <= 4 && (num % 100 < 10 || num % 100 >= 20)
-                ? forms[1]
-                : forms[2];
+            ? forms[1]
+            : forms[2];
     }
     function relativeTimeWithPlural$3(number, withoutSuffix, key) {
         var format = {
@@ -15062,19 +15061,19 @@
     //! moment.js locale configuration
 
     var months$9 = [
-        'جنوري',
-        'فيبروري',
-        'مارچ',
-        'اپريل',
-        'مئي',
-        'جون',
-        'جولاءِ',
-        'آگسٽ',
-        'سيپٽمبر',
-        'آڪٽوبر',
-        'نومبر',
-        'ڊسمبر',
-    ],
+            'جنوري',
+            'فيبروري',
+            'مارچ',
+            'اپريل',
+            'مئي',
+            'جون',
+            'جولاءِ',
+            'آگسٽ',
+            'سيپٽمبر',
+            'آڪٽوبر',
+            'نومبر',
+            'ڊسمبر',
+        ],
         days$1 = ['آچر', 'سومر', 'اڱارو', 'اربع', 'خميس', 'جمع', 'ڇنڇر'];
 
     hooks.defineLocale('sd', {
@@ -15259,8 +15258,8 @@
     //! moment.js locale configuration
 
     var months$a = 'január_február_marec_apríl_máj_jún_júl_august_september_október_november_december'.split(
-        '_'
-    ),
+            '_'
+        ),
         monthsShort$7 = 'jan_feb_mar_apr_máj_jún_júl_aug_sep_okt_nov_dec'.split('_');
     function plural$5(n) {
         return n > 1 && n < 5;
@@ -15641,8 +15640,8 @@
             return number === 1
                 ? wordKey[0]
                 : number >= 2 && number <= 4
-                    ? wordKey[1]
-                    : wordKey[2];
+                ? wordKey[1]
+                : wordKey[2];
         },
         translate: function (number, withoutSuffix, key) {
             var wordKey = translator$1.words[key];
@@ -15753,8 +15752,8 @@
             return number === 1
                 ? wordKey[0]
                 : number >= 2 && number <= 4
-                    ? wordKey[1]
-                    : wordKey[2];
+                ? wordKey[1]
+                : wordKey[2];
         },
         translate: function (number, withoutSuffix, key) {
             var wordKey = translator$2.words[key];
@@ -15980,12 +15979,12 @@
                     ~~((number % 100) / 10) === 1
                         ? ':e'
                         : b === 1
-                            ? ':a'
-                            : b === 2
-                                ? ':a'
-                                : b === 3
-                                    ? ':e'
-                                    : ':e';
+                        ? ':a'
+                        : b === 2
+                        ? ':a'
+                        : b === 3
+                        ? ':e'
+                        : ':e';
             return number + output;
         },
         week: {
@@ -16048,17 +16047,17 @@
     //! moment.js locale configuration
 
     var symbolMap$g = {
-        1: '௧',
-        2: '௨',
-        3: '௩',
-        4: '௪',
-        5: '௫',
-        6: '௬',
-        7: '௭',
-        8: '௮',
-        9: '௯',
-        0: '௦',
-    },
+            1: '௧',
+            2: '௨',
+            3: '௩',
+            4: '௪',
+            5: '௫',
+            6: '௬',
+            7: '௭',
+            8: '௮',
+            9: '௯',
+            0: '௦',
+        },
         numberMap$f = {
             '௧': '1',
             '௨': '2',
@@ -16303,12 +16302,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {
@@ -16643,10 +16642,10 @@
             output.indexOf('jaj') !== -1
                 ? time.slice(0, -3) + 'leS'
                 : output.indexOf('jar') !== -1
-                    ? time.slice(0, -3) + 'waQ'
-                    : output.indexOf('DIS') !== -1
-                        ? time.slice(0, -3) + 'nem'
-                        : time + ' pIq';
+                ? time.slice(0, -3) + 'waQ'
+                : output.indexOf('DIS') !== -1
+                ? time.slice(0, -3) + 'nem'
+                : time + ' pIq';
         return time;
     }
 
@@ -16656,10 +16655,10 @@
             output.indexOf('jaj') !== -1
                 ? time.slice(0, -3) + 'Hu’'
                 : output.indexOf('jar') !== -1
-                    ? time.slice(0, -3) + 'wen'
-                    : output.indexOf('DIS') !== -1
-                        ? time.slice(0, -3) + 'ben'
-                        : time + ' ret';
+                ? time.slice(0, -3) + 'wen'
+                : output.indexOf('DIS') !== -1
+                ? time.slice(0, -3) + 'ben'
+                : time + ' ret';
         return time;
     }
 
@@ -16938,8 +16937,8 @@
         return isFuture
             ? format[key][0]
             : withoutSuffix
-                ? format[key][0]
-                : format[key][1];
+            ? format[key][0]
+            : format[key][1];
     }
 
     //! moment.js locale configuration
@@ -17156,8 +17155,8 @@
         return num % 10 === 1 && num % 100 !== 11
             ? forms[0]
             : num % 10 >= 2 && num % 10 <= 4 && (num % 100 < 10 || num % 100 >= 20)
-                ? forms[1]
-                : forms[2];
+            ? forms[1]
+            : forms[2];
     }
     function relativeTimeWithPlural$4(number, withoutSuffix, key) {
         var format = {
@@ -17178,16 +17177,16 @@
     }
     function weekdaysCaseReplace(m, format) {
         var weekdays = {
-            nominative: 'неділя_понеділок_вівторок_середа_четвер_п’ятниця_субота'.split(
-                '_'
-            ),
-            accusative: 'неділю_понеділок_вівторок_середу_четвер_п’ятницю_суботу'.split(
-                '_'
-            ),
-            genitive: 'неділі_понеділка_вівторка_середи_четверга_п’ятниці_суботи'.split(
-                '_'
-            ),
-        },
+                nominative: 'неділя_понеділок_вівторок_середа_четвер_п’ятниця_субота'.split(
+                    '_'
+                ),
+                accusative: 'неділю_понеділок_вівторок_середу_четвер_п’ятницю_суботу'.split(
+                    '_'
+                ),
+                genitive: 'неділі_понеділка_вівторка_середи_четверга_п’ятниці_суботи'.split(
+                    '_'
+                ),
+            },
             nounCase;
 
         if (m === true) {
@@ -17202,8 +17201,8 @@
         nounCase = /(\[[ВвУу]\]) ?dddd/.test(format)
             ? 'accusative'
             : /\[?(?:минулої|наступної)? ?\] ?dddd/.test(format)
-                ? 'genitive'
-                : 'nominative';
+            ? 'genitive'
+            : 'nominative';
         return weekdays[nounCase][m.day()];
     }
     function processHoursFunction(str) {
@@ -17311,19 +17310,19 @@
     //! moment.js locale configuration
 
     var months$b = [
-        'جنوری',
-        'فروری',
-        'مارچ',
-        'اپریل',
-        'مئی',
-        'جون',
-        'جولائی',
-        'اگست',
-        'ستمبر',
-        'اکتوبر',
-        'نومبر',
-        'دسمبر',
-    ],
+            'جنوری',
+            'فروری',
+            'مارچ',
+            'اپریل',
+            'مئی',
+            'جون',
+            'جولائی',
+            'اگست',
+            'ستمبر',
+            'اکتوبر',
+            'نومبر',
+            'دسمبر',
+        ],
         days$2 = ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
 
     hooks.defineLocale('ur', {
@@ -17613,12 +17612,12 @@
                     ~~((number % 100) / 10) === 1
                         ? 'th'
                         : b === 1
-                            ? 'st'
-                            : b === 2
-                                ? 'nd'
-                                : b === 3
-                                    ? 'rd'
-                                    : 'th';
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
         },
         week: {

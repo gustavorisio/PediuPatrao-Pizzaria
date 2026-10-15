@@ -11,14 +11,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RequestMapping("/api/pedidos")
 public class PedidoController {
 
-    private PedidoService pedidoService;
+    private final PedidoService pedidoService;
 
     public PedidoController(PedidoService pedidoService) {
         this.pedidoService = pedidoService;
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
     // Atendimento e gestão podem registrar novos pedidos.
     public Pedido criarPedido(@RequestBody Pedido pedido) {
         return pedidoService.criarPedido(pedido);
@@ -35,7 +35,7 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE', 'ENTREGADOR')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")
     // Atualiza somente o status do pedido identificado na URL.
     public Object atualizarStatus(@PathVariable String id, @RequestParam String status) {
         Pedido pedido = pedidoService.atualizarStatus(id, status);
@@ -46,20 +46,20 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
     public Pedido atualizarPedido(@PathVariable String id, @RequestBody Pedido pedido) {
         return pedidoService.atualizarPedido(id, pedido);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    @PreAuthorize("hasRole('GERENTE')")
     public ResponseEntity<Void> excluirPedido(@PathVariable String id) {
         pedidoService.excluirPedido(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/cancelar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    @PreAuthorize("hasRole('GERENTE')")
     public Pedido cancelarPedido(@PathVariable String id, @RequestParam String justificativa) {
         return pedidoService.cancelarPedido(id, justificativa);
     }

@@ -1,16 +1,20 @@
-<div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-    th:fragment="content">
+<div xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+     th:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">
             <i class="bi bi-boxes me-2 text-primary"></i>Produtos
         </h2>
-        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#formularioProduto"
-            sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+        <button class="btn btn-primary"
+                data-bs-toggle="collapse"
+                data-bs-target="#formularioProduto"
+                sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
             <i class="bi bi-plus-lg me-1"></i>Novo Produto
         </button>
     </div>
 
-    <div class="collapse mb-4" id="formularioProduto" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+    <div class="collapse mb-4" id="formularioProduto"
+         sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <h5 class="card-title mb-3">Cadastrar produto</h5>
@@ -18,12 +22,13 @@
                     <div class="row g-3">
                         <div class="col-md-5">
                             <label for="nome" class="form-label fw-medium">Nome</label>
-                            <input type="text" id="nome" name="nome" class="form-control" required>
+                            <input type="text" id="nome" name="nome"
+                                   class="form-control" required>
                         </div>
                         <div class="col-md-3">
                             <label for="tipo" class="form-label fw-medium">Tipo</label>
                             <select id="tipo" name="tipo" class="form-select" required
-                                onchange="alternarCamposPizza(this, 'cadastro')">
+                                    onchange="alternarCamposPizza(this, 'cadastro')">
                                 <option value="" disabled selected>Selecione</option>
                                 <option value="Pizza">Pizza</option>
                                 <option value="Lanche">Lanche</option>
@@ -33,20 +38,23 @@
                         </div>
                         <div class="col-md-3 campos-pizza-cadastro d-none">
                             <label for="tipoPizza" class="form-label fw-medium">Tipo de Pizza</label>
-                            <input type="text" id="tipoPizza" name="tipoPizza" class="form-control">
+                            <input type="text" id="tipoPizza" name="tipoPizza"
+                                   class="form-control">
                         </div>
                         <div class="col-md-3 campos-pizza-cadastro d-none">
                             <label for="sabor" class="form-label fw-medium">Sabor</label>
-                            <input type="text" id="sabor" name="sabor" class="form-control">
+                            <input type="text" id="sabor" name="sabor"
+                                   class="form-control">
                         </div>
                         <div class="col-md-2">
                             <label for="preco" class="form-label fw-medium">Preço</label>
-                            <input type="number" id="preco" name="preco" class="form-control" min="0" step="0.01"
-                                required>
+                            <input type="number" id="preco" name="preco"
+                                   class="form-control" min="0" step="0.01" required>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <div class="form-check mb-2">
-                                <input type="checkbox" id="ativo" name="ativo" class="form-check-input">
+                                <input type="checkbox" id="ativo" name="ativo"
+                                       class="form-check-input">
                                 <label for="ativo" class="form-check-label">Ativo</label>
                             </div>
                         </div>
@@ -67,10 +75,11 @@
                 <i class="bi bi-search me-1"></i>Pesquisar produto
             </label>
             <input type="search" id="pesquisaProduto" class="form-control"
-                placeholder="Digite o nome ou tipo do produto">
+                   placeholder="Digite o nome ou tipo do produto">
         </div>
         <div class="card-body p-0">
-            <div th:if="${#lists.isEmpty(produtos)}" class="text-center text-muted py-5">
+            <div th:if="${#lists.isEmpty(produtos)}"
+                 class="text-center text-muted py-5">
                 <i class="bi bi-inbox fs-3 d-block mb-2"></i>
                 Nenhum produto cadastrado.
             </div>
@@ -98,18 +107,20 @@
                                     ? #numbers.formatDecimal(produto.preco, 1, 'COMMA', 2, 'POINT')
                                     : '0,00'}">0,00</td>
                             <td>
-                                <span th:if="${produto.ativo == true}" class="badge text-bg-success">Ativo</span>
+                                <span th:if="${produto.ativo == true}"
+                                      class="badge text-bg-success">Ativo</span>
                                 <span th:unless="${produto.ativo == true}"
-                                    class="badge text-bg-secondary">Inativo</span>
+                                      class="badge text-bg-secondary">Inativo</span>
                             </td>
-                            <td class="text-end pe-4" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+                            <td class="text-end pe-4"
+                                sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
                                 <a th:href="@{/produtos/editar/{id}(id=${produto.id})}"
-                                    class="btn btn-sm btn-outline-primary me-1">
+                                   class="btn btn-sm btn-outline-primary me-1">
                                     <i class="bi bi-pencil-fill"></i> Editar
                                 </a>
-                                <form th:action="@{/produtos/deletar/{id}(id=${produto.id})}" method="post"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
+                                <form th:action="@{/produtos/deletar/{id}(id=${produto.id})}"
+                                      method="post" class="d-inline"
+                                      onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash-fill"></i> Excluir
                                     </button>
