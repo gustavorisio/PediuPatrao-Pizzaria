@@ -30,10 +30,10 @@
                             <select id="tipo" name="tipo" class="form-select" required
                                     onchange="alternarCamposPizza(this, 'cadastro')">
                                 <option value="" disabled selected>Selecione</option>
-                                <option value="Pizza">Pizza</option>
-                                <option value="Lanche">Lanche</option>
-                                <option value="Bebida">Bebida</option>
-                                <option value="Opcional">Opcional</option>
+                                <option value="PIZZA">Pizza</option>
+                                <option value="LANCHE">Lanche</option>
+                                <option value="BEBIDA">Bebida</option>
+                                <option value="OPCIONAL">Opcional</option>
                             </select>
                         </div>
                         <div class="col-md-3 campos-pizza-cadastro d-none">
@@ -144,7 +144,7 @@
     <script>
         function alternarCamposPizza(select, contexto) {
             const campos = document.querySelectorAll('.campos-pizza-' + contexto);
-            const visivel = select.value === 'Pizza';
+            const visivel = select.value === 'PIZZA';
             campos.forEach(function (campo) {
                 campo.classList.toggle('d-none', !visivel);
                 campo.querySelectorAll('input').forEach(function (input) {

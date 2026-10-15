@@ -1,9 +1,10 @@
 package com.umc.pediupatrao.controller;
 
+import com.umc.pediupatrao.dto.ProdutoDTO;
 import com.umc.pediupatrao.entity.Produto;
 import com.umc.pediupatrao.service.ProdutoService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +12,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/produtos")
+@RequiredArgsConstructor
 public class ProdutoController {
 
-    @Autowired
-    private ProdutoService produtoService;
+    private final ProdutoService produtoService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     // Atendimento consulta o catálogo, enquanto a gestão controla sua manutenção.
-    public List<Produto> listarProdutos() {
-        return produtoService.listarProdutos();
+    public List<ProdutoDTO> listarProdutos() {
+        return produtoService.listarProdutos().stream()
+                .map(ProdutoDTO::new)
+                .toList();
     }
 
     @DeleteMapping("/{id}")
@@ -34,17 +37,18 @@ public class ProdutoController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     // Registra um novo item no catálogo de produtos.
-    public ResponseEntity<Produto> salvarProduto(@RequestBody Produto produto) {
-        Produto salvo = produtoService.salvar(produto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    public ResponseEntity<ProdutoDTO> salvarProduto(@RequestBody ProdutoDTO produtoDTO) {
+        Produto salvo = produtoService.salvar(produtoDTO.toEntity());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ProdutoDTO(salvo));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     // Atualiza o produto correspondente ao ID informado na rota.
-    public ResponseEntity<Produto> atualizarProduto(@PathVariable String id, @RequestBody Produto produto) {
-        produto.setId(id);
-        Produto atualizado = produtoService.salvar(produto);
-        return ResponseEntity.ok(atualizado);
+    public ResponseEntity<ProdutoDTO> atualizarProduto(@PathVariable String id,
+            @RequestBody ProdutoDTO produtoDTO) {
+        produtoDTO.setId(id);
+        Produto atualizado = produtoService.salvar(produtoDTO.toEntity());
+        return ResponseEntity.ok(new ProdutoDTO(atualizado));
     }
 }

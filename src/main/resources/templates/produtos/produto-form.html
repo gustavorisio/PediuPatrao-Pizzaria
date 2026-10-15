@@ -26,10 +26,10 @@
                     <select id="tipo" class="form-select" th:field="*{tipo}" required
                             onchange="alternarCamposPizza(this)">
                         <option value="" disabled>Selecione o tipo</option>
-                        <option value="Pizza">Pizza</option>
-                        <option value="Lanche">Lanche</option>
-                        <option value="Bebida">Bebida</option>
-                        <option value="Opcional">Opcional</option>
+                        <option value="PIZZA">Pizza</option>
+                        <option value="LANCHE">Lanche</option>
+                        <option value="BEBIDA">Bebida</option>
+                        <option value="OPCIONAL">Opcional</option>
                     </select>
                 </div>
 
@@ -69,7 +69,7 @@
         <script>
             function alternarCamposPizza(select) {
                 const campos = document.getElementById('camposPizza');
-                const pizza = select.value === 'Pizza';
+                const pizza = select.value === 'PIZZA';
                 campos.classList.toggle('d-none', !pizza);
                 campos.querySelectorAll('input').forEach(function (input) {
                     input.required = pizza;
