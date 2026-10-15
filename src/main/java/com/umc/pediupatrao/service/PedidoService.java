@@ -5,6 +5,7 @@ import com.umc.pediupatrao.entity.PedidoAuditoria;
 import com.umc.pediupatrao.entity.ItemPedido;
 import com.umc.pediupatrao.entity.Produto;
 import com.umc.pediupatrao.entity.Cliente;
+import com.umc.pediupatrao.entity.StatusPedido;
 import com.umc.pediupatrao.dto.PedidoEntregaDTO;
 import com.umc.pediupatrao.repository.PedidoRepository;
 import com.umc.pediupatrao.repository.ClienteRepository;
@@ -21,7 +22,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 import org.springframework.security.core.GrantedAuthority;
@@ -47,8 +47,9 @@ public class PedidoService {
     // Persiste um pedido recém-criado pelo atendimento.
     public Pedido criarPedido(Pedido pedido) {
         validarPedido(pedido);
+        pedido.gerarId();
         pedido.setNumeroPedido(proximoNumeroPedido());
-        pedido.setStatus("RECEBIDO");
+        pedido.setStatus(StatusPedido.RECEBIDO);
         pedido.setValorTotal(calcularValorTotal(pedido));
         pedido.setResponsavelRegistro(usuarioAutenticado());
         pedido.setDataHoraEntrada(LocalDateTime.now());
@@ -56,7 +57,7 @@ public class PedidoService {
         pedido.setDataHoraSaida(null);
         pedido.setJustificativaCancelamento(null);
         pedido.setAuditoria(new ArrayList<>());
-        registrarAuditoria(pedido, "RECEBIMENTO", null, pedido.getStatus(), null,
+        registrarAuditoria(pedido, "RECEBIMENTO", null, statusValue(pedido.getStatus()), null,
                 BigDecimal.ZERO, pedido.getPercentualDesconto(), null, pedido.getValorTotal());
         Pedido salvo = pedidoRepository.save(pedido);
         auditoriaService.registrar("INCLUSAO", "PEDIDO", salvo.getId(),
@@ -276,7 +277,7 @@ public class PedidoService {
             throw erro("Os dados do pedido devem ser informados.");
         }
         Pedido pedido = buscarPedido(id);
-        if (!"RECEBIDO".equals(pedido.getStatus())) {
+        if (pedido.getStatus() != StatusPedido.RECEBIDO) {
             throw erro("Somente pedidos recebidos podem ser editados.");
         }
 
@@ -290,7 +291,7 @@ public class PedidoService {
         BigDecimal valorAnterior = pedido.getValorTotal();
         pedido.setPercentualDesconto(dados.getPercentualDesconto());
         pedido.setValorTotal(calcularValorTotal(pedido));
-        registrarAuditoria(pedido, "ALTERACAO_PEDIDO", pedido.getStatus(), pedido.getStatus(),
+        registrarAuditoria(pedido, "ALTERACAO_PEDIDO", statusValue(pedido.getStatus()), statusValue(pedido.getStatus()),
                 null, descontoAnterior, pedido.getPercentualDesconto(),
                 valorAnterior, pedido.getValorTotal());
         Pedido salvo = pedidoRepository.save(pedido);
@@ -305,7 +306,7 @@ public class PedidoService {
 
     public void excluirPedido(String id) {
         Pedido pedido = buscarPedido(id);
-        if (!"RECEBIDO".equals(pedido.getStatus())) {
+        if (pedido.getStatus() != StatusPedido.RECEBIDO) {
             throw erro("Somente pedidos recebidos podem ser excluídos.");
         }
         pedidoRepository.deleteById(id);
@@ -314,26 +315,26 @@ public class PedidoService {
     // Altera apenas o status, preservando os demais dados do pedido.
     public Pedido atualizarStatus(String id, String status) {
         Pedido pedido = buscarPedido(id);
-        String novoStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
+        StatusPedido novoStatus = StatusPedido.fromValue(status);
         validarTransicao(pedido.getStatus(), novoStatus);
 
-        String statusAnterior = pedido.getStatus();
+        StatusPedido statusAnterior = pedido.getStatus();
         String usuario = usuarioAutenticado();
         pedido.setStatus(novoStatus);
-        if ("SAIU_PARA_ENTREGA".equals(novoStatus)) {
+        if (StatusPedido.SAIU_PARA_ENTREGA == novoStatus) {
             pedido.setResponsavelSaida(usuario);
             pedido.setDataHoraSaida(LocalDateTime.now());
         }
-        if ("RETIRADO".equals(novoStatus)) {
+        if (StatusPedido.RETIRADO == novoStatus) {
             pedido.setResponsavelSaida(usuario);
             pedido.setDataHoraSaida(LocalDateTime.now());
         }
-        registrarAuditoria(pedido, "ALTERACAO_STATUS", statusAnterior, novoStatus,
+        registrarAuditoria(pedido, "ALTERACAO_STATUS", statusValue(statusAnterior), statusValue(novoStatus),
                 null, pedido.getPercentualDesconto(), pedido.getPercentualDesconto(),
                 pedido.getValorTotal(), pedido.getValorTotal());
         Pedido salvo = pedidoRepository.save(pedido);
         auditoriaService.registrar("ALTERACAO_STATUS", "PEDIDO", salvo.getId(),
-                mapa("status", statusAnterior), mapa("status", novoStatus), null);
+                mapa("status", statusValue(statusAnterior)), mapa("status", statusValue(novoStatus)), null);
         return salvo;
     }
 
@@ -343,19 +344,19 @@ public class PedidoService {
         if (isBlank(justificativa)) {
             throw erro("A justificativa do cancelamento é obrigatória.");
         }
-        if (!List.of("RECEBIDO", "EM_PREPARACAO", "PRONTO").contains(pedido.getStatus())) {
+        if (!List.of(StatusPedido.RECEBIDO, StatusPedido.EM_PREPARACAO, StatusPedido.PRONTO).contains(pedido.getStatus())) {
             throw erro("O pedido só pode ser cancelado antes da saída para entrega ou retirada.");
         }
 
-        String statusAnterior = pedido.getStatus();
-        pedido.setStatus("CANCELADO");
+        StatusPedido statusAnterior = pedido.getStatus();
+        pedido.setStatus(StatusPedido.CANCELADO);
         pedido.setJustificativaCancelamento(justificativa.trim());
-        registrarAuditoria(pedido, "CANCELAMENTO", statusAnterior, "CANCELADO",
+        registrarAuditoria(pedido, "CANCELAMENTO", statusValue(statusAnterior), statusValue(StatusPedido.CANCELADO),
                 pedido.getJustificativaCancelamento(), pedido.getPercentualDesconto(),
                 pedido.getPercentualDesconto(), pedido.getValorTotal(), pedido.getValorTotal());
         Pedido salvo = pedidoRepository.save(pedido);
         auditoriaService.registrar("CANCELAMENTO", "PEDIDO", salvo.getId(),
-                mapa("status", statusAnterior), mapa("status", "CANCELADO"),
+                mapa("status", statusValue(statusAnterior)), mapa("status", statusValue(StatusPedido.CANCELADO)),
                 justificativa);
         return salvo;
     }
@@ -365,23 +366,23 @@ public class PedidoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
     }
 
-    private void validarTransicao(String statusAtual, String novoStatus) {
+    private void validarTransicao(StatusPedido statusAtual, StatusPedido novoStatus) {
         if (statusAtual == null) {
             throw erro("O status do pedido deve ser informado.");
         }
-        if (novoStatus.isBlank()) {
+        if (novoStatus == null) {
             throw erro("O status do pedido deve ser informado.");
         }
         if (usuarioEhEntregador()) {
             boolean podeSair = false;
             boolean podeFinalizar = false;
-            if ("PRONTO".equals(statusAtual)) {
-                if ("SAIU_PARA_ENTREGA".equals(novoStatus)) {
+            if (StatusPedido.PRONTO == statusAtual) {
+                if (StatusPedido.SAIU_PARA_ENTREGA == novoStatus) {
                     podeSair = true;
                 }
             }
-            if (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(statusAtual)) {
-                if ("FINALIZADO".equals(novoStatus)) {
+            if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO).contains(statusAtual)) {
+                if (StatusPedido.FINALIZADO == novoStatus) {
                     podeFinalizar = true;
                 }
             }
@@ -393,23 +394,23 @@ public class PedidoService {
             }
         }
         boolean valida = false;
-        if ("RECEBIDO".equals(statusAtual)) {
-            if ("EM_PREPARACAO".equals(novoStatus)) {
+        if (StatusPedido.RECEBIDO == statusAtual) {
+            if (StatusPedido.EM_PREPARACAO == novoStatus) {
                 valida = true;
             }
         }
-        if ("EM_PREPARACAO".equals(statusAtual)) {
-            if ("PRONTO".equals(novoStatus)) {
+        if (StatusPedido.EM_PREPARACAO == statusAtual) {
+            if (StatusPedido.PRONTO == novoStatus) {
                 valida = true;
             }
         }
-        if ("PRONTO".equals(statusAtual)) {
-            if (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(novoStatus)) {
+        if (StatusPedido.PRONTO == statusAtual) {
+            if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO).contains(novoStatus)) {
                 valida = true;
             }
         }
-        if (List.of("SAIU_PARA_ENTREGA", "RETIRADO").contains(statusAtual)) {
-            if ("FINALIZADO".equals(novoStatus)) {
+        if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO).contains(statusAtual)) {
+            if (StatusPedido.FINALIZADO == novoStatus) {
                 valida = true;
             }
         }
@@ -432,16 +433,20 @@ public class PedidoService {
     }
 
     private Map<String, String> dadosPedido(Pedido pedido) {
-        return mapa("status", pedido.getStatus(),
+        return mapa("status", statusValue(pedido.getStatus()),
                 "percentualDesconto", String.valueOf(pedido.getPercentualDesconto()),
                 "valorTotal", String.valueOf(pedido.getValorTotal()));
     }
 
     private Map<String, String> dadosPedidoAntes(Pedido pedido, BigDecimal desconto,
             BigDecimal valorTotal) {
-        return mapa("status", pedido.getStatus(),
+        return mapa("status", statusValue(pedido.getStatus()),
                 "percentualDesconto", String.valueOf(desconto),
                 "valorTotal", String.valueOf(valorTotal));
+    }
+
+    private String statusValue(StatusPedido status) {
+        return status == null ? null : status.name();
     }
 
     private Map<String, String> mapa(String... valores) {
