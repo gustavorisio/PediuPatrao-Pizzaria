@@ -8,7 +8,7 @@
 <div th:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0"><i class="bi bi-bag me-2 text-primary"></i>Pedidos</h2>
-        <button sec:authorize="hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')"
+        <button sec:authorize="hasAnyRole('GERENTE', 'ATENDENTE')"
                 class="btn btn-primary" onclick="abrirFormulario()">
             <i class="bi bi-plus-lg me-1"></i> Novo Pedido
         </button>
@@ -68,8 +68,9 @@
 
     <script th:inline="javascript">
         const API_URL = '/api/pedidos';
-        const podeExcluir = /*[[${#authorization.expression("hasAnyRole('ADMIN', 'GERENTE')")}]]*/ false;
-        const podeEditar = /*[[${#authorization.expression("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")}]]*/ false;
+        const podeExcluir = /*[[${#authorization.expression("hasRole('GERENTE')")}]]*/ false;
+        const podeEditar = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE')")}]]*/ false;
+        const podeAtualizarStatus = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")}]]*/ false;
         const entregador = /*[[${#authorization.expression("hasRole('ENTREGADOR')")}]]*/ false;
         const tabela = document.getElementById('pedidos-tabela');
         let pedidos = [];
@@ -92,7 +93,7 @@
             if (entregador) {
                 cabecalho.innerHTML =
                     '<th class="ps-4">Número do pedido</th><th>Data e hora</th>' +
-                    '<th>Endereço</th><th>Telefone</th>';
+                    '<th>Endereço</th>';
                 return;
             }
             cabecalho.innerHTML =
@@ -185,7 +186,7 @@
             pedidos = await resposta.json();
             tabela.innerHTML = '';
             if (pedidos.length === 0) {
-                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '4' : '9') +
+                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '3' : '9') +
                     '" class="text-center text-muted py-5">Nenhum pedido cadastrado.</td></tr>';
                 return;
             }
@@ -196,8 +197,7 @@
                     linha.innerHTML =
                         '<td class="ps-4">' + mostrarValor(pedido.numeroPedido, '-') + '</td>' +
                         '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
-                        '<td>' + mostrarValor(pedido.endereco, '-') + '</td>' +
-                        '<td>' + mostrarValor(pedido.telefone, '-') + '</td>';
+                        '<td>' + mostrarValor(pedido.endereco, '-') + '</td>';
                     tabela.appendChild(linha);
                     return;
                 }
@@ -228,13 +228,17 @@
 
         function botoes(pedido) {
             let html = '';
-            if (podeEditar && pedido.status === 'RECEBIDO') {
-                html += '<button class="btn btn-sm btn-outline-primary me-1" ' +
-                    'onclick="editarPedido(\'' + pedido.id + '\')">Editar</button>';
+            if (podeEditar) {
+                if (pedido.status === 'RECEBIDO') {
+                    html += '<button class="btn btn-sm btn-outline-primary me-1" ' +
+                        'onclick="editarPedido(\'' + pedido.id + '\')">Editar</button>';
+                }
             }
-            if (podeExcluir && pedido.status === 'RECEBIDO') {
-                html += '<button class="btn btn-sm btn-outline-danger me-1" ' +
-                    'onclick="excluirPedido(\'' + pedido.id + '\')">Excluir</button>';
+            if (podeExcluir) {
+                if (pedido.status === 'RECEBIDO') {
+                    html += '<button class="btn btn-sm btn-outline-danger me-1" ' +
+                        'onclick="excluirPedido(\'' + pedido.id + '\')">Excluir</button>';
+                }
             }
             const proximos = {
                 RECEBIDO: 'EM_PREPARACAO',
@@ -243,10 +247,12 @@
                 SAIU_PARA_ENTREGA: 'FINALIZADO',
                 RETIRADO: 'FINALIZADO'
             };
-            if (proximos[pedido.status]) {
-                html += '<button class="btn btn-sm btn-outline-success" ' +
-                    'onclick="alterarStatus(\'' + pedido.id + '\', \'' +
-                    proximos[pedido.status] + '\')">' + proximos[pedido.status] + '</button>';
+            if (podeAtualizarStatus) {
+                if (proximos[pedido.status]) {
+                    html += '<button class="btn btn-sm btn-outline-success" ' +
+                        'onclick="alterarStatus(\'' + pedido.id + '\', \'' +
+                        proximos[pedido.status] + '\')">' + proximos[pedido.status] + '</button>';
+                }
             }
             return html;
         }
@@ -300,11 +306,19 @@
                 mostrarMensagem('Selecione um cliente cadastrado.', true);
                 return;
             }
-            if (!itens.length || itens.some(item => !item.produtoId)) {
+            if (!itens.length) {
                 mostrarMensagem('Selecione um produto para cada item do pedido.', true);
                 return;
             }
-            if (itens.some(item => !Number.isInteger(item.quantidade) || item.quantidade <= 0)) {
+            if (itens.some(item => !item.produtoId)) {
+                mostrarMensagem('Selecione um produto para cada item do pedido.', true);
+                return;
+            }
+            if (itens.some(item => !Number.isInteger(item.quantidade))) {
+                mostrarMensagem('A quantidade de cada item deve ser maior que zero.', true);
+                return;
+            }
+            if (itens.some(item => item.quantidade <= 0)) {
                 mostrarMensagem('A quantidade de cada item deve ser maior que zero.', true);
                 return;
             }
@@ -322,7 +336,9 @@
                 let mensagem = 'Não foi possível salvar o pedido.';
                 try {
                     const corpo = await resposta.json();
-                    mensagem = corpo.message || mensagem;
+                    if (corpo.message) {
+                        mensagem = corpo.message;
+                    }
                 } catch (erro) {
                     console.error('Resposta inválida ao salvar pedido.', erro);
                 }
@@ -397,9 +413,18 @@
         function definirDescontoNoFormulario() {
             const percentual = prompt('Informe o desconto percentual (máximo 20%):',
                 percentualDesconto ?? '');
-            if (percentual === null || percentual.trim() === '') return;
+            if (percentual === null) return;
+            if (percentual.trim() === '') return;
             const numero = Number(percentual);
-            if (Number.isNaN(numero) || numero < 0 || numero > 20) {
+            if (Number.isNaN(numero)) {
+                mostrarMensagem('O desconto deve estar entre 0% e 20%.', true);
+                return;
+            }
+            if (numero < 0) {
+                mostrarMensagem('O desconto deve estar entre 0% e 20%.', true);
+                return;
+            }
+            if (numero > 20) {
                 mostrarMensagem('O desconto deve estar entre 0% e 20%.', true);
                 return;
             }

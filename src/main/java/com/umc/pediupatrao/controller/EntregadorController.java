@@ -11,12 +11,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public class EntregadorController {
     private final EntregadorService service;
 
-    public EntregadorController(EntregadorService service) { this.service = service; }
+    public EntregadorController(EntregadorService service) {
+        this.service = service;
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     // Apenas as roles de gestão podem consultar o cadastro de entregadores.
-    public ResponseEntity<?> listar() { return ResponseEntity.ok(service.listarTodos()); }
+    public ResponseEntity<?> listar() {
+        return ResponseEntity.ok(service.listarTodos());
+    }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
