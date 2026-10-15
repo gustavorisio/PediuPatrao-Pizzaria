@@ -11,12 +11,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public class HorarioFuncionamentoController {
     private final HorarioFuncionamentoService service;
 
-    public HorarioFuncionamentoController(HorarioFuncionamentoService service) { this.service = service; }
+    public HorarioFuncionamentoController(HorarioFuncionamentoService service) {
+        this.service = service;
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     // A equipe de atendimento pode consultar os horários para orientar clientes.
-    public ResponseEntity<?> listar() { return ResponseEntity.ok(service.listarTodos()); }
+    public ResponseEntity<?> listar() {
+        return ResponseEntity.ok(service.listarTodos());
+    }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
