@@ -22,10 +22,15 @@ public class AuditoriaService {
     public void registrar(String operacao, String entidade, String entidadeId,
             Map<String, String> antes, Map<String, String> depois, String justificativa) {
         Authentication autenticacao = SecurityContextHolder.getContext().getAuthentication();
-        if (autenticacao == null || autenticacao instanceof AnonymousAuthenticationToken
-                || !autenticacao.isAuthenticated()) {
-            return;
-        }
+            if (autenticacao == null) {
+                return;
+            }
+            if (autenticacao instanceof AnonymousAuthenticationToken) {
+                return;
+            }
+            if (!autenticacao.isAuthenticated()) {
+                return;
+            }
 
         Auditoria auditoria = new Auditoria();
         auditoria.setUsuario(autenticacao.getName());
@@ -40,6 +45,20 @@ public class AuditoriaService {
         auditoria.setValoresNovos(depois);
         auditoria.setJustificativa(justificativa);
         auditoriaRepository.save(auditoria);
+    }
+
+    public String usuarioAtual() {
+        Authentication autenticacao = SecurityContextHolder.getContext().getAuthentication();
+        if (autenticacao == null) {
+            return "";
+        }
+        if (autenticacao instanceof AnonymousAuthenticationToken) {
+            return "";
+        }
+        if (!autenticacao.isAuthenticated()) {
+            return "";
+        }
+        return autenticacao.getName();
     }
 
     public List<Auditoria> listar() {
