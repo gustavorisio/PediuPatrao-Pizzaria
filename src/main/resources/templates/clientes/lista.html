@@ -52,7 +52,7 @@
         }
 
         async function carregarClientes() {
-            const response = await fetch(API_URL);
+            const response = await requisicaoApi(API_URL);
             const clientes = await response.json();
             tabelaClientes.innerHTML = '';
 
@@ -88,7 +88,7 @@
 
         async function excluirCliente(id) {
             if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                const response = await requisicaoApi(`${API_URL}/${id}`, { method: 'DELETE' });
                 if (response.ok) {
                     alert('Cliente excluído com sucesso!');
                     carregarClientes();

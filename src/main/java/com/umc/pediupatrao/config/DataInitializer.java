@@ -1,6 +1,7 @@
 package com.umc.pediupatrao.config;
 
 import com.umc.pediupatrao.entity.Usuario;
+import com.umc.pediupatrao.entity.PerfilUsuario;
 import com.umc.pediupatrao.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,7 @@ public class DataInitializer {
                 Usuario user = new Usuario();
                 user.setUsername("admin");
                 user.setPassword(encoder.encode("teste123"));
-                user.setRole("ADMIN");
+                user.setRole(PerfilUsuario.ADMIN);
 
                 repo.save(user);
 

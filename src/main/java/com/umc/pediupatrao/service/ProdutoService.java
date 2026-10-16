@@ -4,21 +4,17 @@ import com.umc.pediupatrao.entity.Produto;
 import com.umc.pediupatrao.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class ProdutoService {
 
     private static final Set<String> TIPOS_PERMITIDOS = Set.of("Pizza", "Lanche", "Bebida", "Opcional");
 
-    @Autowired
-    private ProdutoRepository produtoRepository;
-
-    public Produto novoProduto(Produto produto) {
-        return produtoRepository.save(produto);
-    }
+    private final ProdutoRepository produtoRepository;
 
     public List<Produto> listarProdutos() {
         return produtoRepository.findAll();
@@ -39,37 +35,42 @@ public class ProdutoService {
         if (produto.getAtivo() == null) {
             produto.setAtivo(false);
         }
-
-        // Se o cliente não tem ID (novo cliente), salva como novo
-        if (produto.getId() == null) {
-            return produtoRepository.save(produto); // Cria um novo cliente
-        } // Se já tem ID (cliente existente), atualiza
-        else {
-            // Verifica se o cliente existe antes de atualizar
-            if (produtoRepository.existsById(produto.getId())) {
-                return produtoRepository.save(produto); // Atualiza o cliente existente
-            } else {
-                throw new IllegalArgumentException("Cliente não encontrado para atualização.");
+        if (produto.getId() != null) {
+            if (!produtoRepository.existsById(produto.getId())) {
+                throw new IllegalArgumentException("Produto não encontrado para atualização.");
             }
         }
+        return produtoRepository.save(produto);
     }
 
     private void validarProduto(Produto produto) {
-        if (produto == null || produto.getNome() == null || produto.getNome().isBlank()) {
+        if (produto == null) {
             throw new IllegalArgumentException("O nome do produto é obrigatório.");
         }
+        validarTexto(produto.getNome(), "O nome do produto é obrigatório.");
+        validarTexto(produto.getTipo(), "O tipo do produto é obrigatório.");
         if (!TIPOS_PERMITIDOS.contains(produto.getTipo())) {
             throw new IllegalArgumentException(
                     "O tipo deve ser Pizza, Lanche, Bebida ou Opcional.");
         }
-        if ("Pizza".equals(produto.getTipo())
-                && (produto.getTipoPizza() == null || produto.getTipoPizza().isBlank()
-                        || produto.getSabor() == null || produto.getSabor().isBlank())) {
-            throw new IllegalArgumentException(
-                    "Tipo de pizza e sabor são obrigatórios para produtos do tipo Pizza.");
+        if ("Pizza".equals(produto.getTipo())) {
+            validarTexto(produto.getTipoPizza(), "O tipo de pizza é obrigatório.");
+            validarTexto(produto.getSabor(), "O sabor é obrigatório.");
         }
-        if (produto.getPreco() == null || produto.getPreco() < 0) {
+        if (produto.getPreco() == null) {
             throw new IllegalArgumentException("O preço deve ser informado e não pode ser negativo.");
+        }
+        if (produto.getPreco() < 0) {
+            throw new IllegalArgumentException("O preço deve ser informado e não pode ser negativo.");
+        }
+    }
+
+    private void validarTexto(String texto, String mensagem) {
+        if (texto == null) {
+            throw new IllegalArgumentException(mensagem);
+        }
+        if (texto.isBlank()) {
+            throw new IllegalArgumentException(mensagem);
         }
     }
 }
