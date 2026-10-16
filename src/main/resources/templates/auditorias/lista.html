@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Auditoria e logs</title>
+</head>
+<body>
+<div th:fragment="content" class="auditoria-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">
+            Auditoria e logs
+        </h2>
+        <span class="badge bg-light text-dark border">Somente ADMIN</span>
+    </div>
+
+    <div class="auditoria-scroll">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+            <tr>
+                <th>Data e hora</th>
+                <th>Usuário</th>
+                <th>Perfil</th>
+                <th>Operação</th>
+                <th>Entidade</th>
+                <th>ID</th>
+                <th>Antes</th>
+                <th>Depois</th>
+                <th>Justificativa</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(auditorias)}">
+                <td colspan="9" class="text-center text-muted py-5">Nenhum registro de auditoria.</td>
+            </tr>
+            <tr th:each="auditoria : ${auditorias}">
+                <td th:text="${#temporals.format(auditoria.dataHora, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                <td th:text="${auditoria.usuario}"></td>
+                <td><span class="badge bg-white text-dark border" th:text="${auditoria.perfil}"></span></td>
+                <td th:text="${auditoria.operacao}"></td>
+                <td th:text="${auditoria.entidade}"></td>
+                <td class="text-break" th:text="${auditoria.entidadeId}"></td>
+                <td class="small text-break" th:text="${auditoria.valoresAnteriores}"></td>
+                <td class="small text-break" th:text="${auditoria.valoresNovos}"></td>
+                <td th:text="${auditoria.justificativa ?: '-'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
