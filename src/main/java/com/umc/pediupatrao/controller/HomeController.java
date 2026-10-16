@@ -6,10 +6,9 @@ import com.umc.pediupatrao.entity.Cliente;
 import com.umc.pediupatrao.entity.Produto;
 import com.umc.pediupatrao.entity.Usuario;
 import com.umc.pediupatrao.entity.Entregador;
-import com.umc.pediupatrao.entity.HorarioFuncionamento;
 import com.umc.pediupatrao.service.ClienteService;
+import com.umc.pediupatrao.service.AuditoriaService;
 import com.umc.pediupatrao.service.EntregadorService;
-import com.umc.pediupatrao.service.HorarioFuncionamentoService;
 import com.umc.pediupatrao.service.PedidoService;
 import com.umc.pediupatrao.service.ProdutoService;
 import com.umc.pediupatrao.service.UsuarioService;
@@ -34,13 +33,13 @@ public class HomeController {
 
     private final ClienteService clienteService;
 
+    private final AuditoriaService auditoriaService;
+
     private final ProdutoService produtoService;
 
     private final UsuarioService usuarioService;
 
     private final EntregadorService entregadorService;
-
-    private final HorarioFuncionamentoService horarioFuncionamentoService;
 
     @GetMapping("/login")
     public String login() {
@@ -125,15 +124,19 @@ public class HomeController {
 
     // Renderiza os pedidos disponíveis para a operação.
     @GetMapping("/pedidos")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE', 'ENTREGADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     public String pedidos(Model model) {
-        if (pedidoService.usuarioEhEntregador()) {
-            model.addAttribute("pedidos", pedidoService.listarPedidosParaEntrega());
-        } else {
-            model.addAttribute("pedidos", pedidoService.listarPedidos());
-        }
+        model.addAttribute("pedidos", pedidoService.listarPedidos());
         model.addAttribute("content", "pedidos :: content");
         log.info("Carregando fragmento: pedidos :: content");
+        return "layout";
+    }
+
+    @GetMapping("/auditorias")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String auditorias(Model model) {
+        model.addAttribute("auditorias", auditoriaService.listar());
+        model.addAttribute("content", "auditorias/lista :: content");
         return "layout";
     }
 
@@ -172,34 +175,6 @@ public class HomeController {
         entregadorService.excluir(id);
         redirectAttributes.addFlashAttribute("sucesso", "Entregador removido com sucesso!");
         return "redirect:/entregadores";
-    }
-
-    @GetMapping("/horarios")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
-    // Mostra os horários que orientam o funcionamento da pizzaria.
-    public String horarios(Model model) {
-        model.addAttribute("horarios", horarioFuncionamentoService.listarTodos());
-        model.addAttribute("content", "horarios/lista :: content");
-        return "layout";
-    }
-
-    @PostMapping("/horarios/salvar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
-    // Salva uma configuração de horário enviada pela gestão.
-    public String salvarHorario(@ModelAttribute HorarioFuncionamento horario,
-            RedirectAttributes redirectAttributes) {
-        horarioFuncionamentoService.salvar(horario);
-        redirectAttributes.addFlashAttribute("sucesso", "Horário salvo com sucesso!");
-        return "redirect:/horarios";
-    }
-
-    @PostMapping("/horarios/deletar/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
-    // Exclui uma configuração de horário selecionada.
-    public String deletarHorario(@PathVariable String id, RedirectAttributes redirectAttributes) {
-        horarioFuncionamentoService.excluir(id);
-        redirectAttributes.addFlashAttribute("sucesso", "Horário removido com sucesso!");
-        return "redirect:/horarios";
     }
 
     // Renderiza o catálogo de produtos para consulta e manutenção.

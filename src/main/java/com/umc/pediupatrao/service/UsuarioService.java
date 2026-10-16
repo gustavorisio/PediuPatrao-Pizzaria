@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditoriaService auditoriaService;
 
     // Busca um usuário por ID
     @PreAuthorize("hasRole('ADMIN')")
@@ -46,7 +49,9 @@ public class UsuarioService {
                 throw new IllegalArgumentException("A senha é obrigatória.");
             }
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-            usuarioRepository.save(usuario);
+            Usuario salvo = usuarioRepository.save(usuario);
+            auditoriaService.registrar("INCLUSAO", "USUARIO", salvo.getId(),
+                    Map.of(), dadosUsuario(salvo), null);
         } catch (DataAccessException | IllegalArgumentException exception) {
             throw new IllegalArgumentException("Não foi possível salvar o usuário.", exception);
         }
@@ -54,6 +59,10 @@ public class UsuarioService {
     @PreAuthorize("hasRole('ADMIN')")
     public void deletarUsuario(String id) {
         try {
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+            auditoriaService.registrar("EXCLUSAO", "USUARIO", id,
+                    dadosUsuario(usuario), Map.of(), null);
             usuarioRepository.deleteById(id);
         } catch (DataAccessException exception) {
             throw new IllegalArgumentException("Não foi possível excluir o usuário.", exception);
@@ -80,6 +89,7 @@ public class UsuarioService {
         try {
             Usuario usuarioExistente = usuarioRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+            Map<String, String> antes = dadosUsuario(usuarioExistente);
             boolean administrador = temRole("ADMIN");
 
             usuarioExistente.setUsername(usuarioAtualizado.getUsername());
@@ -100,7 +110,10 @@ public class UsuarioService {
                 }
             }
 
-            return usuarioRepository.save(usuarioExistente);
+            Usuario salvo = usuarioRepository.save(usuarioExistente);
+            auditoriaService.registrar("ALTERACAO", "USUARIO", salvo.getId(),
+                    antes, dadosUsuario(salvo), null);
+            return salvo;
         } catch (DataAccessException | IllegalArgumentException exception) {
             throw new IllegalArgumentException("Não foi possível atualizar o usuário.", exception);
         }
@@ -136,7 +149,14 @@ public class UsuarioService {
 
     private void validarRole(PerfilUsuario role) {
         if (role == null) {
-            throw new IllegalArgumentException("A role deve ser ADMIN, GERENTE, ATENDENTE ou ENTREGADOR.");
+            throw new IllegalArgumentException("A role deve ser ADMIN, GERENTE ou ATENDENTE.");
         }
+    }
+
+    private Map<String, String> dadosUsuario(Usuario usuario) {
+        Map<String, String> dados = new HashMap<>();
+        dados.put("username", usuario.getUsername());
+        dados.put("role", usuario.getRole() == null ? null : usuario.getRole().name());
+        return dados;
     }
 }

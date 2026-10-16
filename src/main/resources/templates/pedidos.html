@@ -16,6 +16,35 @@
 
     <div id="mensagem" class="alert d-none"></div>
 
+    <div id="saida-modal" class="card shadow-sm mb-4 d-none">
+        <div class="card-header fw-bold">Registrar saída do pedido</div>
+        <div class="card-body">
+            <input type="hidden" id="saida-pedido-id">
+            <div class="mb-3">
+                <label class="form-label" for="saida-status">Tipo de saída</label>
+                <select id="saida-status" class="form-select">
+                    <option value="SAIU_PARA_ENTREGA">Saiu para entrega</option>
+                    <option value="RETIRADO">Retirado</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="entregador-pesquisa">Entregador responsável</label>
+                <input id="entregador-pesquisa" class="form-control"
+                       oninput="mostrarSugestoesEntregadores()"
+                       placeholder="Digite o nome ou telefone do entregador">
+                <input type="hidden" id="entregador-id">
+                <small id="entregador-selecionado" class="text-success"></small>
+                <div id="entregadores-sugestoes" class="list-group mt-1"></div>
+            </div>
+            <button type="button" class="btn btn-success" onclick="finalizarSaida()">
+                <i class="bi bi-check-lg me-1"></i>Finalizar saída
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="fecharSaida()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
     <div id="formulario" class="card shadow-sm mb-4 d-none">
         <div class="card-header fw-bold">Criar ou editar pedido</div>
         <div class="card-body">
@@ -70,12 +99,12 @@
         const API_URL = '/api/pedidos';
         const podeGerenciar = /*[[${#authorization.expression("hasRole('GERENTE')")}]]*/ false;
         const podeEditar = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE')")}]]*/ false;
-        const podeAtualizarStatus = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")}]]*/ false;
-        const entregador = /*[[${#authorization.expression("hasRole('ENTREGADOR')")}]]*/ false;
+        const podeAtualizarStatus = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE')")}]]*/ false;
         const tabela = document.getElementById('pedidos-tabela');
         let pedidos = [];
         let produtos = [];
         let produtosCarregados = false;
+        let entregadores = [];
         let percentualDesconto = 0;
 
         function mostrarValor(valor, padrao) {
@@ -90,12 +119,6 @@
 
         function configurarCabecalho() {
             const cabecalho = document.getElementById('pedidos-cabecalho');
-            if (entregador) {
-                cabecalho.innerHTML =
-                    '<th class="ps-4">Número do pedido</th><th>Data e hora</th>' +
-                    '<th>Endereço</th>';
-                return;
-            }
             cabecalho.innerHTML =
                 '<th class="ps-4">Número</th><th>Cliente</th><th>Item</th>' +
                 '<th>Qtd.</th><th>Preço original</th><th>Valor total</th>' +
@@ -186,22 +209,12 @@
             pedidos = await resposta.json();
             tabela.innerHTML = '';
             if (pedidos.length === 0) {
-                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '3' : '9') +
-                    '" class="text-center text-muted py-5">Nenhum pedido cadastrado.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-5">' +
+                    'Nenhum pedido cadastrado.</td></tr>';
                 return;
             }
 
             pedidos.forEach(pedido => {
-                if (entregador) {
-                    const linha = document.createElement('tr');
-                    linha.innerHTML =
-                        '<td class="ps-4">' + mostrarValor(pedido.numeroPedido, '-') + '</td>' +
-                        '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
-                        '<td>' + mostrarValor(pedido.endereco, '-') + '</td>';
-                    tabela.appendChild(linha);
-                    return;
-                }
-
                 const itens = pedido.itens ?? [];
                 const descricaoItens = itens.length
                     ? itens.map(item => mostrarValor(item.descricao ?? item.produtoId, '-') +
@@ -220,7 +233,11 @@
                     '<td>R$ ' + subtotal.toFixed(2) + '</td>' +
                     '<td>R$ ' + mostrarValor(pedido.valorTotal, '0.00') + '</td>' +
                     '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
-                    '<td><span class="badge bg-secondary">' + pedido.status + '</span></td>' +
+                    '<td><span class="badge bg-secondary">' + pedido.status + '</span>' +
+                    (pedido.entregadorSaidaNome
+                        ? '<br><small>' + pedido.entregadorSaidaNome +
+                        (pedido.entregadorSaidaTelefone
+                            ? ' - ' + pedido.entregadorSaidaTelefone : '') + '</small>' : '') + '</td>' +
                     '<td class="text-end pe-4">' + botoes(pedido) + '</td>';
                 tabela.appendChild(linha);
             });
@@ -251,16 +268,13 @@
                 html += '<button class="btn btn-sm btn-outline-warning me-1" onclick="aplicarDesconto(\'' +
                     pedido.id + '\')">Desconto</button>';
             }
-            if (podeAtualizarStatus && !entregador && pedido.status === 'PRONTO') {
-                html += '<button class="btn btn-sm btn-outline-success me-1" onclick="alterarStatus(\'' +
-                    pedido.id + '\', \'RETIRADO\')">Retirado</button>';
-            }
-            if (podeAtualizarStatus) {
-                if (proximos[pedido.status]) {
+            if (podeAtualizarStatus && pedido.status === 'PRONTO') {
+                html += '<button class="btn btn-sm btn-outline-success me-1" onclick="abrirSaida(\'' +
+                    pedido.id + '\')">Registrar saída</button>';
+            } else if (podeAtualizarStatus && proximos[pedido.status]) {
                     html += '<button class="btn btn-sm btn-outline-success" ' +
                         'onclick="alterarStatus(\'' + pedido.id + '\', \'' +
                         proximos[pedido.status] + '\')">' + proximos[pedido.status] + '</button>';
-                }
             }
             return html;
         }
@@ -369,6 +383,42 @@
             carregarPedidos();
         }
 
+        function abrirSaida(id) {
+            document.getElementById('saida-pedido-id').value = id;
+            document.getElementById('saida-status').value = 'SAIU_PARA_ENTREGA';
+            document.getElementById('entregador-pesquisa').value = '';
+            document.getElementById('entregador-id').value = '';
+            document.getElementById('entregador-selecionado').textContent = '';
+            document.getElementById('entregadores-sugestoes').innerHTML = '';
+            document.getElementById('saida-modal').classList.remove('d-none');
+            document.getElementById('entregador-pesquisa').focus();
+        }
+
+        function fecharSaida() {
+            document.getElementById('saida-modal').classList.add('d-none');
+        }
+
+        async function finalizarSaida() {
+            const pedidoId = document.getElementById('saida-pedido-id').value;
+            const status = document.getElementById('saida-status').value;
+            const entregadorId = document.getElementById('entregador-id').value;
+            if (!entregadorId) {
+                mostrarMensagem('Selecione o entregador responsável pela saída.', true);
+                return;
+            }
+            const resposta = await requisicaoApi(API_URL + '/' + pedidoId + '/status?status=' +
+                encodeURIComponent(status) + '&entregadorId=' + encodeURIComponent(entregadorId), {
+                    method: 'PUT'
+                });
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível registrar a saída do pedido.', true);
+                return;
+            }
+            fecharSaida();
+            mostrarMensagem('Saída registrada com data, hora e entregador responsável.', false);
+            carregarPedidos();
+        }
+
         async function cancelarPedido(id) {
             const justificativa = prompt('Informe a justificativa do cancelamento:');
             if (!justificativa?.trim()) return;
@@ -401,6 +451,47 @@
                 return;
             }
             window.clientes = await resposta.json();
+        }
+
+        async function carregarEntregadores() {
+            const resposta = await requisicaoApi('/api/entregadores');
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível carregar os entregadores cadastrados.', true);
+                return;
+            }
+            entregadores = await resposta.json();
+        }
+
+        function mostrarSugestoesEntregadores() {
+            const pesquisa = document.getElementById('entregador-pesquisa');
+            const sugestoes = document.getElementById('entregadores-sugestoes');
+            const texto = pesquisa.value.trim().toLowerCase();
+            sugestoes.innerHTML = '';
+            document.getElementById('entregador-id').value = '';
+            document.getElementById('entregador-selecionado').textContent = '';
+            if (!texto) return;
+
+            entregadores.filter(entregador =>
+                (entregador.nome ?? '').toLowerCase().includes(texto) ||
+                (entregador.telefone ?? '').toLowerCase().includes(texto)
+            ).forEach(entregador => {
+                const opcao = document.createElement('button');
+                opcao.type = 'button';
+                opcao.className = 'list-group-item list-group-item-action';
+                opcao.textContent = entregador.nome + (entregador.telefone
+                    ? ' - ' + entregador.telefone : '');
+                opcao.onclick = () => selecionarEntregador(entregador);
+                sugestoes.appendChild(opcao);
+            });
+        }
+
+        function selecionarEntregador(entregador) {
+            document.getElementById('entregador-pesquisa').value =
+                entregador.nome + (entregador.telefone ? ' - ' + entregador.telefone : '');
+            document.getElementById('entregador-id').value = entregador.id;
+            document.getElementById('entregador-selecionado').textContent =
+                'Entregador selecionado: ' + entregador.nome + '.';
+            document.getElementById('entregadores-sugestoes').innerHTML = '';
         }
 
         function mostrarSugestoesClientes() {
@@ -456,10 +547,9 @@
         }
 
         configurarCabecalho();
-        if (!entregador) {
-            carregarClientes();
-            carregarProdutos();
-        }
+        carregarClientes();
+        carregarProdutos();
+        carregarEntregadores();
         carregarPedidos();
     </script>
 </div>

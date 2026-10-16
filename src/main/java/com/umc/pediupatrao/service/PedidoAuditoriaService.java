@@ -26,6 +26,9 @@ public class PedidoAuditoriaService {
         dados.put("dataHoraEntrada", String.valueOf(pedido.getDataHoraEntrada()));
         dados.put("responsavelSaida", pedido.getResponsavelSaida());
         dados.put("dataHoraSaida", pedido.getDataHoraSaida() == null ? null : pedido.getDataHoraSaida().toString());
+        dados.put("entregadorSaidaId", pedido.getEntregadorSaidaId());
+        dados.put("entregadorSaidaNome", pedido.getEntregadorSaidaNome());
+        dados.put("entregadorSaidaTelefone", pedido.getEntregadorSaidaTelefone());
         dados.put("justificativaCancelamento", pedido.getJustificativaCancelamento());
         if (pedido.getItens() != null) {
             for (int i = 0; i < pedido.getItens().size(); i++) {

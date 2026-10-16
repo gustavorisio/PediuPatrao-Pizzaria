@@ -1,9 +1,10 @@
 package com.umc.pediupatrao.service;
 
-import com.umc.pediupatrao.dto.PedidoEntregaDTO;
 import com.umc.pediupatrao.entity.Pedido;
 import com.umc.pediupatrao.entity.StatusPedido;
 import com.umc.pediupatrao.repository.PedidoRepository;
+import com.umc.pediupatrao.repository.EntregadorRepository;
+import com.umc.pediupatrao.entity.Entregador;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,9 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final EntregadorRepository entregadorRepository;
     private final PedidoAuditoriaService pedidoAuditoriaService;
     private final PedidoCalculoService pedidoCalculoService;
-    private final PedidoEntregaService pedidoEntregaService;
     private final PedidoRegrasService pedidoRegrasService;
 
     @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
@@ -45,14 +46,6 @@ public class PedidoService {
 
     public List<Pedido> listarPedidos() {
         return pedidoRepository.findAll();
-    }
-
-    public List<PedidoEntregaDTO> listarPedidosParaEntrega() {
-        return pedidoEntregaService.converterLista(pedidoRepository.findAll());
-    }
-
-    public PedidoEntregaDTO pedidoParaEntrega(String id) {
-        return pedidoEntregaService.converter(buscarPedido(id));
     }
 
     @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
@@ -102,15 +95,15 @@ public class PedidoService {
         return salvo;
     }
 
-    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")
-    public Pedido atualizarStatus(String id, String status) {
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
+    public Pedido atualizarStatus(String id, String status, String entregadorId) {
         Pedido pedido = buscarPedido(id);
         StatusPedido novoStatus = StatusPedido.fromValue(status);
         pedidoRegrasService.validarTransicao(pedido.getStatus(), novoStatus);
 
         Map<String, String> antes = pedidoAuditoriaService.dadosPedido(pedido);
         pedido.setStatus(novoStatus);
-        registrarSaidaQuandoNecessario(pedido);
+        registrarSaidaQuandoNecessario(pedido, entregadorId);
 
         Pedido salvo = pedidoRepository.save(pedido);
         pedidoAuditoriaService.registrar("ALTERACAO_STATUS", salvo, antes, null);
@@ -139,10 +132,6 @@ public class PedidoService {
         return salvo;
     }
 
-    public boolean usuarioEhEntregador() {
-        return pedidoRegrasService.usuarioEhEntregador();
-    }
-
     private void prepararDadosParaEdicao(Pedido pedido, Pedido dados) {
         if (!pedidoRegrasService.podeAplicarDesconto()) {
             if (dados.getPercentualDesconto() != null) {
@@ -168,10 +157,24 @@ public class PedidoService {
         pedido.setItens(dados.getItens());
     }
 
-    private void registrarSaidaQuandoNecessario(Pedido pedido) {
+    private void registrarSaidaQuandoNecessario(Pedido pedido, String entregadorId) {
         if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO)
                 .contains(pedido.getStatus())) {
-            pedido.setResponsavelSaida(pedidoRegrasService.usuarioAutenticado());
+            if (entregadorId == null || entregadorId.isBlank()) {
+                throw pedidoRegrasService.erro(
+                        "Selecione o entregador responsável pela saída.");
+            }
+            Entregador entregador = entregadorRepository.findById(entregadorId)
+                    .orElseThrow(() -> pedidoRegrasService.erro(
+                            "O entregador selecionado não está cadastrado."));
+            if (entregador.getNome() == null || entregador.getNome().isBlank()) {
+                throw pedidoRegrasService.erro(
+                        "O entregador selecionado não possui nome cadastrado.");
+            }
+            pedido.setEntregadorSaidaId(entregador.getId());
+            pedido.setEntregadorSaidaNome(entregador.getNome());
+            pedido.setEntregadorSaidaTelefone(entregador.getTelefone());
+            pedido.setResponsavelSaida(entregador.getNome());
             pedido.setDataHoraSaida(LocalDateTime.now());
         }
     }

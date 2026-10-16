@@ -11,8 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Setter
 public class Entregador {
     @Id
-    private String id;
+        private String id;
     private String nome;
+    
     private String telefone;
     // Indica se o entregador pode receber novas entregas.
     private boolean disponivel = true;
