@@ -2,13 +2,12 @@
 //! locale : Breton [br]
 //! author : Jean-Baptiste Le Duigou : https://github.com/jbleduigou
 
-; (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        && typeof require === 'function' ? factory(require('../moment')) :
-        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-            factory(global.moment)
-}(this, (function (moment) {
-    'use strict';
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
 
     //! moment.js locale configuration
 
@@ -57,19 +56,19 @@
     }
 
     var monthsParse = [
-        /^gen/i,
-        /^c[ʼ\']hwe/i,
-        /^meu/i,
-        /^ebr/i,
-        /^mae/i,
-        /^(mez|eve)/i,
-        /^gou/i,
-        /^eos/i,
-        /^gwe/i,
-        /^her/i,
-        /^du/i,
-        /^ker/i,
-    ],
+            /^gen/i,
+            /^c[ʼ\']hwe/i,
+            /^meu/i,
+            /^ebr/i,
+            /^mae/i,
+            /^(mez|eve)/i,
+            /^gou/i,
+            /^eos/i,
+            /^gwe/i,
+            /^her/i,
+            /^du/i,
+            /^ker/i,
+        ],
         monthsRegex = /^(genver|c[ʼ\']hwevrer|meurzh|ebrel|mae|mezheven|gouere|eost|gwengolo|here|du|kerzu|gen|c[ʼ\']hwe|meu|ebr|mae|eve|gou|eos|gwe|her|du|ker)/i,
         monthsStrictRegex = /^(genver|c[ʼ\']hwevrer|meurzh|ebrel|mae|mezheven|gouere|eost|gwengolo|here|du|kerzu)/i,
         monthsShortStrictRegex = /^(gen|c[ʼ\']hwe|meu|ebr|mae|eve|gou|eos|gwe|her|du|ker)/i,

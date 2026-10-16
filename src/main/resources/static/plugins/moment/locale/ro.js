@@ -4,26 +4,25 @@
 //! author : Valentin Agachi : https://github.com/avaly
 //! author : Emanuel Cepoi : https://github.com/cepem
 
-; (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        && typeof require === 'function' ? factory(require('../moment')) :
-        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-            factory(global.moment)
-}(this, (function (moment) {
-    'use strict';
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
 
     //! moment.js locale configuration
 
     function relativeTimeWithPlural(number, withoutSuffix, key) {
         var format = {
-            ss: 'secunde',
-            mm: 'minute',
-            hh: 'ore',
-            dd: 'zile',
-            ww: 'săptămâni',
-            MM: 'luni',
-            yy: 'ani',
-        },
+                ss: 'secunde',
+                mm: 'minute',
+                hh: 'ore',
+                dd: 'zile',
+                ww: 'săptămâni',
+                MM: 'luni',
+                yy: 'ani',
+            },
             separator = ' ';
         if (number % 100 >= 20 || (number >= 100 && number % 100 === 0)) {
             separator = ' de ';

@@ -18,7 +18,7 @@
     var innerMode = CodeMirror.getMode(config, parserConfig && parserConfig.base || "gfm")
 
     function localMode(state) {
-      return state.state == FRONTMATTER ? { mode: yamlMode, state: state.yaml } : { mode: innerMode, state: state.inner }
+      return state.state == FRONTMATTER ? {mode: yamlMode, state: state.yaml} : {mode: innerMode, state: state.inner}
     }
 
     return {
@@ -59,7 +59,7 @@
         }
       },
       innerMode: localMode,
-      indent: function (state, a, b) {
+      indent: function(state, a, b) {
         var m = localMode(state)
         return m.mode.indent ? m.mode.indent(m.state, a, b) : CodeMirror.Pass
       },

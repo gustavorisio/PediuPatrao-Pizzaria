@@ -1,36 +1,36 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
+})(function(CodeMirror) {
   "use strict";
 
-  CodeMirror.defineMode("ttcn", function (config, parserConfig) {
+  CodeMirror.defineMode("ttcn", function(config, parserConfig) {
     var indentUnit = config.indentUnit,
-      keywords = parserConfig.keywords || {},
-      builtin = parserConfig.builtin || {},
-      timerOps = parserConfig.timerOps || {},
-      portOps = parserConfig.portOps || {},
-      configOps = parserConfig.configOps || {},
-      verdictOps = parserConfig.verdictOps || {},
-      sutOps = parserConfig.sutOps || {},
-      functionOps = parserConfig.functionOps || {},
+        keywords = parserConfig.keywords || {},
+        builtin = parserConfig.builtin || {},
+        timerOps = parserConfig.timerOps || {},
+        portOps  = parserConfig.portOps || {},
+        configOps = parserConfig.configOps || {},
+        verdictOps = parserConfig.verdictOps || {},
+        sutOps = parserConfig.sutOps || {},
+        functionOps = parserConfig.functionOps || {},
 
-      verdictConsts = parserConfig.verdictConsts || {},
-      booleanConsts = parserConfig.booleanConsts || {},
-      otherConsts = parserConfig.otherConsts || {},
+        verdictConsts = parserConfig.verdictConsts || {},
+        booleanConsts = parserConfig.booleanConsts || {},
+        otherConsts   = parserConfig.otherConsts || {},
 
-      types = parserConfig.types || {},
-      visibilityModifiers = parserConfig.visibilityModifiers || {},
-      templateMatch = parserConfig.templateMatch || {},
-      multiLineStrings = parserConfig.multiLineStrings,
-      indentStatements = parserConfig.indentStatements !== false;
+        types = parserConfig.types || {},
+        visibilityModifiers = parserConfig.visibilityModifiers || {},
+        templateMatch = parserConfig.templateMatch || {},
+        multiLineStrings = parserConfig.multiLineStrings,
+        indentStatements = parserConfig.indentStatements !== false;
     var isOperatorChar = /[+\-*&@=<>!\/]/;
     var curPunc;
 
@@ -45,11 +45,11 @@
         curPunc = ch;
         return "punctuation";
       }
-      if (ch == "#") {
+      if (ch == "#"){
         stream.skipToEnd();
         return "atom preprocessor";
       }
-      if (ch == "%") {
+      if (ch == "%"){
         stream.eatWhile(/\b/);
         return "atom ttcn3Macros";
       }
@@ -68,9 +68,9 @@
         }
       }
       if (isOperatorChar.test(ch)) {
-        if (ch == "@") {
-          if (stream.match("try") || stream.match("catch")
-            || stream.match("lazy")) {
+        if(ch == "@"){
+          if(stream.match("try") || stream.match("catch")
+              || stream.match("lazy")){
             return "keyword";
           }
         }
@@ -103,15 +103,15 @@
     }
 
     function tokenString(quote) {
-      return function (stream, state) {
+      return function(stream, state) {
         var escaped = false, next, end = false;
         while ((next = stream.next()) != null) {
-          if (next == quote && !escaped) {
+          if (next == quote && !escaped){
             var afterQuote = stream.peek();
             //look if the character after the quote is like the B in '10100010'B
-            if (afterQuote) {
+            if (afterQuote){
               afterQuote = afterQuote.toLowerCase();
-              if (afterQuote == "b" || afterQuote == "h" || afterQuote == "o")
+              if(afterQuote == "b" || afterQuote == "h" || afterQuote == "o")
                 stream.next();
             }
             end = true; break;
@@ -160,7 +160,7 @@
 
     //Interface
     return {
-      startState: function (basecolumn) {
+      startState: function(basecolumn) {
         return {
           tokenize: null,
           context: new Context((basecolumn || 0) - indentUnit, 0, "top", false),
@@ -169,7 +169,7 @@
         };
       },
 
-      token: function (stream, state) {
+      token: function(stream, state) {
         var ctx = state.context;
         if (stream.sol()) {
           if (ctx.align == null) ctx.align = false;
@@ -183,7 +183,7 @@
         if (ctx.align == null) ctx.align = true;
 
         if ((curPunc == ";" || curPunc == ":" || curPunc == ",")
-          && ctx.type == "statement") {
+            && ctx.type == "statement"){
           popContext(state);
         }
         else if (curPunc == "{") pushContext(state, stream.column(), "}");
@@ -196,7 +196,7 @@
         }
         else if (curPunc == ctx.type) popContext(state);
         else if (indentStatements &&
-          (((ctx.type == "}" || ctx.type == "top") && curPunc != ';') ||
+            (((ctx.type == "}" || ctx.type == "top") && curPunc != ';') ||
             (ctx.type == "statement" && curPunc == "newstatement")))
           pushContext(state, stream.column(), "statement");
 
@@ -244,29 +244,29 @@
   def(["text/x-ttcn", "text/x-ttcn3", "text/x-ttcnpp"], {
     name: "ttcn",
     keywords: words("activate address alive all alt altstep and and4b any" +
-      " break case component const continue control deactivate" +
-      " display do else encode enumerated except exception" +
-      " execute extends extension external for from function" +
-      " goto group if import in infinity inout interleave" +
-      " label language length log match message mixed mod" +
-      " modifies module modulepar mtc noblock not not4b nowait" +
-      " of on optional or or4b out override param pattern port" +
-      " procedure record recursive rem repeat return runs select" +
-      " self sender set signature system template testcase to" +
-      " type union value valueof var variant while with xor xor4b"),
+    " break case component const continue control deactivate" +
+    " display do else encode enumerated except exception" +
+    " execute extends extension external for from function" +
+    " goto group if import in infinity inout interleave" +
+    " label language length log match message mixed mod" +
+    " modifies module modulepar mtc noblock not not4b nowait" +
+    " of on optional or or4b out override param pattern port" +
+    " procedure record recursive rem repeat return runs select" +
+    " self sender set signature system template testcase to" +
+    " type union value valueof var variant while with xor xor4b"),
     builtin: words("bit2hex bit2int bit2oct bit2str char2int char2oct encvalue" +
-      " decomp decvalue float2int float2str hex2bit hex2int" +
-      " hex2oct hex2str int2bit int2char int2float int2hex" +
-      " int2oct int2str int2unichar isbound ischosen ispresent" +
-      " isvalue lengthof log2str oct2bit oct2char oct2hex oct2int" +
-      " oct2str regexp replace rnd sizeof str2bit str2float" +
-      " str2hex str2int str2oct substr unichar2int unichar2char" +
-      " enum2int"),
+    " decomp decvalue float2int float2str hex2bit hex2int" +
+    " hex2oct hex2str int2bit int2char int2float int2hex" +
+    " int2oct int2str int2unichar isbound ischosen ispresent" +
+    " isvalue lengthof log2str oct2bit oct2char oct2hex oct2int" +
+    " oct2str regexp replace rnd sizeof str2bit str2float" +
+    " str2hex str2int str2oct substr unichar2int unichar2char" +
+    " enum2int"),
     types: words("anytype bitstring boolean char charstring default float" +
-      " hexstring integer objid octetstring universal verdicttype timer"),
+    " hexstring integer objid octetstring universal verdicttype timer"),
     timerOps: words("read running start stop timeout"),
     portOps: words("call catch check clear getcall getreply halt raise receive" +
-      " reply send trigger"),
+    " reply send trigger"),
     configOps: words("create connect disconnect done kill killed map unmap"),
     verdictOps: words("getverdict setverdict"),
     sutOps: words("action"),

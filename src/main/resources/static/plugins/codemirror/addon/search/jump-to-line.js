@@ -3,21 +3,21 @@
 
 // Defines jumpToLine command. Uses dialog.js if present.
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"), require("../dialog/dialog"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror", "../dialog/dialog"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
+})(function(CodeMirror) {
   "use strict";
 
   // default search panel location
-  CodeMirror.defineOption("search", { bottom: false });
+  CodeMirror.defineOption("search", {bottom: false});
 
   function dialog(cm, text, shortText, deflt, f) {
-    if (cm.openDialog) cm.openDialog(text, f, { value: deflt, selectValueOnOpen: true, bottom: cm.options.search.bottom });
+    if (cm.openDialog) cm.openDialog(text, f, {value: deflt, selectValueOnOpen: true, bottom: cm.options.search.bottom});
     else f(prompt(shortText, deflt));
   }
 
@@ -31,9 +31,9 @@
     else return num - 1
   }
 
-  CodeMirror.commands.jumpToLine = function (cm) {
+  CodeMirror.commands.jumpToLine = function(cm) {
     var cur = cm.getCursor();
-    dialog(cm, getJumpDialog(cm), cm.phrase("Jump to line:"), (cur.line + 1) + ":" + cur.ch, function (posStr) {
+    dialog(cm, getJumpDialog(cm), cm.phrase("Jump to line:"), (cur.line + 1) + ":" + cur.ch, function(posStr) {
       if (!posStr) return;
 
       var match;

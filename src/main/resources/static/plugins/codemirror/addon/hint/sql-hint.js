@@ -1,14 +1,14 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"), require("../../mode/sql/sql"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror", "../../mode/sql/sql"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
+})(function(CodeMirror) {
   "use strict";
 
   var tables;
@@ -40,7 +40,7 @@
   }
 
   function wrapTable(name, value) {
-    if (isArray(value)) value = { columns: value }
+    if (isArray(value)) value = {columns: value}
     if (!value.text) value.text = name
     return value
   }
@@ -86,7 +86,7 @@
         if (!val || val === true)
           val = word
         else
-          val = val.displayText ? { text: val.text, displayText: val.displayText } : val.text
+          val = val.displayText ? {text: val.text, displayText: val.displayText} : val.text
         if (match(search, val)) result.push(formatter(val))
       }
     }
@@ -99,9 +99,9 @@
     }
     // replace duplicated identifierQuotes with single identifierQuotes
     // and remove single identifierQuotes
-    var nameParts = name.split(identifierQuote + identifierQuote);
+    var nameParts = name.split(identifierQuote+identifierQuote);
     for (var i = 0; i < nameParts.length; i++)
-      nameParts[i] = nameParts[i].replace(new RegExp(identifierQuote, "g"), "");
+      nameParts[i] = nameParts[i].replace(new RegExp(identifierQuote,"g"), "");
     return nameParts.join(identifierQuote);
   }
 
@@ -110,7 +110,7 @@
     for (var i = 0; i < nameParts.length; i++)
       nameParts[i] = identifierQuote +
         // duplicate identifierQuotes
-        nameParts[i].replace(new RegExp(identifierQuote, "g"), identifierQuote + identifierQuote) +
+        nameParts[i].replace(new RegExp(identifierQuote,"g"), identifierQuote+identifierQuote) +
         identifierQuote;
     var escaped = nameParts.join(".");
     if (typeof name == "string") return escaped;
@@ -141,12 +141,12 @@
 
     // Try to complete table names
     var string = nameParts.join(".");
-    addMatches(result, string, tables, function (w) {
+    addMatches(result, string, tables, function(w) {
       return useIdentifierQuotes ? insertIdentifierQuotes(w) : w;
     });
 
     // Try to complete columns from defaultTable
-    addMatches(result, string, defaultTable, function (w) {
+    addMatches(result, string, defaultTable, function(w) {
       return useIdentifierQuotes ? insertIdentifierQuotes(w) : w;
     });
 
@@ -168,7 +168,7 @@
       columns = columns.columns;
 
     if (columns) {
-      addMatches(result, string, columns, function (w) {
+      addMatches(result, string, columns, function(w) {
         var tableInsert = table;
         if (alias == true) tableInsert = aliasTable;
         if (typeof w == "string") {
@@ -204,9 +204,9 @@
 
     //add separator
     var indexOfSeparator = fullQuery.indexOf(CONS.QUERY_DIV);
-    while (indexOfSeparator != -1) {
+    while(indexOfSeparator != -1) {
       separator.push(doc.posFromIndex(indexOfSeparator));
-      indexOfSeparator = fullQuery.indexOf(CONS.QUERY_DIV, indexOfSeparator + 1);
+      indexOfSeparator = fullQuery.indexOf(CONS.QUERY_DIV, indexOfSeparator+1);
     }
     separator.unshift(Pos(0, 0));
     separator.push(Pos(editor.lastLine(), editor.getLineHandle(editor.lastLine()).text.length));
@@ -216,7 +216,7 @@
     var current = editor.getCursor()
     for (var i = 0; i < separator.length; i++) {
       if ((prevItem == null || cmpPos(current, prevItem) > 0) && cmpPos(current, separator[i]) <= 0) {
-        validRange = { start: prevItem, end: separator[i] };
+        validRange = {start: prevItem, end: separator[i]};
         break;
       }
       prevItem = separator[i];
@@ -227,7 +227,7 @@
 
       for (var i = 0; i < query.length; i++) {
         var lineText = query[i];
-        eachWord(lineText, function (word) {
+        eachWord(lineText, function(word) {
           var wordUpperCase = word.toUpperCase();
           if (wordUpperCase === aliasUpperCase && getTable(previousWord))
             table = previousWord;
@@ -240,7 +240,7 @@
     return table;
   }
 
-  CodeMirror.registerHelper("hint", "sql", function (editor, options) {
+  CodeMirror.registerHelper("hint", "sql", function(editor, options) {
     tables = parseTables(options && options.tables)
     var defaultTableName = options && options.defaultTable;
     var disableKeywords = options && options.disableKeywords;
@@ -275,7 +275,7 @@
     if (search.charAt(0) == "." || search.charAt(0) == identifierQuote) {
       start = nameCompletion(cur, token, result, editor);
     } else {
-      var objectOrClass = function (w, className) {
+      var objectOrClass = function(w, className) {
         if (typeof w === "object") {
           w.className = className;
         } else {
@@ -283,22 +283,22 @@
         }
         return w;
       };
-      addMatches(result, search, defaultTable, function (w) {
+    addMatches(result, search, defaultTable, function(w) {
         return objectOrClass(w, "CodeMirror-hint-table CodeMirror-hint-default-table");
-      });
-      addMatches(
+    });
+    addMatches(
         result,
         search,
-        tables, function (w) {
+        tables, function(w) {
           return objectOrClass(w, "CodeMirror-hint-table");
         }
-      );
-      if (!disableKeywords)
-        addMatches(result, search, keywords, function (w) {
+    );
+    if (!disableKeywords)
+      addMatches(result, search, keywords, function(w) {
           return objectOrClass(w.toUpperCase(), "CodeMirror-hint-keyword");
-        });
-    }
+      });
+  }
 
-    return { list: result, from: Pos(cur.line, start), to: Pos(cur.line, end) };
+    return {list: result, from: Pos(cur.line, start), to: Pos(cur.line, end)};
   });
 });

@@ -1,331 +1,467 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Lista de Pedidos</title>
 </head>
-
 <body>
-    <div th:fragment="content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold mb-0"><i class="bi bi-bag me-2 text-primary"></i>Pedidos</h2>
-            <button sec:authorize="hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')" class="btn btn-primary"
-                onclick="abrirFormulario()">
-                <i class="bi bi-plus-lg me-1"></i> Novo Pedido
-            </button>
-        </div>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0"><i class="bi bi-bag me-2 text-primary"></i>Pedidos</h2>
+        <button sec:authorize="hasAnyRole('GERENTE', 'ATENDENTE')"
+                class="btn btn-primary" onclick="abrirFormulario()">
+            <i class="bi bi-plus-lg me-1"></i> Novo Pedido
+        </button>
+    </div>
 
-        <div id="mensagem" class="alert d-none"></div>
+    <div id="mensagem" class="alert d-none"></div>
 
-        <div id="formulario" class="card shadow-sm mb-4 d-none">
-            <div class="card-header fw-bold">Criar ou editar pedido</div>
-            <div class="card-body">
-                <input type="hidden" id="pedido-id">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label" for="cliente-pesquisa">Cliente</label>
-                        <input id="cliente-pesquisa" class="form-control" oninput="mostrarSugestoesClientes()"
-                            placeholder="Digite e selecione o nome do cliente">
-                        <input type="hidden" id="cliente-id">
-                        <small id="cliente-selecionado" class="text-success"></small>
-                        <div id="clientes-sugestoes" class="list-group mt-1"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Produto</label>
-                        <select id="produto-id" class="form-select">
-                            <option value="">Selecione um produto</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Quantidade</label>
-                        <input id="quantidade-item" type="number" min="1" value="1" class="form-control">
-                    </div>
+    <div id="formulario" class="card shadow-sm mb-4 d-none">
+        <div class="card-header fw-bold">Criar ou editar pedido</div>
+        <div class="card-body">
+            <input type="hidden" id="pedido-id">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="cliente-pesquisa">Cliente</label>
+                    <input id="cliente-pesquisa" class="form-control"
+                           oninput="mostrarSugestoesClientes()"
+                           placeholder="Digite e selecione o nome do cliente">
+                    <input type="hidden" id="cliente-id">
+                    <small id="cliente-selecionado" class="text-success"></small>
+                    <div id="clientes-sugestoes" class="list-group mt-1"></div>
                 </div>
-                <div class="mt-3">
-                    <label class="form-label">Descrição do item</label>
-                    <input id="descricao-item" class="form-control" placeholder="Nome ou observação do item">
-                </div>
-                <div class="mt-3">
-                    <button class="btn btn-success" onclick="salvarPedido()">Salvar</button>
-                    <button sec:authorize="hasAnyRole('ADMIN', 'GERENTE')" type="button" class="btn btn-warning"
-                        onclick="definirDescontoNoFormulario()">
-                        Desconto
+            </div>
+
+            <div class="mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0">Itens do pedido</label>
+                    <button type="button" class="btn btn-sm btn-outline-success"
+                            onclick="adicionarItem()">
+                        <i class="bi bi-plus-lg me-1"></i>Adicionar item
                     </button>
-                    <small id="desconto-selecionado" class="text-muted ms-2"></small>
-                    <button class="btn btn-secondary" onclick="fecharFormulario()">Cancelar</button>
                 </div>
+                <div id="itens-formulario"></div>
+            </div>
+
+            <div class="mt-3">
+                <button class="btn btn-success" onclick="salvarPedido()">Salvar</button>
+                <button sec:authorize="hasRole('GERENTE')" type="button"
+                        class="btn btn-warning" onclick="definirDescontoNoFormulario()">
+                    Desconto
+                </button>
+                <small id="desconto-selecionado" class="text-muted ms-2"></small>
+                <button class="btn btn-secondary" onclick="fecharFormulario()">Cancelar</button>
             </div>
         </div>
+    </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-dark">
-                        <tr id="pedidos-cabecalho">
-                            <th class="ps-4">Cliente</th>
-                            <th>Item</th>
-                            <th>Qtd.</th>
-                            <th>Preço original</th>
-                            <th>Valor total</th>
-                            <th>Status</th>
-                            <th class="text-end pe-4">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pedidos-tabela"></tbody>
-                </table>
-            </div>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                <tr id="pedidos-cabecalho"></tr>
+                </thead>
+                <tbody id="pedidos-tabela"></tbody>
+            </table>
         </div>
+    </div>
 
-        <script th:inline="javascript">
-            const API_URL = '/api/pedidos';
-            const podeExcluir = /*[[${#authorization.expression("hasAnyRole('ADMIN', 'GERENTE')")}]]*/ false;
-            const podeEditar = /*[[${#authorization.expression("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")}]]*/ false;
-            const entregador = /*[[${#authorization.expression("hasRole('ENTREGADOR')")}]]*/ false;
-            const tabela = document.getElementById('pedidos-tabela');
-            let pedidos = [];
-            let percentualDesconto = 0;
+    <script th:inline="javascript">
+        const API_URL = '/api/pedidos';
+        const podeGerenciar = /*[[${#authorization.expression("hasRole('GERENTE')")}]]*/ false;
+        const podeEditar = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE')")}]]*/ false;
+        const podeAtualizarStatus = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")}]]*/ false;
+        const entregador = /*[[${#authorization.expression("hasRole('ENTREGADOR')")}]]*/ false;
+        const tabela = document.getElementById('pedidos-tabela');
+        let pedidos = [];
+        let produtos = [];
+        let produtosCarregados = false;
+        let percentualDesconto = 0;
 
-            function mostrarValor(valor, padrao) {
-                return valor ?? padrao;
-            }
+        function mostrarValor(valor, padrao) {
+            return valor ?? padrao;
+        }
 
+        function mostrarMensagem(texto, erro) {
+            const mensagem = document.getElementById('mensagem');
+            mensagem.textContent = texto;
+            mensagem.className = 'alert ' + (erro ? 'alert-danger' : 'alert-success');
+        }
+
+        function configurarCabecalho() {
+            const cabecalho = document.getElementById('pedidos-cabecalho');
             if (entregador) {
-                document.getElementById('pedidos-cabecalho').innerHTML =
+                cabecalho.innerHTML =
                     '<th class="ps-4">Número do pedido</th><th>Data e hora</th>' +
-                    '<th>Endereço</th><th>Telefone</th>';
-            } else {
-                document.getElementById('pedidos-cabecalho').innerHTML =
-                    '<th class="ps-4">Número</th><th>Cliente</th><th>Item</th>' +
-                    '<th>Qtd.</th><th>Preço original</th><th>Valor total</th>' +
-                    '<th>Data e hora</th><th>Status</th><th class="text-end pe-4">Ações</th>';
+                    '<th>Endereço</th>';
+                return;
             }
+            cabecalho.innerHTML =
+                '<th class="ps-4">Número</th><th>Cliente</th><th>Item</th>' +
+                '<th>Qtd.</th><th>Preço original</th><th>Valor total</th>' +
+                '<th>Data e hora</th><th>Status</th>' +
+                '<th class="text-end pe-4">Ações</th>';
+        }
 
-            function mostrarMensagem(texto, erro) {
-                const mensagem = document.getElementById('mensagem');
-                mensagem.textContent = texto;
-                mensagem.className = 'alert ' + (erro ? 'alert-danger' : 'alert-success');
+        async function carregarProdutos() {
+            const resposta = await requisicaoApi('/api/produtos');
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível carregar o catálogo de produtos.', true);
+                return;
             }
+            produtos = await resposta.json();
+            produtosCarregados = true;
+            document.querySelectorAll('.produto-item').forEach(select => {
+                preencherProdutos(select, select.value);
+            });
+        }
 
-            async function carregarProdutos() {
-                const resposta = await fetch('/api/produtos');
-                if (!resposta.ok) return;
-                const produtos = await resposta.json();
-                const select = document.getElementById('produto-id');
-                produtos.forEach(produto => {
-                    const option = document.createElement('option');
-                    option.value = produto.id;
-                    option.textContent = produto.nome + ' - R$ ' + produto.preco;
-                    option.dataset.preco = produto.preco;
-                    option.dataset.descricao = produto.nome;
-                    select.appendChild(option);
-                });
-                select.onchange = function () {
-                    const option = this.options[this.selectedIndex];
-                    document.getElementById('descricao-item').value = option.dataset.descricao ?? '';
-                };
-            }
+        function preencherProdutos(select, produtoSelecionado) {
+            select.innerHTML = '<option value="">Selecione um produto</option>';
+            produtos.forEach(produto => {
+                const option = document.createElement('option');
+                option.value = produto.id;
+                option.textContent = produto.nome + ' - R$ ' + produto.preco;
+                option.dataset.descricao = produto.nome;
+                option.selected = produto.id === produtoSelecionado;
+                select.appendChild(option);
+            });
+        }
 
-            async function carregarPedidos() {
-                const resposta = await fetch(API_URL);
-                pedidos = await resposta.json();
-                tabela.innerHTML = '';
-                if (pedidos.length === 0) {
-                    tabela.innerHTML = '<tr><td colspan="' + (entregador ? '4' : '9')
-                        + '" class="text-center text-muted py-5">Nenhum pedido cadastrado.</td></tr>';
-                    return;
+        function adicionarItem(item = {}) {
+            const linha = document.createElement('div');
+            linha.className = 'row g-2 align-items-end mb-2 item-formulario';
+            linha.innerHTML =
+                '<div class="col-md-5"><label class="form-label">Produto</label>' +
+                '<select class="form-select produto-item"></select></div>' +
+                '<div class="col-md-2"><label class="form-label">Quantidade</label>' +
+                '<input class="form-control quantidade-item" type="number" min="1" value="' +
+                (item.quantidade ?? 1) + '"></div>' +
+                '<div class="col-md-4"><label class="form-label">Descrição</label>' +
+                '<input class="form-control descricao-item" placeholder="Nome ou observação"></div>' +
+                '<div class="col-md-1"><button type="button" ' +
+                'class="btn btn-outline-danger remover-item" title="Remover item">' +
+                '<i class="bi bi-trash"></i></button></div>';
+
+            const select = linha.querySelector('.produto-item');
+            const descricao = linha.querySelector('.descricao-item');
+            preencherProdutos(select, item.produtoId);
+            descricao.value = item.descricao ?? '';
+
+            select.onchange = function () {
+                const option = this.options[this.selectedIndex];
+                if (!descricao.value.trim()) {
+                    descricao.value = option.dataset.descricao ?? '';
                 }
-                pedidos.forEach(pedido => {
-                    if (entregador) {
-                        const linhaEntrega = document.createElement('tr');
-                        linhaEntrega.innerHTML =
-                            '<td class="ps-4">' + mostrarValor(pedido.numeroPedido, '-') + '</td>' +
-                            '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
-                            '<td>' + mostrarValor(pedido.endereco, '-') + '</td>' +
-                            '<td>' + mostrarValor(pedido.telefone, '-') + '</td>';
-                        tabela.appendChild(linhaEntrega);
-                        return;
-                    }
-                    const item = pedido.itens && pedido.itens.length ? pedido.itens[0] : {};
+            };
+            linha.querySelector('.remover-item').onclick = function () {
+                linha.remove();
+                atualizarBotoesRemover();
+            };
+            document.getElementById('itens-formulario').appendChild(linha);
+            atualizarBotoesRemover();
+        }
+
+        function atualizarBotoesRemover() {
+            const linhas = document.querySelectorAll('.item-formulario');
+            document.querySelectorAll('.remover-item').forEach(botao => {
+                botao.disabled = linhas.length === 1;
+            });
+        }
+
+        function coletarItens() {
+            return Array.from(document.querySelectorAll('.item-formulario')).map(linha => ({
+                produtoId: linha.querySelector('.produto-item').value,
+                descricao: linha.querySelector('.descricao-item').value,
+                quantidade: Number(linha.querySelector('.quantidade-item').value)
+            }));
+        }
+
+        async function carregarPedidos() {
+            const resposta = await requisicaoApi(API_URL);
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível carregar os pedidos.', true);
+                return;
+            }
+            pedidos = await resposta.json();
+            tabela.innerHTML = '';
+            if (pedidos.length === 0) {
+                tabela.innerHTML = '<tr><td colspan="' + (entregador ? '3' : '9') +
+                    '" class="text-center text-muted py-5">Nenhum pedido cadastrado.</td></tr>';
+                return;
+            }
+
+            pedidos.forEach(pedido => {
+                if (entregador) {
                     const linha = document.createElement('tr');
                     linha.innerHTML =
-                        '<td class="ps-4">' + numeroPedido(pedido) + '</td>' +
-                        '<td>' + nomeCliente(pedido.clienteId) + '</td>' +
-                        '<td>' + mostrarValor(item.descricao ?? item.produtoId, '-') + '</td>' +
-                        '<td>' + mostrarValor(item.quantidade, '-') + '</td>' +
-                        '<td>R$ ' + mostrarValor(item.precoUnitario, '0.00') + '</td>' +
-                        '<td>R$ ' + mostrarValor(pedido.valorTotal, '0.00') + '</td>' +
+                        '<td class="ps-4">' + mostrarValor(pedido.numeroPedido, '-') + '</td>' +
                         '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
-                        '<td><span class="badge bg-secondary">' + pedido.status + '</span></td>' +
-                        '<td class="text-end pe-4">' + botoes(pedido) + '</td>';
+                        '<td>' + mostrarValor(pedido.endereco, '-') + '</td>';
                     tabela.appendChild(linha);
-                });
-            }
+                    return;
+                }
 
-            function botoes(pedido) {
-                let html = '';
-                if (podeEditar && pedido.status === 'RECEBIDO') {
-                    html += '<button class="btn btn-sm btn-outline-primary me-1" onclick="editarPedido(\'' + pedido.id + '\')">Editar</button>';
+                const itens = pedido.itens ?? [];
+                const descricaoItens = itens.length
+                    ? itens.map(item => mostrarValor(item.descricao ?? item.produtoId, '-') +
+                        ' x ' + mostrarValor(item.quantidade, 0)).join('<br>')
+                    : '-';
+                const quantidadeTotal = itens.reduce((total, item) =>
+                    total + Number(item.quantidade ?? 0), 0);
+                const subtotal = itens.reduce((total, item) =>
+                    total + Number(item.precoUnitario ?? 0) * Number(item.quantidade ?? 0), 0);
+                const linha = document.createElement('tr');
+                linha.innerHTML =
+                    '<td class="ps-4">' + numeroPedido(pedido) + '</td>' +
+                    '<td>' + nomeCliente(pedido.clienteId) + '</td>' +
+                    '<td>' + descricaoItens + '</td>' +
+                    '<td>' + quantidadeTotal + '</td>' +
+                    '<td>R$ ' + subtotal.toFixed(2) + '</td>' +
+                    '<td>R$ ' + mostrarValor(pedido.valorTotal, '0.00') + '</td>' +
+                    '<td>' + formatarData(pedido.dataHoraEntrada) + '</td>' +
+                    '<td><span class="badge bg-secondary">' + pedido.status + '</span></td>' +
+                    '<td class="text-end pe-4">' + botoes(pedido) + '</td>';
+                tabela.appendChild(linha);
+            });
+        }
+
+        function botoes(pedido) {
+            let html = '';
+            if (podeEditar) {
+                if (pedido.status === 'RECEBIDO') {
+                    html += '<button class="btn btn-sm btn-outline-primary me-1" ' +
+                        'onclick="editarPedido(\'' + pedido.id + '\')">Editar</button>';
                 }
-                if (podeExcluir && pedido.status === 'RECEBIDO') {
-                    html += '<button class="btn btn-sm btn-outline-danger me-1" onclick="excluirPedido(\'' + pedido.id + '\')">Excluir</button>';
+            }
+            if (podeGerenciar) {
+                if (['RECEBIDO', 'EM_PREPARACAO', 'PRONTO'].includes(pedido.status)) {
+                    html += '<button class="btn btn-sm btn-outline-danger me-1" ' +
+                        'onclick="cancelarPedido(\'' + pedido.id + '\')">Cancelar</button>';
                 }
-                const proximos = {
-                    RECEBIDO: 'EM_PREPARACAO',
-                    EM_PREPARACAO: 'PRONTO',
-                    PRONTO: 'SAIU_PARA_ENTREGA',
-                    SAIU_PARA_ENTREGA: 'FINALIZADO',
-                    RETIRADO: 'FINALIZADO'
-                };
+            }
+            const proximos = {
+                RECEBIDO: 'EM_PREPARACAO',
+                EM_PREPARACAO: 'PRONTO',
+                PRONTO: 'SAIU_PARA_ENTREGA',
+                SAIU_PARA_ENTREGA: 'FINALIZADO',
+                RETIRADO: 'FINALIZADO'
+            };
+            if (podeGerenciar && ['RECEBIDO', 'EM_PREPARACAO', 'PRONTO'].includes(pedido.status)) {
+                html += '<button class="btn btn-sm btn-outline-warning me-1" onclick="aplicarDesconto(\'' +
+                    pedido.id + '\')">Desconto</button>';
+            }
+            if (podeAtualizarStatus && !entregador && pedido.status === 'PRONTO') {
+                html += '<button class="btn btn-sm btn-outline-success me-1" onclick="alterarStatus(\'' +
+                    pedido.id + '\', \'RETIRADO\')">Retirado</button>';
+            }
+            if (podeAtualizarStatus) {
                 if (proximos[pedido.status]) {
-                    html += '<button class="btn btn-sm btn-outline-success" onclick="alterarStatus(\'' + pedido.id + '\', \'' + proximos[pedido.status] + '\')">' + proximos[pedido.status] + '</button>';
+                    html += '<button class="btn btn-sm btn-outline-success" ' +
+                        'onclick="alterarStatus(\'' + pedido.id + '\', \'' +
+                        proximos[pedido.status] + '\')">' + proximos[pedido.status] + '</button>';
                 }
-                return html;
+            }
+            return html;
+        }
+
+        function nomeCliente(id) {
+            const cliente = (window.clientes ?? []).find(item => item.id === id);
+            return cliente ? cliente.nome : mostrarValor(id, '-');
+        }
+
+        function numeroPedido(pedido) {
+            return pedido.numeroPedido ? 'Pedido ' + pedido.numeroPedido : 'Pedido ' + pedido.id;
+        }
+
+        function formatarData(data) {
+            return data ? new Date(data).toLocaleString('pt-BR') : '-';
+        }
+
+        function abrirFormulario(pedido) {
+            document.getElementById('formulario').classList.remove('d-none');
+            document.getElementById('pedido-id').value = pedido?.id ?? '';
+            document.getElementById('cliente-id').value = pedido?.clienteId ?? '';
+            const cliente = (window.clientes ?? []).find(item => item.id === pedido?.clienteId);
+            document.getElementById('cliente-pesquisa').value = cliente?.nome ?? '';
+            document.getElementById('cliente-selecionado').textContent =
+                pedido?.clienteId ? 'Cliente selecionado.' : '';
+            percentualDesconto = pedido?.percentualDesconto ?? 0;
+            document.getElementById('desconto-selecionado').textContent =
+                percentualDesconto > 0 ? 'Desconto: ' + percentualDesconto + '%' : '';
+            const itens = pedido?.itens?.length ? pedido.itens : [{}];
+            document.getElementById('itens-formulario').innerHTML = '';
+            itens.forEach(item => adicionarItem(item));
+        }
+
+        function editarPedido(id) {
+            abrirFormulario(pedidos.find(pedido => pedido.id === id));
+        }
+
+        function fecharFormulario() {
+            document.getElementById('formulario').classList.add('d-none');
+        }
+
+        async function salvarPedido() {
+            if (!produtosCarregados) {
+                mostrarMensagem('Aguarde o carregamento dos produtos e tente novamente.', true);
+                return;
+            }
+            const id = document.getElementById('pedido-id').value;
+            const clienteId = document.getElementById('cliente-id').value.trim();
+            const itens = coletarItens();
+            if (!clienteId) {
+                mostrarMensagem('Selecione um cliente cadastrado.', true);
+                return;
+            }
+            if (!itens.length) {
+                mostrarMensagem('Selecione um produto para cada item do pedido.', true);
+                return;
+            }
+            if (itens.some(item => !item.produtoId)) {
+                mostrarMensagem('Selecione um produto para cada item do pedido.', true);
+                return;
+            }
+            if (itens.some(item => !Number.isInteger(item.quantidade))) {
+                mostrarMensagem('A quantidade de cada item deve ser maior que zero.', true);
+                return;
+            }
+            if (itens.some(item => item.quantidade <= 0)) {
+                mostrarMensagem('A quantidade de cada item deve ser maior que zero.', true);
+                return;
             }
 
-            function nomeCliente(id) {
-                const cliente = (window.clientes ?? []).find(item => item.id === id);
-                return cliente ? cliente.nome : mostrarValor(id, '-');
-            }
-
-            function numeroPedido(pedido) {
-                return pedido.numeroPedido ? 'Pedido ' + pedido.numeroPedido : 'Pedido ' + pedido.id;
-            }
-
-            function formatarData(data) {
-                if (!data) return '-';
-                return new Date(data).toLocaleString('pt-BR');
-            }
-
-            function abrirFormulario(pedido) {
-                document.getElementById('formulario').classList.remove('d-none');
-                document.getElementById('pedido-id').value = pedido ? pedido.id : '';
-                document.getElementById('cliente-id').value = pedido ? pedido.clienteId ?? '' : '';
-                const clienteAtual = pedido && pedido.clienteId
-                    ? (window.clientes ?? []).find(cliente => cliente.id === pedido.clienteId) : null;
-                document.getElementById('cliente-pesquisa').value = clienteAtual
-                    ? clienteAtual.nome : '';
-                document.getElementById('cliente-selecionado').textContent = pedido && pedido.clienteId
-                    ? 'Cliente selecionado.' : '';
-                percentualDesconto = pedido?.percentualDesconto ?? 0;
-                document.getElementById('desconto-selecionado').textContent = percentualDesconto > 0
-                    ? 'Desconto: ' + percentualDesconto + '%' : '';
-                const item = pedido && pedido.itens && pedido.itens.length ? pedido.itens[0] : {};
-                document.getElementById('produto-id').value = item.produtoId ?? '';
-                document.getElementById('quantidade-item').value = item.quantidade ?? 1;
-                document.getElementById('descricao-item').value = item.descricao ?? '';
-            }
-
-            function editarPedido(id) {
-                abrirFormulario(pedidos.find(pedido => pedido.id === id));
-            }
-
-            function fecharFormulario() {
-                document.getElementById('formulario').classList.add('d-none');
-            }
-
-            async function salvarPedido() {
-                const id = document.getElementById('pedido-id').value;
-                const dados = {
-                    clienteId: document.getElementById('cliente-id').value,
+            const resposta = await requisicaoApi(id ? API_URL + '/' + id : API_URL, {
+                method: id ? 'PUT' : 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    clienteId: clienteId,
                     percentualDesconto: percentualDesconto,
-                    itens: [{
-                        produtoId: document.getElementById('produto-id').value,
-                        descricao: document.getElementById('descricao-item').value,
-                        quantidade: Number(document.getElementById('quantidade-item').value)
-                    }]
-                };
-                const resposta = await fetch(id ? API_URL + '/' + id : API_URL, {
-                    method: id ? 'PUT' : 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dados)
-                });
-                if (!resposta.ok) {
-                    const erro = await resposta.text();
-                    mostrarMensagem(erro || 'Não foi possível salvar o pedido.', true);
-                    return;
+                    itens: itens
+                })
+            });
+            if (!resposta.ok) {
+                let mensagem = 'Não foi possível salvar o pedido.';
+                try {
+                    const corpo = await resposta.json();
+                    if (corpo.message) {
+                        mensagem = corpo.message;
+                    }
+                } catch (erro) {
+                    console.error('Resposta inválida ao salvar pedido.', erro);
                 }
-                fecharFormulario();
-                mostrarMensagem('Pedido salvo com sucesso.', false);
-                carregarPedidos();
+                mostrarMensagem(mensagem, true);
+                return;
             }
+            fecharFormulario();
+            mostrarMensagem('Pedido salvo com sucesso.', false);
+            carregarPedidos();
+        }
 
-            async function alterarStatus(id, status) {
-                const resposta = await fetch(API_URL + '/' + id + '/status?status=' + status, { method: 'PUT' });
-                if (!resposta.ok) mostrarMensagem('Transição de status inválida.', true);
-                carregarPedidos();
-            }
-
-            async function excluirPedido(id) {
-                if (!confirm('Deseja excluir este pedido?')) return;
-                const resposta = await fetch(API_URL + '/' + id, { method: 'DELETE' });
-                if (!resposta.ok) {
-                    mostrarMensagem('Somente pedidos recebidos podem ser excluídos.', true);
-                    return;
-                }
-                mostrarMensagem('Pedido excluído com sucesso.', false);
-                carregarPedidos();
-            }
-
-            async function carregarClientes() {
-                const resposta = await fetch('/api/clientes');
-                if (!resposta.ok) return;
-                window.clientes = await resposta.json();
-                mostrarSugestoesClientes();
-            }
-
-            function mostrarSugestoesClientes() {
-                const pesquisa = document.getElementById('cliente-pesquisa');
-                const sugestoes = document.getElementById('clientes-sugestoes');
-                if (!pesquisa || !sugestoes) return;
-                const texto = pesquisa.value.trim().toLowerCase();
-                sugestoes.innerHTML = '';
-                document.getElementById('cliente-id').value = '';
-                document.getElementById('cliente-selecionado').textContent = '';
-                if (texto === '') return;
-
-                (window.clientes ?? []).filter(cliente =>
-                    (cliente.nome ?? '').toLowerCase().includes(texto)
-                ).forEach(cliente => {
-                    const opcao = document.createElement('button');
-                    opcao.type = 'button';
-                    opcao.className = 'list-group-item list-group-item-action';
-                    opcao.textContent = cliente.nome + (cliente.telefone
-                        ? ' - ' + cliente.telefone : '');
-                    opcao.onclick = function () {
-                        selecionarCliente(cliente);
-                    };
-                    sugestoes.appendChild(opcao);
-                });
-            }
-
-            function selecionarCliente(cliente) {
-                document.getElementById('cliente-pesquisa').value = cliente.nome;
-                document.getElementById('cliente-id').value = cliente.id;
-                document.getElementById('cliente-selecionado').textContent = 'Cliente selecionado.';
-                document.getElementById('clientes-sugestoes').innerHTML = '';
-            }
-
-            function definirDescontoNoFormulario() {
-                const percentual = prompt('Informe o desconto percentual (máximo 20%):',
-                    percentualDesconto ?? '');
-                if (percentual === null || percentual.trim() === '') return;
-                const numero = Number(percentual);
-                if (Number.isNaN(numero) || numero < 0 || numero > 20) {
-                    mostrarMensagem('O desconto deve estar entre 0% e 20%.', true);
-                    return;
-                }
-                percentualDesconto = numero;
-                document.getElementById('desconto-selecionado').textContent =
-                    'Desconto: ' + numero + '%';
-            }
-
-            if (!entregador) {
-                carregarClientes();
-                carregarProdutos();
+        async function alterarStatus(id, status) {
+            const resposta = await requisicaoApi(API_URL + '/' + id + '/status?status=' + status, {
+                method: 'PUT'
+            });
+            if (!resposta.ok) {
+                mostrarMensagem('Transição de status inválida.', true);
+                return;
             }
             carregarPedidos();
-        </script>
-    </div>
-</body>
+        }
 
+        async function cancelarPedido(id) {
+            const justificativa = prompt('Informe a justificativa do cancelamento:');
+            if (!justificativa?.trim()) return;
+            const resposta = await requisicaoApi(API_URL + '/' + id + '/cancelar?justificativa=' + encodeURIComponent(justificativa), {method: 'PUT'});
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível cancelar o pedido.', true);
+                return;
+            }
+            mostrarMensagem('Pedido cancelado com sucesso.', false);
+            carregarPedidos();
+        }
+
+        async function aplicarDesconto(id) {
+            const percentual = prompt('Desconto percentual (0 a 20):');
+            if (percentual === null || percentual.trim() === '') return;
+            const resposta = await requisicaoApi(API_URL + '/' + id + '/desconto?percentual=' +
+                encodeURIComponent(percentual.replace(',', '.')), {method: 'PUT'});
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível aplicar o desconto. Informe um percentual de 0 a 20.', true);
+                return;
+            }
+            mostrarMensagem('Desconto atualizado.', false);
+            carregarPedidos();
+        }
+
+        async function carregarClientes() {
+            const resposta = await requisicaoApi('/api/clientes');
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível carregar os clientes.', true);
+                return;
+            }
+            window.clientes = await resposta.json();
+        }
+
+        function mostrarSugestoesClientes() {
+            const pesquisa = document.getElementById('cliente-pesquisa');
+            const sugestoes = document.getElementById('clientes-sugestoes');
+            const texto = pesquisa.value.trim().toLowerCase();
+            sugestoes.innerHTML = '';
+            document.getElementById('cliente-id').value = '';
+            document.getElementById('cliente-selecionado').textContent = '';
+            if (!texto) return;
+
+            (window.clientes ?? []).filter(cliente =>
+                (cliente.nome ?? '').toLowerCase().includes(texto)
+            ).forEach(cliente => {
+                const opcao = document.createElement('button');
+                opcao.type = 'button';
+                opcao.className = 'list-group-item list-group-item-action';
+                opcao.textContent = cliente.nome + (cliente.telefone
+                    ? ' - ' + cliente.telefone : '');
+                opcao.onclick = () => selecionarCliente(cliente);
+                sugestoes.appendChild(opcao);
+            });
+        }
+
+        function selecionarCliente(cliente) {
+            document.getElementById('cliente-pesquisa').value = cliente.nome;
+            document.getElementById('cliente-id').value = cliente.id;
+            document.getElementById('cliente-selecionado').textContent = 'Cliente selecionado.';
+            document.getElementById('clientes-sugestoes').innerHTML = '';
+        }
+
+        function definirDescontoNoFormulario() {
+            const percentual = prompt('Informe o desconto percentual (máximo 20%):',
+                percentualDesconto ?? '');
+            if (percentual === null) return;
+            if (percentual.trim() === '') return;
+            const numero = Number(percentual);
+            if (Number.isNaN(numero)) {
+                mostrarMensagem('O desconto deve estar entre 0% e 20%.', true);
+                return;
+            }
+            if (numero < 0) {
+                mostrarMensagem('O desconto deve estar entre 0% e 20%.', true);
+                return;
+            }
+            if (numero > 20) {
+                mostrarMensagem('O desconto deve estar entre 0% e 20%.', true);
+                return;
+            }
+            percentualDesconto = numero;
+            document.getElementById('desconto-selecionado').textContent =
+                'Desconto: ' + numero + '%';
+        }
+
+        configurarCabecalho();
+        if (!entregador) {
+            carregarClientes();
+            carregarProdutos();
+        }
+        carregarPedidos();
+    </script>
+</div>
+</body>
 </html>

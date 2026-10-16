@@ -1,18 +1,18 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
+})(function(CodeMirror) {
   "use strict";
 
-  CodeMirror.defineExtension("annotateScrollbar", function (options) {
-    if (typeof options == "string") options = { className: options };
+  CodeMirror.defineExtension("annotateScrollbar", function(options) {
+    if (typeof options == "string") options = {className: options};
     return new Annotation(this, options);
   });
 
@@ -30,25 +30,25 @@
 
     function scheduleRedraw(delay) {
       clearTimeout(self.doRedraw);
-      self.doRedraw = setTimeout(function () { self.redraw(); }, delay);
+      self.doRedraw = setTimeout(function() { self.redraw(); }, delay);
     }
 
     var self = this;
-    cm.on("refresh", this.resizeHandler = function () {
+    cm.on("refresh", this.resizeHandler = function() {
       clearTimeout(self.doUpdate);
-      self.doUpdate = setTimeout(function () {
+      self.doUpdate = setTimeout(function() {
         if (self.computeScale()) scheduleRedraw(20);
       }, 100);
     });
     cm.on("markerAdded", this.resizeHandler);
     cm.on("markerCleared", this.resizeHandler);
     if (options.listenForChanges !== false)
-      cm.on("changes", this.changeHandler = function () {
+      cm.on("changes", this.changeHandler = function() {
         scheduleRedraw(250);
       });
   }
 
-  Annotation.prototype.computeScale = function () {
+  Annotation.prototype.computeScale = function() {
     var cm = this.cm;
     var hScale = (cm.getWrapperElement().clientHeight - cm.display.barHeight - this.buttonHeight * 2) /
       cm.getScrollerElement().scrollHeight
@@ -58,12 +58,12 @@
     }
   };
 
-  Annotation.prototype.update = function (annotations) {
+  Annotation.prototype.update = function(annotations) {
     this.annotations = annotations;
     this.redraw();
   };
 
-  Annotation.prototype.redraw = function (compute) {
+  Annotation.prototype.redraw = function(compute) {
     if (compute !== false) this.computeScale();
     var cm = this.cm, hScale = this.hScale;
 
@@ -84,7 +84,7 @@
         }
       }
       if ((curLineObj.widgets && curLineObj.widgets.length) ||
-        (wrapping && curLineObj.height > singleLineH))
+          (wrapping && curLineObj.height > singleLineH))
         return cm.charCoords(pos, "local")[top ? "top" : "bottom"];
       var topY = cm.heightAtLine(curLineObj, "local");
       return topY + (top ? 0 : curLineObj.height);
@@ -118,7 +118,7 @@
     this.div.appendChild(frag);
   };
 
-  Annotation.prototype.clear = function () {
+  Annotation.prototype.clear = function() {
     this.cm.off("refresh", this.resizeHandler);
     this.cm.off("markerAdded", this.resizeHandler);
     this.cm.off("markerCleared", this.resizeHandler);

@@ -4,28 +4,27 @@
 //! author : Ahmed Elkhatib
 //! author : forabi https://github.com/forabi
 
-; (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        && typeof require === 'function' ? factory(require('../moment')) :
-        typeof define === 'function' && define.amd ? define(['../moment'], factory) :
-            factory(global.moment)
-}(this, (function (moment) {
-    'use strict';
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
 
     //! moment.js locale configuration
 
     var symbolMap = {
-        1: '١',
-        2: '٢',
-        3: '٣',
-        4: '٤',
-        5: '٥',
-        6: '٦',
-        7: '٧',
-        8: '٨',
-        9: '٩',
-        0: '٠',
-    },
+            1: '١',
+            2: '٢',
+            3: '٣',
+            4: '٤',
+            5: '٥',
+            6: '٦',
+            7: '٧',
+            8: '٨',
+            9: '٩',
+            0: '٠',
+        },
         numberMap = {
             '١': '1',
             '٢': '2',
@@ -42,14 +41,14 @@
             return n === 0
                 ? 0
                 : n === 1
-                    ? 1
-                    : n === 2
-                        ? 2
-                        : n % 100 >= 3 && n % 100 <= 10
-                            ? 3
-                            : n % 100 >= 11
-                                ? 4
-                                : 5;
+                ? 1
+                : n === 2
+                ? 2
+                : n % 100 >= 3 && n % 100 <= 10
+                ? 3
+                : n % 100 >= 11
+                ? 4
+                : 5;
         },
         plurals = {
             s: [

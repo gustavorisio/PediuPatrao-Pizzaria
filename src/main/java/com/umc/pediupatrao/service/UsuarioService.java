@@ -1,6 +1,7 @@
 package com.umc.pediupatrao.service;
 
 import com.umc.pediupatrao.entity.Usuario;
+import com.umc.pediupatrao.entity.PerfilUsuario;
 import com.umc.pediupatrao.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,24 +9,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Set;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
+import java.util.ArrayList;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioService {
-
-    private static final Set<String> ROLES_PERMITIDAS = Set.of("ADMIN", "GERENTE", "ATENDENTE", "ENTREGADOR");
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
-        this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     // Busca um usuário por ID
     @PreAuthorize("hasRole('ADMIN')")
@@ -44,7 +39,10 @@ public class UsuarioService {
     public void salvarUsuario(Usuario usuario) {
         try {
             validarRole(usuario.getRole());
-            if (usuario.getPassword() == null || usuario.getPassword().isBlank()) {
+            if (usuario.getPassword() == null) {
+                throw new IllegalArgumentException("A senha é obrigatória.");
+            }
+            if (usuario.getPassword().isBlank()) {
                 throw new IllegalArgumentException("A senha é obrigatória.");
             }
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
@@ -53,8 +51,6 @@ public class UsuarioService {
             throw new IllegalArgumentException("Não foi possível salvar o usuário.", exception);
         }
     }
-
-    // Deleta um usuário pelo ID
     @PreAuthorize("hasRole('ADMIN')")
     public void deletarUsuario(String id) {
         try {
@@ -63,20 +59,22 @@ public class UsuarioService {
             throw new IllegalArgumentException("Não foi possível excluir o usuário.", exception);
         }
     }
-
-    // Lista todos os usuários
     @PreAuthorize("hasRole('ADMIN')")
     public Iterable<Usuario> listarTodos() {
         return usuarioRepository.findAll();
     }
 
     public List<Usuario> listarFuncionarios() {
-        return StreamSupport.stream(usuarioRepository.findAll().spliterator(), false)
-                .filter(usuario -> "GERENTE".equals(usuario.getRole()) || "ATENDENTE".equals(usuario.getRole()))
-                .toList();
+        List<Usuario> funcionarios = new ArrayList<>();
+        for (Usuario usuario : usuarioRepository.findAll()) {
+            if (usuario.getRole() == PerfilUsuario.GERENTE) {
+                funcionarios.add(usuario);
+            } else if (usuario.getRole() == PerfilUsuario.ATENDENTE) {
+                funcionarios.add(usuario);
+            }
+        }
+        return funcionarios;
     }
-
-    // Atualiza o usuário usuários
     @PreAuthorize("hasRole('ADMIN') or @usuarioService.isCurrentUser(#id)")
     public Usuario atualizarUsuario(String id, Usuario usuarioAtualizado) {
         try {
@@ -85,16 +83,21 @@ public class UsuarioService {
             boolean administrador = temRole("ADMIN");
 
             usuarioExistente.setUsername(usuarioAtualizado.getUsername());
+            // Editar a própria conta não dá permissão para trocar de perfil.
             if (administrador) {
                 validarRole(usuarioAtualizado.getRole());
                 usuarioExistente.setRole(usuarioAtualizado.getRole());
-            } else if (usuarioAtualizado.getRole() != null
-                    && !usuarioAtualizado.getRole().equals(usuarioExistente.getRole())) {
-                throw new IllegalArgumentException("Somente ADMIN pode alterar perfis.");
+            } else if (usuarioAtualizado.getRole() != null) {
+                if (usuarioAtualizado.getRole() != usuarioExistente.getRole()) {
+                    throw new IllegalArgumentException("Somente ADMIN pode alterar perfis.");
+                }
             }
 
-            if (usuarioAtualizado.getPassword() != null && !usuarioAtualizado.getPassword().isBlank()) {
-                usuarioExistente.setPassword(passwordEncoder.encode(usuarioAtualizado.getPassword()));
+            // Senha em branco na edição mantém a senha atual.
+            if (usuarioAtualizado.getPassword() != null) {
+                if (!usuarioAtualizado.getPassword().isBlank()) {
+                    usuarioExistente.setPassword(passwordEncoder.encode(usuarioAtualizado.getPassword()));
+                }
             }
 
             return usuarioRepository.save(usuarioExistente);
@@ -105,25 +108,34 @@ public class UsuarioService {
 
     public boolean isCurrentUser(String id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null
-                && authentication.isAuthenticated()
-                && buscarPorIdSemAutorizacao(id)
-                        .map(usuario -> usuario.getUsername().equals(authentication.getName()))
-                        .orElse(false);
-    }
-
-    private Optional<Usuario> buscarPorIdSemAutorizacao(String id) {
-        return usuarioRepository.findById(id);
+        if (authentication == null) {
+            return false;
+        }
+        if (!authentication.isAuthenticated()) {
+            return false;
+        }
+        Usuario usuario = usuarioRepository.findById(id).orElse(null);
+        if (usuario == null) {
+            return false;
+        }
+        return usuario.getUsername().equals(authentication.getName());
     }
 
     private boolean temRole(String role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + role));
+        if (authentication == null) {
+            return false;
+        }
+        for (var autoridade : authentication.getAuthorities()) {
+            if (autoridade.getAuthority().equals("ROLE_" + role)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private void validarRole(String role) {
-        if (role == null || !ROLES_PERMITIDAS.contains(role)) {
+    private void validarRole(PerfilUsuario role) {
+        if (role == null) {
             throw new IllegalArgumentException("A role deve ser ADMIN, GERENTE, ATENDENTE ou ENTREGADOR.");
         }
     }

@@ -1,17 +1,17 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"), require("../../addon/mode/simple"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror", "../../addon/mode/simple"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
-  "use strict";
+})(function(CodeMirror) {
+"use strict";
 
-  var kKeywords = [
+var kKeywords = [
     "align",
     "block",
     "br(_if|_table|_on_(cast|data|func|i31|null))?",
@@ -100,33 +100,33 @@
     "\\bnull\\b",
     "ref(\\.(([ai]s_(data|func|i31))|cast|eq|func|(is_|as_non_)?null|test))?",
     "rtt(\\.(canon|sub))?",
-  ];
+];
 
-  CodeMirror.defineSimpleMode('wast', {
-    start: [
-      { regex: /[+\-]?(?:nan(?::0x[0-9a-fA-F]+)?|infinity|inf|0x[0-9a-fA-F]+\.?[0-9a-fA-F]*p[+\/-]?\d+|\d+(?:\.\d*)?[eE][+\-]?\d*|\d+\.\d*|0x[0-9a-fA-F]+|\d+)/, token: "number" },
-      { regex: new RegExp(kKeywords.join('|')), token: "keyword" },
-      { regex: /\b((any|data|eq|extern|i31|func)ref|[fi](32|64)|i(8|16))\b/, token: "atom" },
-      { regex: /\$([a-zA-Z0-9_`\+\-\*\/\\\^~=<>!\?@#$%&|:\.]+)/, token: "variable-2" },
-      { regex: /"(?:[^"\\\x00-\x1f\x7f]|\\[nt\\'"]|\\[0-9a-fA-F][0-9a-fA-F])*"/, token: "string" },
-      { regex: /\(;.*?/, token: "comment", next: "comment" },
-      { regex: /;;.*$/, token: "comment" },
-      { regex: /\(/, indent: true },
-      { regex: /\)/, dedent: true },
-    ],
+CodeMirror.defineSimpleMode('wast', {
+  start: [
+    {regex: /[+\-]?(?:nan(?::0x[0-9a-fA-F]+)?|infinity|inf|0x[0-9a-fA-F]+\.?[0-9a-fA-F]*p[+\/-]?\d+|\d+(?:\.\d*)?[eE][+\-]?\d*|\d+\.\d*|0x[0-9a-fA-F]+|\d+)/, token: "number"},
+    {regex: new RegExp(kKeywords.join('|')), token: "keyword"},
+    {regex: /\b((any|data|eq|extern|i31|func)ref|[fi](32|64)|i(8|16))\b/, token: "atom"},
+    {regex: /\$([a-zA-Z0-9_`\+\-\*\/\\\^~=<>!\?@#$%&|:\.]+)/, token: "variable-2"},
+    {regex: /"(?:[^"\\\x00-\x1f\x7f]|\\[nt\\'"]|\\[0-9a-fA-F][0-9a-fA-F])*"/, token: "string"},
+    {regex: /\(;.*?/, token: "comment", next: "comment"},
+    {regex: /;;.*$/, token: "comment"},
+    {regex: /\(/, indent: true},
+    {regex: /\)/, dedent: true},
+  ],
 
-    comment: [
-      { regex: /.*?;\)/, token: "comment", next: "start" },
-      { regex: /.*/, token: "comment" },
-    ],
+  comment: [
+    {regex: /.*?;\)/, token: "comment", next: "start"},
+    {regex: /.*/, token: "comment"},
+  ],
 
-    meta: {
-      dontIndentStates: ['comment'],
-    },
-  });
+  meta: {
+    dontIndentStates: ['comment'],
+  },
+});
 
-  // https://github.com/WebAssembly/design/issues/981 mentions text/webassembly,
-  // which seems like a reasonable choice, although it's not standard right now.
-  CodeMirror.defineMIME("text/webassembly", "wast");
+// https://github.com/WebAssembly/design/issues/981 mentions text/webassembly,
+// which seems like a reasonable choice, although it's not standard right now.
+CodeMirror.defineMIME("text/webassembly", "wast");
 
 });

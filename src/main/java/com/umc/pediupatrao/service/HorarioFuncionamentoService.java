@@ -3,16 +3,14 @@ package com.umc.pediupatrao.service;
 import com.umc.pediupatrao.entity.HorarioFuncionamento;
 import com.umc.pediupatrao.repository.HorarioFuncionamentoRepository;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class HorarioFuncionamentoService {
     private final HorarioFuncionamentoRepository repository;
-
-    public HorarioFuncionamentoService(HorarioFuncionamentoRepository repository) {
-        this.repository = repository;
-    }
 
     // Consulta os horários exibidos para a equipe e para o atendimento.
     public List<HorarioFuncionamento> listarTodos() {

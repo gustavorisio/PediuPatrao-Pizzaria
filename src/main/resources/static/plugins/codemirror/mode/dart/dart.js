@@ -1,14 +1,14 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-(function (mod) {
+(function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(require("../../lib/codemirror"), require("../clike/clike"));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror", "../clike/clike"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function (CodeMirror) {
+})(function(CodeMirror) {
   "use strict";
 
   var keywords = ("this super static final const abstract class extends external factory " +
@@ -45,19 +45,19 @@
     builtin: set(builtins),
     atoms: set(atoms),
     hooks: {
-      "@": function (stream) {
+      "@": function(stream) {
         stream.eatWhile(/[\w\$_\.]/);
         return "meta";
       },
 
       // custom string handling to deal with triple-quoted strings and string interpolation
-      "'": function (stream, state) {
+      "'": function(stream, state) {
         return tokenString("'", stream, state, false);
       },
-      "\"": function (stream, state) {
+      "\"": function(stream, state) {
         return tokenString("\"", stream, state, false);
       },
-      "r": function (stream, state) {
+      "r": function(stream, state) {
         var peek = stream.peek();
         if (peek == "'" || peek == "\"") {
           return tokenString(stream.next(), stream, state, true);
@@ -65,7 +65,7 @@
         return false;
       },
 
-      "}": function (_stream, state) {
+      "}": function(_stream, state) {
         // "}" is end of interpolation, if interpolation stack is non-empty
         if (sizeInterpolationStack(state) > 0) {
           state.tokenize = popInterpolationStack(state);
@@ -74,15 +74,15 @@
         return false;
       },
 
-      "/": function (stream, state) {
+      "/": function(stream, state) {
         if (!stream.eat("*")) return false
         state.tokenize = tokenNestedComment(1)
         return state.tokenize(stream, state)
       },
-      token: function (stream, _, style) {
+      token: function(stream, _, style) {
         if (style == "variable") {
           // Assume uppercase symbols are classes using variable-2
-          var isUpper = RegExp('^[_$]*[A-Z][a-zA-Z0-9_$]*$', 'g');
+          var isUpper = RegExp('^[_$]*[A-Z][a-zA-Z0-9_$]*$','g');
           if (isUpper.test(stream.current())) {
             return 'variable-2';
           }
@@ -160,7 +160,7 @@
   CodeMirror.registerHelper("hintWords", "application/dart", keywords.concat(atoms).concat(builtins));
 
   // This is needed to make loading through meta.js work.
-  CodeMirror.defineMode("dart", function (conf) {
+  CodeMirror.defineMode("dart", function(conf) {
     return CodeMirror.getMode(conf, "application/dart");
   }, "clike");
 });

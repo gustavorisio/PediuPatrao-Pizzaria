@@ -1,13 +1,16 @@
 package com.umc.pediupatrao.entity;
 
-import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "produtos")
-@Entity
+@Getter
+@Setter
 public class Produto {
-
+    
     @Id
     private String id;
     private String nome;
@@ -16,61 +19,4 @@ public class Produto {
     private String sabor;
     private Double preco;
     private Boolean ativo;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getTipoPizza() {
-        return tipoPizza;
-    }
-
-    public void setTipoPizza(String tipoPizza) {
-        this.tipoPizza = tipoPizza;
-    }
-
-    public String getSabor() {
-        return sabor;
-    }
-
-    public void setSabor(String sabor) {
-        this.sabor = sabor;
-    }
-
-    public Double getPreco() {
-        return preco;
-    }
-
-    public void setPreco(Double preco) {
-        this.preco = preco;
-    }
-
-    public Boolean getAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(Boolean ativo) {
-        this.ativo = ativo;
-    }
-
 }
