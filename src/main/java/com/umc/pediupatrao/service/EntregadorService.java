@@ -3,16 +3,14 @@ package com.umc.pediupatrao.service;
 import com.umc.pediupatrao.entity.Entregador;
 import com.umc.pediupatrao.repository.EntregadorRepository;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class EntregadorService {
     private final EntregadorRepository repository;
-
-    public EntregadorService(EntregadorRepository repository) {
-        this.repository = repository;
-    }
 
     // Lista os entregadores cadastrados para a gestão da operação.
     public List<Entregador> listarTodos() {

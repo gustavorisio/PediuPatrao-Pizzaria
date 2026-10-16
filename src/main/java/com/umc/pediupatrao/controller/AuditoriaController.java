@@ -18,6 +18,7 @@ public class AuditoriaController {
         this.auditoriaService = auditoriaService;
     }
 
+    // A API permite consultar o histórico, sem editar ou apagar os registros.
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public List<Auditoria> listar() {

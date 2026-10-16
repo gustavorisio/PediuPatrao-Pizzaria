@@ -9,29 +9,28 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Service
+@RequiredArgsConstructor
 public class AuditoriaService {
 
     private final AuditoriaRepository auditoriaRepository;
 
-    public AuditoriaService(AuditoriaRepository auditoriaRepository) {
-        this.auditoriaRepository = auditoriaRepository;
-    }
 
     public void registrar(String operacao, String entidade, String entidadeId,
             Map<String, String> antes, Map<String, String> depois, String justificativa) {
         Authentication autenticacao = SecurityContextHolder.getContext().getAuthentication();
-            if (autenticacao == null) {
-                return;
-            }
-            if (autenticacao instanceof AnonymousAuthenticationToken) {
-                return;
-            }
-            if (!autenticacao.isAuthenticated()) {
-                return;
-            }
-
+        if (autenticacao == null) {
+            throw new org.springframework.security.access.AccessDeniedException("Autenticação obrigatória para auditar.");
+        }
+        if (!autenticacao.isAuthenticated()) {
+            throw new org.springframework.security.access.AccessDeniedException("Autenticação obrigatória para auditar.");
+        }
+        if (autenticacao instanceof AnonymousAuthenticationToken) {
+            throw new org.springframework.security.access.AccessDeniedException("Autenticação obrigatória para auditar.");
+        }
         Auditoria auditoria = new Auditoria();
         auditoria.setUsuario(autenticacao.getName());
         auditoria.setPerfil(autenticacao.getAuthorities().stream()
@@ -41,26 +40,24 @@ public class AuditoriaService {
         auditoria.setOperacao(operacao);
         auditoria.setEntidade(entidade);
         auditoria.setEntidadeId(entidadeId);
-        auditoria.setValoresAnteriores(antes);
-        auditoria.setValoresNovos(depois);
+        Map<String, String> alteracoesAnteriores = new java.util.LinkedHashMap<>();
+        Map<String, String> alteracoesNovas = new java.util.LinkedHashMap<>();
+        java.util.Set<String> campos = new java.util.LinkedHashSet<>(antes.keySet());
+        campos.addAll(depois.keySet());
+        // Grava só os campos que mudaram, incluindo os que foram removidos.
+        for (String campo : campos) {
+            if (!java.util.Objects.equals(antes.get(campo), depois.get(campo))) {
+                alteracoesAnteriores.put(campo, antes.get(campo));
+                alteracoesNovas.put(campo, depois.get(campo));
+            }
+        }
+        auditoria.setValoresAnteriores(alteracoesAnteriores);
+        auditoria.setValoresNovos(alteracoesNovas);
         auditoria.setJustificativa(justificativa);
         auditoriaRepository.save(auditoria);
     }
 
-    public String usuarioAtual() {
-        Authentication autenticacao = SecurityContextHolder.getContext().getAuthentication();
-        if (autenticacao == null) {
-            return "";
-        }
-        if (autenticacao instanceof AnonymousAuthenticationToken) {
-            return "";
-        }
-        if (!autenticacao.isAuthenticated()) {
-            return "";
-        }
-        return autenticacao.getName();
-    }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public List<Auditoria> listar() {
         return auditoriaRepository.findAll();
     }

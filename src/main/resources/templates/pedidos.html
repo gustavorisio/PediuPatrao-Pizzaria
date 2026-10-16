@@ -68,7 +68,7 @@
 
     <script th:inline="javascript">
         const API_URL = '/api/pedidos';
-        const podeExcluir = /*[[${#authorization.expression("hasRole('GERENTE')")}]]*/ false;
+        const podeGerenciar = /*[[${#authorization.expression("hasRole('GERENTE')")}]]*/ false;
         const podeEditar = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE')")}]]*/ false;
         const podeAtualizarStatus = /*[[${#authorization.expression("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")}]]*/ false;
         const entregador = /*[[${#authorization.expression("hasRole('ENTREGADOR')")}]]*/ false;
@@ -104,7 +104,7 @@
         }
 
         async function carregarProdutos() {
-            const resposta = await fetch('/api/produtos');
+            const resposta = await requisicaoApi('/api/produtos');
             if (!resposta.ok) {
                 mostrarMensagem('Não foi possível carregar o catálogo de produtos.', true);
                 return;
@@ -178,7 +178,7 @@
         }
 
         async function carregarPedidos() {
-            const resposta = await fetch(API_URL);
+            const resposta = await requisicaoApi(API_URL);
             if (!resposta.ok) {
                 mostrarMensagem('Não foi possível carregar os pedidos.', true);
                 return;
@@ -234,10 +234,10 @@
                         'onclick="editarPedido(\'' + pedido.id + '\')">Editar</button>';
                 }
             }
-            if (podeExcluir) {
-                if (pedido.status === 'RECEBIDO') {
+            if (podeGerenciar) {
+                if (['RECEBIDO', 'EM_PREPARACAO', 'PRONTO'].includes(pedido.status)) {
                     html += '<button class="btn btn-sm btn-outline-danger me-1" ' +
-                        'onclick="excluirPedido(\'' + pedido.id + '\')">Excluir</button>';
+                        'onclick="cancelarPedido(\'' + pedido.id + '\')">Cancelar</button>';
                 }
             }
             const proximos = {
@@ -247,6 +247,14 @@
                 SAIU_PARA_ENTREGA: 'FINALIZADO',
                 RETIRADO: 'FINALIZADO'
             };
+            if (podeGerenciar && ['RECEBIDO', 'EM_PREPARACAO', 'PRONTO'].includes(pedido.status)) {
+                html += '<button class="btn btn-sm btn-outline-warning me-1" onclick="aplicarDesconto(\'' +
+                    pedido.id + '\')">Desconto</button>';
+            }
+            if (podeAtualizarStatus && !entregador && pedido.status === 'PRONTO') {
+                html += '<button class="btn btn-sm btn-outline-success me-1" onclick="alterarStatus(\'' +
+                    pedido.id + '\', \'RETIRADO\')">Retirado</button>';
+            }
             if (podeAtualizarStatus) {
                 if (proximos[pedido.status]) {
                     html += '<button class="btn btn-sm btn-outline-success" ' +
@@ -323,7 +331,7 @@
                 return;
             }
 
-            const resposta = await fetch(id ? API_URL + '/' + id : API_URL, {
+            const resposta = await requisicaoApi(id ? API_URL + '/' + id : API_URL, {
                 method: id ? 'PUT' : 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -351,7 +359,7 @@
         }
 
         async function alterarStatus(id, status) {
-            const resposta = await fetch(API_URL + '/' + id + '/status?status=' + status, {
+            const resposta = await requisicaoApi(API_URL + '/' + id + '/status?status=' + status, {
                 method: 'PUT'
             });
             if (!resposta.ok) {
@@ -361,19 +369,33 @@
             carregarPedidos();
         }
 
-        async function excluirPedido(id) {
-            if (!confirm('Deseja excluir este pedido?')) return;
-            const resposta = await fetch(API_URL + '/' + id, {method: 'DELETE'});
+        async function cancelarPedido(id) {
+            const justificativa = prompt('Informe a justificativa do cancelamento:');
+            if (!justificativa?.trim()) return;
+            const resposta = await requisicaoApi(API_URL + '/' + id + '/cancelar?justificativa=' + encodeURIComponent(justificativa), {method: 'PUT'});
             if (!resposta.ok) {
-                mostrarMensagem('Somente pedidos recebidos podem ser excluídos.', true);
+                mostrarMensagem('Não foi possível cancelar o pedido.', true);
                 return;
             }
-            mostrarMensagem('Pedido excluído com sucesso.', false);
+            mostrarMensagem('Pedido cancelado com sucesso.', false);
+            carregarPedidos();
+        }
+
+        async function aplicarDesconto(id) {
+            const percentual = prompt('Desconto percentual (0 a 20):');
+            if (percentual === null || percentual.trim() === '') return;
+            const resposta = await requisicaoApi(API_URL + '/' + id + '/desconto?percentual=' +
+                encodeURIComponent(percentual.replace(',', '.')), {method: 'PUT'});
+            if (!resposta.ok) {
+                mostrarMensagem('Não foi possível aplicar o desconto. Informe um percentual de 0 a 20.', true);
+                return;
+            }
+            mostrarMensagem('Desconto atualizado.', false);
             carregarPedidos();
         }
 
         async function carregarClientes() {
-            const resposta = await fetch('/api/clientes');
+            const resposta = await requisicaoApi('/api/clientes');
             if (!resposta.ok) {
                 mostrarMensagem('Não foi possível carregar os clientes.', true);
                 return;

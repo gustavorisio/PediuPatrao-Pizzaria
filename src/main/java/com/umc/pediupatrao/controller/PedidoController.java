@@ -63,4 +63,10 @@ public class PedidoController {
     public Pedido cancelarPedido(@PathVariable String id, @RequestParam String justificativa) {
         return pedidoService.cancelarPedido(id, justificativa);
     }
+
+    @PutMapping("/{id}/desconto")
+    @PreAuthorize("hasRole('GERENTE')")
+    public Pedido aplicarDesconto(@PathVariable String id, @RequestParam java.math.BigDecimal percentual) {
+        return pedidoService.aplicarDesconto(id, percentual);
+    }
 }

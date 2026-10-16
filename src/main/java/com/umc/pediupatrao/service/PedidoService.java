@@ -14,16 +14,20 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import org.springframework.security.core.GrantedAuthority;
 
 @Service
+@RequiredArgsConstructor
 public class PedidoService {
 
     private static final BigDecimal DESCONTO_MAXIMO = new BigDecimal("20");
@@ -32,18 +36,11 @@ public class PedidoService {
     private final ClienteRepository clienteRepository;
     private final ProdutoRepository produtoRepository;
     private final PedidoAuditoriaService pedidoAuditoriaService;
-
-    public PedidoService(PedidoRepository pedidoRepository, ClienteRepository clienteRepository,
-            ProdutoRepository produtoRepository, PedidoAuditoriaService pedidoAuditoriaService) {
-        this.pedidoRepository = pedidoRepository;
-        this.clienteRepository = clienteRepository;
-        this.produtoRepository = produtoRepository;
-        this.pedidoAuditoriaService = pedidoAuditoriaService;
-    }
-
-    // Persiste um pedido recém-criado pelo atendimento.
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
     public Pedido criarPedido(Pedido pedido) {
         validarPedido(pedido);
+        // Ignora o ID enviado para não sobrescrever outro pedido.
+        pedido.setId(null);
         pedido.gerarId();
         pedido.setNumeroPedido(proximoNumeroPedido());
         pedido.setStatus(StatusPedido.RECEBIDO);
@@ -53,10 +50,8 @@ public class PedidoService {
         pedido.setResponsavelSaida(null);
         pedido.setDataHoraSaida(null);
         pedido.setJustificativaCancelamento(null);
-        pedido.setAuditoria(new ArrayList<>());
-        pedidoAuditoriaService.prepararRecebimento(pedido);
         Pedido salvo = pedidoRepository.save(pedido);
-        pedidoAuditoriaService.registrarRecebimento(salvo);
+        pedidoAuditoriaService.registrar("INCLUSAO", salvo, Map.of(), null);
         return salvo;
     }
 
@@ -92,9 +87,13 @@ public class PedidoService {
             if (produto.getPreco() == null) {
                 throw erro("O produto selecionado não possui preço válido.");
             }
+            if (!Double.isFinite(produto.getPreco())) {
+                throw erro("O produto selecionado não possui preço válido.");
+            }
             if (produto.getPreco() < 0) {
                 throw erro("O produto selecionado não possui preço válido.");
             }
+            // O preço vem do cadastro do produto, não do navegador.
             item.setPrecoUnitario(BigDecimal.valueOf(produto.getPreco()));
             item.setDescricao(produto.getNome());
         }
@@ -103,13 +102,8 @@ public class PedidoService {
         if (desconto == null) {
             pedido.setPercentualDesconto(BigDecimal.ZERO);
         } else {
-            if (desconto.compareTo(BigDecimal.ZERO) < 0) {
-                throw erro("O desconto deve estar entre 0% e 20%.");
-            }
-            if (desconto.compareTo(DESCONTO_MAXIMO) > 0) {
-                throw erro("O desconto deve estar entre 0% e 20%.");
-            }
-            if (desconto.compareTo(BigDecimal.ZERO) > 0) {
+            validarPercentual(desconto);
+            if (desconto.signum() > 0) {
                 if (!podeAplicarDesconto()) {
                     throw new ResponseStatusException(
                             HttpStatus.FORBIDDEN,
@@ -134,22 +128,15 @@ public class PedidoService {
     private String usuarioAutenticado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Autenticação obrigatória.");
         }
         if (!authentication.isAuthenticated()) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Autenticação obrigatória.");
         }
         if (authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Autenticação obrigatória.");
         }
-        if (authentication.getName() == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
-        }
-        if (authentication.getName().isBlank()) {
+        if (isBlank(authentication.getName())) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "É necessário estar autenticado para registrar um pedido.");
         }
@@ -187,17 +174,13 @@ public class PedidoService {
         }
         return valor.isBlank();
     }
-
     // Entrega à aplicação os pedidos necessários para acompanhamento.
     public List<Pedido> listarPedidos() {
-        List<Pedido> pedidos = pedidoRepository.findAll();
-        preencherNumerosAntigos(pedidos);
-        return pedidos;
+        return pedidoRepository.findAll();
     }
 
     public List<PedidoEntregaDTO> listarPedidosParaEntrega() {
         List<Pedido> pedidos = pedidoRepository.findAll();
-        preencherNumerosAntigos(pedidos);
         List<PedidoEntregaDTO> resultado = new ArrayList<>();
         for (Pedido pedido : pedidos) {
             resultado.add(transformarParaEntrega(pedido));
@@ -210,6 +193,7 @@ public class PedidoService {
     }
 
     private PedidoEntregaDTO transformarParaEntrega(Pedido pedido) {
+        // O entregador recebe só o número, o endereço e a data de entrada.
         Cliente cliente = clienteRepository.findById(pedido.getClienteId()).orElse(null);
         if (cliente == null) {
             return new PedidoEntregaDTO(numeroParaExibicao(pedido), "-",
@@ -232,16 +216,6 @@ public class PedidoService {
                         ? 1
                         : pedido.getNumeroPedido() + 1)
                 .orElse(1);
-    }
-
-    private void preencherNumerosAntigos(List<Pedido> pedidos) {
-        int proximo = proximoNumeroPedido();
-        for (Pedido pedido : pedidos) {
-            if (pedido.getNumeroPedido() == null) {
-                pedido.setNumeroPedido(proximo++);
-                pedidoRepository.save(pedido);
-            }
-        }
     }
 
     private String enderecoCliente(com.umc.pediupatrao.entity.Cliente cliente) {
@@ -267,6 +241,7 @@ public class PedidoService {
         }
     }
 
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
     public Pedido atualizarPedido(String id, Pedido dados) {
         if (dados == null) {
             throw erro("Os dados do pedido devem ser informados.");
@@ -275,54 +250,76 @@ public class PedidoService {
         if (pedido.getStatus() != StatusPedido.RECEBIDO) {
             throw erro("Somente pedidos recebidos podem ser editados.");
         }
-
-        validarPedido(dados);
+        if (!podeAplicarDesconto()) {
+            if (dados.getPercentualDesconto() != null) {
+                if (dados.getPercentualDesconto().compareTo(percentualDoPedido(pedido)) != 0) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Somente o GERENTE pode alterar descontos.");
+                }
+            }
+            // Valida os itens sem desconto novo e depois mantém o desconto já autorizado.
+            dados.setPercentualDesconto(BigDecimal.ZERO);
+            validarPedido(dados);
+            dados.setPercentualDesconto(percentualDoPedido(pedido));
+        } else {
+            validarPedido(dados);
+        }
+        // Guarda os valores antes dos setters para comparar na auditoria.
+        Map<String, String> dadosAnteriores = pedidoAuditoriaService.dadosPedido(pedido);
         pedido.setClienteId(dados.getClienteId());
         pedido.setTipoPizza(dados.getTipoPizza());
         pedido.setQuantidade(dados.getQuantidade());
         pedido.setSabor(dados.getSabor());
         pedido.setItens(dados.getItens());
         BigDecimal descontoAnterior = percentualDoPedido(pedido);
-        BigDecimal valorAnterior = pedido.getValorTotal();
         pedido.setPercentualDesconto(dados.getPercentualDesconto());
         pedido.setValorTotal(calcularValorTotal(pedido));
-        pedidoAuditoriaService.prepararAlteracao(pedido, descontoAnterior, valorAnterior);
         Pedido salvo = pedidoRepository.save(pedido);
-        pedidoAuditoriaService.registrarAlteracao(salvo, descontoAnterior, valorAnterior);
+        pedidoAuditoriaService.registrar(descontoAnterior.compareTo(pedido.getPercentualDesconto()) == 0 ? "ALTERACAO" : "DESCONTO", salvo, dadosAnteriores, null);
         return salvo;
     }
 
     public void excluirPedido(String id) {
-        Pedido pedido = buscarPedido(id);
-        if (pedido.getStatus() != StatusPedido.RECEBIDO) {
-            throw erro("Somente pedidos recebidos podem ser excluídos.");
-        }
-        pedidoRepository.deleteById(id);
+        throw erro("Pedidos devem ser cancelados com justificativa; o histórico é preservado.");
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
+    public Pedido aplicarDesconto(String id, BigDecimal percentual) {
+        Pedido pedido = buscarPedido(id);
+        if (!List.of(StatusPedido.RECEBIDO, StatusPedido.EM_PREPARACAO, StatusPedido.PRONTO)
+                .contains(pedido.getStatus())) {
+            throw erro("Descontos só podem ser alterados antes da saída do pedido.");
+        }
+        validarPercentual(percentual);
+        Map<String, String> antes = pedidoAuditoriaService.dadosPedido(pedido);
+        pedido.setPercentualDesconto(percentual);
+        pedido.setValorTotal(calcularValorTotal(pedido));
+        Pedido salvo = pedidoRepository.save(pedido);
+        pedidoAuditoriaService.registrar("DESCONTO", salvo, antes, null);
+        return salvo;
+    }
     // Altera apenas o status, preservando os demais dados do pedido.
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")
     public Pedido atualizarStatus(String id, String status) {
         Pedido pedido = buscarPedido(id);
         StatusPedido novoStatus = StatusPedido.fromValue(status);
         validarTransicao(pedido.getStatus(), novoStatus);
 
-        StatusPedido statusAnterior = pedido.getStatus();
+        Map<String, String> antes = pedidoAuditoriaService.dadosPedido(pedido);
+
         String usuario = usuarioAutenticado();
         pedido.setStatus(novoStatus);
-        if (StatusPedido.SAIU_PARA_ENTREGA == novoStatus) {
+        // A retirada no balcão também conta como saída do pedido.
+        if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO).contains(novoStatus)) {
             pedido.setResponsavelSaida(usuario);
             pedido.setDataHoraSaida(LocalDateTime.now());
         }
-        if (StatusPedido.RETIRADO == novoStatus) {
-            pedido.setResponsavelSaida(usuario);
-            pedido.setDataHoraSaida(LocalDateTime.now());
-        }
-        pedidoAuditoriaService.prepararAlteracaoStatus(pedido, statusAnterior);
         Pedido salvo = pedidoRepository.save(pedido);
-        pedidoAuditoriaService.registrarAlteracaoStatus(salvo, statusAnterior);
+        pedidoAuditoriaService.registrar("ALTERACAO_STATUS", salvo, antes, null);
         return salvo;
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     public Pedido cancelarPedido(String id, String justificativa) {
         Pedido pedido = buscarPedido(id);
         exigirGerente();
@@ -333,12 +330,12 @@ public class PedidoService {
             throw erro("O pedido só pode ser cancelado antes da saída para entrega ou retirada.");
         }
 
-        StatusPedido statusAnterior = pedido.getStatus();
+
+        Map<String, String> antes = pedidoAuditoriaService.dadosPedido(pedido);
         pedido.setStatus(StatusPedido.CANCELADO);
         pedido.setJustificativaCancelamento(justificativa.trim());
-        pedidoAuditoriaService.prepararCancelamento(pedido, statusAnterior, justificativa);
         Pedido salvo = pedidoRepository.save(pedido);
-        pedidoAuditoriaService.registrarCancelamento(salvo, statusAnterior, justificativa);
+        pedidoAuditoriaService.registrar("CANCELAMENTO", salvo, antes, pedido.getJustificativaCancelamento());
         return salvo;
     }
 
@@ -355,55 +352,65 @@ public class PedidoService {
             throw erro("O status do pedido deve ser informado.");
         }
         if (usuarioEhEntregador()) {
-            boolean podeSair = false;
-            boolean podeFinalizar = false;
-            if (StatusPedido.PRONTO == statusAtual) {
-                if (StatusPedido.SAIU_PARA_ENTREGA == novoStatus) {
-                    podeSair = true;
-                }
+            boolean permitido = false;
+            if (statusAtual == StatusPedido.PRONTO) {
+                permitido = novoStatus == StatusPedido.SAIU_PARA_ENTREGA;
             }
-            if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO).contains(statusAtual)) {
-                if (StatusPedido.FINALIZADO == novoStatus) {
-                    podeFinalizar = true;
-                }
+            if (statusAtual == StatusPedido.SAIU_PARA_ENTREGA) {
+                permitido = novoStatus == StatusPedido.FINALIZADO;
             }
-            if (!podeSair) {
-                if (!podeFinalizar) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                            "O entregador só pode atualizar o status da entrega.");
-                }
+            if (statusAtual == StatusPedido.RETIRADO) {
+                permitido = novoStatus == StatusPedido.FINALIZADO;
+            }
+            if (!permitido) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "O entregador só pode atualizar o status da entrega.");
             }
         }
         boolean valida = false;
-        if (StatusPedido.RECEBIDO == statusAtual) {
-            if (StatusPedido.EM_PREPARACAO == novoStatus) {
-                valida = true;
-            }
-        }
-        if (StatusPedido.EM_PREPARACAO == statusAtual) {
-            if (StatusPedido.PRONTO == novoStatus) {
-                valida = true;
-            }
-        }
-        if (StatusPedido.PRONTO == statusAtual) {
-            if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO).contains(novoStatus)) {
-                valida = true;
-            }
-        }
-        if (List.of(StatusPedido.SAIU_PARA_ENTREGA, StatusPedido.RETIRADO).contains(statusAtual)) {
-            if (StatusPedido.FINALIZADO == novoStatus) {
-                valida = true;
-            }
+        switch (statusAtual) {
+            case RECEBIDO:
+                valida = novoStatus == StatusPedido.EM_PREPARACAO;
+                break;
+            case EM_PREPARACAO:
+                valida = novoStatus == StatusPedido.PRONTO;
+                break;
+            case PRONTO:
+                if (novoStatus == StatusPedido.SAIU_PARA_ENTREGA) {
+                    valida = true;
+                }
+                if (novoStatus == StatusPedido.RETIRADO) {
+                    valida = true;
+                }
+                break;
+            case SAIU_PARA_ENTREGA:
+            case RETIRADO:
+                valida = novoStatus == StatusPedido.FINALIZADO;
+                break;
+            default:
+                // Pedidos finalizados ou cancelados não mudam mais de status.
+                break;
         }
         if (!valida) {
             throw erro("Transição de status inválida.");
         }
     }
-
     private void exigirGerente() {
         if (!usuarioTemRole("GERENTE")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Somente o GERENTE pode cancelar pedidos.");
+        }
+    }
+
+    private void validarPercentual(BigDecimal percentual) {
+        if (percentual == null) {
+            throw erro("O desconto deve estar entre 0% e 20%.");
+        }
+        if (percentual.signum() < 0) {
+            throw erro("O desconto deve estar entre 0% e 20%.");
+        }
+        if (percentual.compareTo(DESCONTO_MAXIMO) > 0) {
+            throw erro("O desconto deve estar entre 0% e 20%.");
         }
     }
 
