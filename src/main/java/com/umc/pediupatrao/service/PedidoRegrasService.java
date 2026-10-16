@@ -46,10 +46,6 @@ public class PedidoRegrasService {
         return authentication.getName();
     }
 
-    public boolean usuarioEhEntregador() {
-        return usuarioTemRole("ENTREGADOR");
-    }
-
     public boolean podeAplicarDesconto() {
         return usuarioTemRole("GERENTE");
     }
@@ -70,10 +66,6 @@ public class PedidoRegrasService {
     public void validarTransicao(StatusPedido statusAtual, StatusPedido novoStatus) {
         if (statusAusente(statusAtual, novoStatus)) {
             throw erro("O status do pedido deve ser informado.");
-        }
-        if (entregadorNaoPodeFazerTransicao(statusAtual, novoStatus)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "O entregador só pode atualizar o status da entrega.");
         }
         if (!transicaoPermitida(statusAtual, novoStatus)) {
             throw erro("Transição de status inválida.");
@@ -167,19 +159,6 @@ public class PedidoRegrasService {
         return false;
     }
 
-    private boolean transicaoDoEntregadorPermitida(StatusPedido atual, StatusPedido novo) {
-        if (atual == StatusPedido.PRONTO) {
-            return novo == StatusPedido.SAIU_PARA_ENTREGA;
-        }
-        if (atual == StatusPedido.SAIU_PARA_ENTREGA) {
-            return novo == StatusPedido.FINALIZADO;
-        }
-        if (atual == StatusPedido.RETIRADO) {
-            return novo == StatusPedido.FINALIZADO;
-        }
-        return false;
-    }
-
     private boolean authenticationInvalida(Authentication authentication) {
         if (authentication == null) {
             return true;
@@ -205,13 +184,6 @@ public class PedidoRegrasService {
             return true;
         }
         return novo == null;
-    }
-
-    private boolean entregadorNaoPodeFazerTransicao(StatusPedido atual, StatusPedido novo) {
-        if (!usuarioEhEntregador()) {
-            return false;
-        }
-        return !transicaoDoEntregadorPermitida(atual, novo);
     }
 
     private boolean precoInvalido(Produto produto) {

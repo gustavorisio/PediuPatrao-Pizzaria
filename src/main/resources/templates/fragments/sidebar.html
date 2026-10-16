@@ -42,18 +42,23 @@
                                 </a>
                             </li>
                             <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
-                                <a class="nav-link" th:href="@{/horarios}">
-                                    <i class="bi bi-clock"></i><span class="d-none d-md-inline">&nbsp;Horário de Funcionamento</span>
+                                <a class="nav-link" th:href="@{/produtos}">
+                                    <i class="bi bi-boxes"></i><span class="d-none d-md-inline">&nbsp;Produtos</span>
                                 </a>
                             </li>
                             <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
-                                <a class="nav-link" th:href="@{/produtos}">
-                                    <i class="bi bi-boxes"></i><span class="d-none d-md-inline">&nbsp;Produtos</span>
+                                <a class="nav-link" th:href="@{/horarios}">
+                                    <i class="bi bi-clock"></i><span class="d-none d-md-inline">&nbsp;Horário de Funcionamento</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" th:href="@{/usuarios}">
                                     <i class="bi bi-people-fill"></i><span class="d-none d-md-inline">&nbsp;Usuários</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                                <a class="nav-link" th:href="@{/auditorias}">
+                                    <span class="d-none d-md-inline">Auditoria e logs</span>
                                 </a>
                             </li>
                     </li>

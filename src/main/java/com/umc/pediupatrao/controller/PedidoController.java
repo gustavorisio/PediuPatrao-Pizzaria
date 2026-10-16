@@ -25,23 +25,18 @@ public class PedidoController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE', 'ENTREGADOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
     // Entregadores consultam os pedidos para acompanhar as entregas.
     public List<?> listarPedidos() {
-        if (pedidoService.usuarioEhEntregador()) {
-            return pedidoService.listarPedidosParaEntrega();
-        }
         return pedidoService.listarPedidos();
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE', 'ENTREGADOR')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'ATENDENTE')")
     // Atualiza somente o status do pedido identificado na URL.
-    public Object atualizarStatus(@PathVariable String id, @RequestParam String status) {
-        Pedido pedido = pedidoService.atualizarStatus(id, status);
-        if (pedidoService.usuarioEhEntregador()) {
-            return pedidoService.pedidoParaEntrega(pedido.getId());
-        }
+    public Object atualizarStatus(@PathVariable String id, @RequestParam String status,
+            @RequestParam(required = false) String entregadorId) {
+        Pedido pedido = pedidoService.atualizarStatus(id, status, entregadorId);
         return pedido;
     }
 

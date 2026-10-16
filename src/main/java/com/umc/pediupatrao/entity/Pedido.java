@@ -33,6 +33,9 @@ public class Pedido {
     private LocalDateTime dataHoraEntrada;
     private String responsavelSaida;
     private LocalDateTime dataHoraSaida;
+    private String entregadorSaidaId;
+    private String entregadorSaidaNome;
+    private String entregadorSaidaTelefone;
     private String justificativaCancelamento;
 
     public void gerarId() {
