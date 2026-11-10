@@ -26,7 +26,7 @@ public class PedidoController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
-    // Entregadores consultam os pedidos para acompanhar as entregas.
+    // Os três perfis do sistema podem consultar os pedidos.
     public List<?> listarPedidos() {
         return pedidoService.listarPedidos();
     }

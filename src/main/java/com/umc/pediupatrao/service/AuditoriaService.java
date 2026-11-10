@@ -57,7 +57,7 @@ public class AuditoriaService {
         auditoriaRepository.save(auditoria);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public List<Auditoria> listar() {
         return auditoriaRepository.findAll();
     }

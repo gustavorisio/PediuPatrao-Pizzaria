@@ -20,7 +20,7 @@ public class AuditoriaController {
 
     // A API permite consultar o histórico, sem editar ou apagar os registros.
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public List<Auditoria> listar() {
         return auditoriaService.listar();
     }

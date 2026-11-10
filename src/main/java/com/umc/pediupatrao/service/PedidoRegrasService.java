@@ -148,7 +148,7 @@ public class PedidoRegrasService {
 
     private boolean usuarioTemRole(String role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
+        if (authenticationInvalida(authentication)) {
             return false;
         }
         for (GrantedAuthority authority : authentication.getAuthorities()) {
