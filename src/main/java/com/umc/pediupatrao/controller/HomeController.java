@@ -52,6 +52,13 @@ public class HomeController {
         return "layout";
     }
 
+    @GetMapping("/dashboard")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    public String dashboard(Model model) {
+        model.addAttribute("content", "dashboard :: content");
+        return "layout";
+    }
+
     // Renderiza a lista administrativa de usuários.
     @GetMapping("/usuarios")
     @PreAuthorize("hasRole('ADMIN')")

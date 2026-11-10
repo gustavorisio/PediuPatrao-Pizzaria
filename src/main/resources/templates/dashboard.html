@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section th:fragment="content" id="dashboard" class="dashboard" th:attr="data-api=@{/api/dashboard}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <header class="dash-header">
+        <div><p class="dash-eyebrow">PEDIU PATRÃO / GESTÃO</p><h1>Visão da operação</h1><p>Os números do seu negócio, do pedido à decisão.</p></div>
+        <span class="dash-badge">Painel administrativo</span>
+    </header>
+    <form id="dash-filters" class="dash-filters">
+        <label>Data inicial<input type="date" name="inicio" required></label>
+        <label>Data final<input type="date" name="fim" required></label>
+        <label>Situação<select name="status"><option value="">Todas as situações</option></select></label>
+        <label>Agrupar por<select name="agrupamento"><option value="dia">Dia</option><option value="mes">Mês</option></select></label>
+        <button type="submit" class="dash-primary">Aplicar filtros</button>
+        <button type="button" id="dash-month" class="dash-secondary">Este mês</button>
+    </form>
+    <div class="dash-toolbar"><p id="dash-feedback" role="status" aria-live="polite">Preparando consulta…</p>
+        <div><label><input type="checkbox" id="dash-auto"> Atualizar a cada 60 s</label><button type="button" id="dash-refresh" class="dash-secondary">↻ Atualizar</button></div>
+    </div>
+    <p id="dash-error" class="dash-error" role="alert" hidden></p>
+    <div id="dash-results" aria-busy="true">
+        <div class="dash-kpis">
+            <article class="dash-kpi dash-featured"><h2>Faturamento</h2><strong id="dash-revenue">—</strong><small>Valor líquido dos pedidos válidos</small></article>
+            <article class="dash-kpi"><h2>Pedidos</h2><strong id="dash-orders">—</strong><small id="dash-valid">No período selecionado</small></article>
+            <article class="dash-kpi"><h2>Ticket médio</h2><strong id="dash-ticket">—</strong><small>Faturamento / pedidos válidos</small></article>
+            <article class="dash-kpi"><h2>Em andamento</h2><strong id="dash-open">—</strong><small id="dash-canceled">—</small></article>
+        </div>
+        <p id="dash-empty" class="dash-empty" hidden>Nenhum pedido encontrado. Experimente outro período ou situação.</p>
+        <div class="dash-grid">
+            <article class="dash-panel dash-sales"><div class="dash-panel-heading"><div><p class="dash-eyebrow">DESEMPENHO</p><h2>Evolução das vendas</h2></div><span>Faturamento em R$</span></div>
+                <div id="dash-chart" class="dash-chart" role="img" aria-label="Evolução do faturamento"></div>
+                <details><summary>Consultar valores do gráfico</summary><div class="dash-scroll"><table><thead><tr><th>Período</th><th>Pedidos válidos</th><th>Faturamento</th></tr></thead><tbody id="dash-sales-table"></tbody></table></div></details>
+            </article>
+            <article class="dash-panel"><p class="dash-eyebrow">OPERAÇÃO</p><h2>Situação dos pedidos</h2><div id="dash-status" class="dash-status"></div></article>
+            <article class="dash-panel"><p class="dash-eyebrow">PREFERÊNCIAS DOS CLIENTES</p><h2>Produtos mais vendidos</h2><p class="dash-muted">Top 10 por unidades • valores antes do desconto</p><div class="dash-scroll"><table><thead><tr><th>Produto</th><th>Unidades</th><th>Valor bruto</th></tr></thead><tbody id="dash-products"></tbody></table></div></article>
+            <article class="dash-panel"><div class="dash-panel-heading"><div><p class="dash-eyebrow">ACOMPANHAMENTO</p><h2>Pedidos recentes</h2></div><a th:href="@{/pedidos}">Ver pedidos →</a></div><p class="dash-muted">Últimos 20 do período e situação selecionados</p><div class="dash-scroll"><table><thead><tr><th>Pedido</th><th>Entrada</th><th>Situação</th><th>Total</th></tr></thead><tbody id="dash-recent"></tbody></table></div></article>
+        </div>
+    </div>
+    <footer class="dash-note">Os filtros usam a data de entrada do pedido. Cancelados não compõem faturamento, ticket ou ranking. Pedidos em andamento entram no faturamento; os valores representam vendas registradas, não recebimentos de caixa. Horário de Brasília.</footer>
+    <script th:src="@{/js/dashboard.js}" defer></script>
+</section>
+</body>
+</html>

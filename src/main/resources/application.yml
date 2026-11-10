@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/pediupatrao}
+      database: ${MONGODB_DATABASE:pediupatrao}
