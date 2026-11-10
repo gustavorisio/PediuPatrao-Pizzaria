@@ -14,19 +14,12 @@ Para executar o projeto, é necessário ter instalado:
 
 Editor e inicializador recomendado: Visual Studio Code.
 1. Clone o projeto e abra a pasta no terminal.
-2. Configure o acesso ao MongoDB usando as variáveis abaixo, com o nome do arquivo se chamando: application.properties.
-3. o arquivo application.properties deve ser alocado na pasta src/target/classes/, contendo:
+2. O arquivo versionado `src/main/resources/application.yml` usa MongoDB local por padrão. Para outro servidor, configure `MONGODB_URI` e, opcionalmente, `MONGODB_DATABASE` no ambiente. Usuário e senha, quando necessários, fazem parte da URI (com caracteres especiais codificados). Não versione credenciais nem edite arquivos em `target/`.
 
-   - `MONGODB_URI`: endereço de conexão do banco;
-   - `MONGODB_USERNAME`: usuário do banco, quando necessário;
-   - `MONGODB_PASSWORD`: senha do banco, quando necessário.
-  
-```
-MONGODB_USERNAME=usuario_mongodb
-MONGODB_PASSWORD=senha_mongodb
-MONGODB_URI=exemplo: mongodb+srv://...
-spring.data.mongodb.uri=${MONGODB_URI}
-spring.data.mongodb.database=pediupatrao
+```powershell
+$env:MONGODB_URI = 'mongodb://localhost:27017/pediupatrao'
+$env:MONGODB_DATABASE = 'pediupatrao'
+$env:JAVA_TOOL_OPTIONS = '-Duser.timezone=America/Sao_Paulo'
 ```
 
 3. Execute o projeto.
@@ -57,6 +50,17 @@ Na primeira execução, o sistema cria um usuário administrador para o acesso i
 Essa senha deve ser alterada depois do primeiro acesso, em editar usuario.
 
 ## Requisitos implementados
+
+### Dashboard administrativo
+
+Acesse **Dashboard** no menu ou `/dashboard`, com perfil ADMIN ou GERENTE. O painel oferece indicadores de vendas, gráfico por dia ou mês, situações dos pedidos, ranking de produtos, pedidos recentes e filtros de período/situação. Consome `/api/dashboard/filtros` e `/api/dashboard/resumo`, com atualização manual e automática opcional.
+
+- [Requisitos, arquitetura, regras e documentação da API](docs/dashboard.md)
+- [Evidências dos testes e capturas de tela](docs/testes-dashboard.md)
+- Execute os testes com `./mvnw test` ou `.\mvnw.cmd test`; não exigem MongoDB.
+- Há uma prévia isolada com dados fictícios e instruções em `docs/dashboard.md`.
+
+![Dashboard administrativo com dados fictícios](docs/evidencias/dashboard-desktop.png)
 
 ### RF01 - Controle de usuários e permissões
 

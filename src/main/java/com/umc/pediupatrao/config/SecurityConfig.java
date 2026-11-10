@@ -42,9 +42,25 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/css/**", "/dist/**", "/plugins/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/api/dashboard/**", "/dashboard").hasAnyRole("ADMIN", "GERENTE")
                         .requestMatchers("/api/usuarios/**").authenticated()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(errors -> errors
+                        .defaultAuthenticationEntryPointFor((request, response, exception) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"message\":\"Sessão expirada. Entre novamente.\"}");
+                        }, new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/dashboard/**"))
+                        .accessDeniedHandler((request, response, exception) -> {
+                            if (request.getRequestURI().startsWith(request.getContextPath() + "/api/dashboard/")) {
+                                response.setStatus(403);
+                                response.setContentType("application/json;charset=UTF-8");
+                                response.getWriter().write("{\"message\":\"Acesso permitido somente para administrador ou gerente.\"}");
+                            } else {
+                                response.sendError(403);
+                            }
+                        }))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
