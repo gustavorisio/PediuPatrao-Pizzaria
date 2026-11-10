@@ -2,9 +2,11 @@
 
 Verificação realizada em **10/11/2026**, com Java 21.0.12.1, Maven e Spring Boot 3.4.4.
 
+Esta página preserva as evidências da entrega inicial do dashboard (17 testes). A [revisão de permissões e regras operacionais](revisao-permissoes.md) ampliou a suíte para **84 testes aprovados** e contém os relatórios atuais.
+
 ## Testes automatizados
 
-Comando: `mvn -B test` (ou `./mvnw test` / `.\mvnw.cmd test`). Os testes usam MongoTemplate simulado e MockMvc com a configuração real de segurança. Não exigem MongoDB nem acesso a dados de produção.
+Comando: `mvn -B test` (ou `sh ./mvnw test` / `.\mvnw.cmd test`). Os testes usam MongoTemplate simulado e MockMvc com a configuração real de segurança. Não exigem MongoDB nem acesso a dados de produção.
 
 Resultado: **17 testes executados, 0 falhas, 0 erros, 0 ignorados — BUILD SUCCESS**.
 

@@ -3,6 +3,7 @@ package com.umc.pediupatrao.service;
 import com.umc.pediupatrao.entity.Produto;
 import com.umc.pediupatrao.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
 public class ProdutoService {
 
     private static final Set<String> TIPOS_PERMITIDOS = Set.of("Pizza", "Lanche", "Bebida", "Opcional");
@@ -25,11 +27,13 @@ public class ProdutoService {
     }
 
     // Método para excluir cliente
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public void excluir(String id) {
         produtoRepository.deleteById(id);
     }
 
     // Método para salvar um novo cliente ou atualizar um cliente existente
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public Produto salvar(Produto produto) {
         validarProduto(produto);
         if (produto.getAtivo() == null) {

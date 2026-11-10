@@ -140,7 +140,7 @@ public class HomeController {
     }
 
     @GetMapping("/auditorias")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public String auditorias(Model model) {
         model.addAttribute("auditorias", auditoriaService.listar());
         model.addAttribute("content", "auditorias/lista :: content");
@@ -300,12 +300,6 @@ public class HomeController {
     public String configuracoes(Model model) {
         model.addAttribute("content", "configuracoes :: content");
         return "layout";
-    }
-
-    @GetMapping("/teste")
-    // Mantém a rota de teste disponível para validações locais.
-    public String teste() {
-        return "teste";
     }
 
     @GetMapping("/admin")

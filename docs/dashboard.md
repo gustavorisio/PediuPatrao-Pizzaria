@@ -138,7 +138,7 @@ No agrupamento mensal, `periodo` tem formato `AAAA-MM`. Sem resultados, a API re
 | 400 | Agrupamento desconhecido | `Agrupamento deve ser dia ou mes.` |
 | 400 | Situação desconhecida | `Status de pedido inválido: INEXISTENTE` |
 | 401 | Sem sessão ou sessão expirada | `Sessão expirada. Entre novamente.` |
-| 403 | Perfil sem acesso | `Acesso permitido somente para administrador ou gerente.` |
+| 403 | Perfil sem acesso | `Acesso negado para este perfil.` |
 | 503 | Falha de acesso ao MongoDB | `Dados temporariamente indisponíveis. Tente atualizar novamente.` |
 
 Corpo de erro: `{"message":"Descrição do erro."}`. Na página HTML, o login continua usando o fluxo de formulário do sistema; a resposta JSON 401 aplica-se à API.
@@ -146,6 +146,8 @@ Corpo de erro: `{"message":"Descrição do erro."}`. Na página HTML, o login co
 ## Executar e testar
 
 Produção/desenvolvimento com MongoDB: siga o [README](../README.md), autentique como administrador ou gerente e abra `http://localhost:8080/dashboard`.
+
+No Linux/macOS, use `sh ./mvnw` em lugar de `.\mvnw.cmd` nos comandos abaixo; o wrapper está versionado sem permissão de execução.
 
 ```powershell
 .\mvnw.cmd test
