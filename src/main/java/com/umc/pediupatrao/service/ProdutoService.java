@@ -64,7 +64,7 @@ public class ProdutoService {
         if (produto.getPreco() == null) {
             throw new IllegalArgumentException("O preço deve ser informado e não pode ser negativo.");
         }
-        if (produto.getPreco() < 0) {
+        if (!Double.isFinite(produto.getPreco()) || produto.getPreco() < 0) {
             throw new IllegalArgumentException("O preço deve ser informado e não pode ser negativo.");
         }
     }
