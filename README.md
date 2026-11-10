@@ -10,24 +10,29 @@ Para executar o projeto, é necessário ter instalado:
 - MongoDB, podendo ser local ou MongoDB Atlas;
 - Maven (o projeto também possui o arquivo `mvnw`, que pode ser usado sem instalar o Maven).
 
+Use um **JDK 21**, com `JAVA_HOME` apontando para sua instalação e `java` disponível no PATH. O MongoDB precisa estar ativo para executar a aplicação; os testes automatizados não exigem o banco. A primeira execução do Maven Wrapper requer conexão para baixar o Maven e as dependências.
+
 ## Como executar
 
 Editor e inicializador recomendado: Visual Studio Code.
 1. Clone o projeto e abra a pasta no terminal.
-2. Configure o acesso ao MongoDB usando as variáveis abaixo, com o nome do arquivo se chamando: application.properties.
-3. o arquivo application.properties deve ser alocado na pasta src/target/classes/, contendo:
+2. O arquivo versionado `src/main/resources/application.yml` usa MongoDB local por padrão. Para outro servidor, configure `MONGODB_URI` e, opcionalmente, `MONGODB_DATABASE` no ambiente. Usuário e senha, quando necessários, fazem parte da URI (com caracteres especiais codificados). Não versione credenciais nem edite arquivos em `target/`.
 
-   - `MONGODB_URI`: endereço de conexão do banco;
-   - `MONGODB_USERNAME`: usuário do banco, quando necessário;
-   - `MONGODB_PASSWORD`: senha do banco, quando necessário.
-  
+```powershell
+$env:MONGODB_URI = 'mongodb://localhost:27017/pediupatrao'
+$env:MONGODB_DATABASE = 'pediupatrao'
+$env:JAVA_TOOL_OPTIONS = '-Duser.timezone=America/Sao_Paulo'
 ```
-MONGODB_USERNAME=usuario_mongodb
-MONGODB_PASSWORD=senha_mongodb
-MONGODB_URI=exemplo: mongodb+srv://...
-spring.data.mongodb.uri=${MONGODB_URI}
-spring.data.mongodb.database=pediupatrao
+
+No Linux/macOS:
+
+```bash
+export MONGODB_URI='mongodb://localhost:27017/pediupatrao'
+export MONGODB_DATABASE='pediupatrao'
+export JAVA_TOOL_OPTIONS='-Duser.timezone=America/Sao_Paulo'
 ```
+
+Um `application.properties` local existente pode sobrescrever o YAML; confira configurações antigas se o sistema tentar acessar outro banco ou porta.
 
 3. Execute o projeto.
 
@@ -40,7 +45,7 @@ spring.data.mongodb.database=pediupatrao
    No Linux ou macOS:
 
    ```bash
-   ./mvnw spring-boot:run
+   sh ./mvnw spring-boot:run
    ```
 
 4. Acesse no navegador:
@@ -57,6 +62,17 @@ Na primeira execução, o sistema cria um usuário administrador para o acesso i
 Essa senha deve ser alterada depois do primeiro acesso, em editar usuario.
 
 ## Requisitos implementados
+
+### Dashboard administrativo
+
+Acesse **Dashboard** no menu ou `/dashboard`, com perfil ADMIN ou GERENTE. O painel oferece indicadores de vendas, gráfico por dia ou mês, situações dos pedidos, ranking de produtos, pedidos recentes e filtros de período/situação. Consome `/api/dashboard/filtros` e `/api/dashboard/resumo`, com atualização manual e automática opcional.
+
+- [Requisitos, arquitetura, regras e documentação da API](docs/dashboard.md)
+- [Evidências dos testes e capturas de tela](docs/testes-dashboard.md)
+- Execute os testes com `sh ./mvnw test` ou `.\mvnw.cmd test`; não exigem MongoDB.
+- Há uma prévia isolada com dados fictícios e instruções em `docs/dashboard.md`.
+
+![Dashboard administrativo com dados fictícios](docs/evidencias/dashboard-desktop.png)
 
 ### RF01 - Controle de usuários e permissões
 
@@ -95,7 +111,7 @@ Essa senha deve ser alterada depois do primeiro acesso, em editar usuario.
 - As inclusões, alterações e exclusões de clientes também são registradas.
 - Cada registro guarda o usuário, o perfil, a data e a hora, a operação, o item alterado e os valores anteriores e novos.
 - Cancelamentos guardam também a justificativa.
-- A consulta da auditoria é restrita ao administrador.
+- A consulta da auditoria é permitida ao administrador e ao gerente; o atendente não tem acesso.
 - Os registros de auditoria podem ser consultados, mas não possuem funções para alteração ou exclusão.
 
 ### Qualidade do sistema
@@ -104,6 +120,15 @@ Essa senha deve ser alterada depois do primeiro acesso, em editar usuario.
 - As regras principais ficam nos serviços do backend.
 - Os erros de validação e de regra de negócio retornam mensagens para informar o motivo da operação não ser aceita.
 - As informações ficam armazenadas no MongoDB.
+
+## Permissões e testes
+
+As permissões são verificadas nas rotas e nos serviços. Rotas não autorizadas explicitamente são bloqueadas. ADMIN consulta os pedidos, enquanto GERENTE e ATENDENTE conduzem a operação. Somente GERENTE cancela e aplica descontos; ADMIN não recebe essa permissão por herança. ATENDENTE consulta entregadores para registrar a saída, mas só ADMIN e GERENTE podem manter esse cadastro.
+
+- [Validação das afirmações, correções e matriz de permissões](docs/revisao-permissoes.md)
+- Testes: dashboard, permissões HTTP/CSRF, regras de pedidos, autorização dos serviços, edição de contas e persistência da auditoria com repositório simulado.
+- Windows: `.\mvnw.cmd verify`; Linux/macOS: `sh ./mvnw verify`. O comando testa e gera `target/pediupatrao-1.0-SNAPSHOT.jar`.
+- Para executar o pacote: `java -Duser.timezone=America/Sao_Paulo -jar target/pediupatrao-1.0-SNAPSHOT.jar`.
 
 ## Principais alterações realizadas no backend
 

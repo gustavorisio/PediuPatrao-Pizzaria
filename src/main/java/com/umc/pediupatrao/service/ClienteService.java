@@ -3,6 +3,7 @@ package com.umc.pediupatrao.service;
 import com.umc.pediupatrao.entity.Cliente;
 import com.umc.pediupatrao.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
@@ -20,6 +22,7 @@ public class ClienteService {
     public List<Cliente> listarClientes() {
         return clienteRepository.findAll();
     }
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     public void excluir(String id) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));

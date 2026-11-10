@@ -17,7 +17,7 @@ public class EntregadorController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
-    // O atendimento também precisa consultar os entregadores para registrar a saída do pedido.
+    // O atendimento consulta os entregadores para registrar a saída dos pedidos.
     public ResponseEntity<?> listar() {
         return ResponseEntity.ok(service.listarTodos());
     }

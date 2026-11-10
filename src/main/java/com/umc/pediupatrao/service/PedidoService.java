@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ATENDENTE')")
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
@@ -37,6 +38,9 @@ public class PedidoService {
         pedido.setDataHoraEntrada(LocalDateTime.now());
         pedido.setResponsavelSaida(null);
         pedido.setDataHoraSaida(null);
+        pedido.setEntregadorSaidaId(null);
+        pedido.setEntregadorSaidaNome(null);
+        pedido.setEntregadorSaidaTelefone(null);
         pedido.setJustificativaCancelamento(null);
 
         Pedido salvo = pedidoRepository.save(pedido);
@@ -72,6 +76,7 @@ public class PedidoService {
         return salvo;
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     public void excluirPedido(String id) {
         throw pedidoRegrasService.erro(
                 "Pedidos devem ser cancelados com justificativa; o histórico é preservado.");
